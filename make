@@ -43,6 +43,7 @@ ANDROID_MICRO_ABI: Final[str]='arm64-v8a'
 
 APKSIGNER: Final[str]=f'{BUILD_TOOLS}/apksigner'
 ADB: Final[str]=f'{PLATFORM_TOOLS}/adb'
+ZIPALIGN: Final[str]=f'{BUILD_TOOLS}/zipalign'
 
 BUILD_TYPES: Final[tuple]=('Release', 'Debug')
 BUILD_MODE: Final[str]=BUILD_TYPES[int(ENB_DEBUG)]
@@ -123,6 +124,7 @@ def generate_apk():
         shutil.copy(lib_file, f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/'+lib_file.split('/')[-1])
     
     subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_MTM_FILE}.un', APK_OUT])
+    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_MTM_FILE}.un', f'{OUTPUT_MTM_FILE}.aligned'],)
     subprocess.run([
         APKSIGNER, 'sign', '-v',
         f'--min-sdk-version={ANDROID_MIN}',
@@ -130,11 +132,12 @@ def generate_apk():
         f'--ks={SIGNER_KSPATH}',
         f'--ks-key-alias={SIGNER_KSALIAS}',
         f'--ks-pass=pass:{SIGNER_KSPASSWORD}',
-        f'--in={OUTPUT_MTM_FILE}.un',
+        f'--in={OUTPUT_MTM_FILE}.aligned',
         f'--out={OUTPUT_MTM_FILE}'  
     ])
     
     os.remove(f'{OUTPUT_MTM_FILE}.un')
+    os.remove(f'{OUTPUT_MTM_FILE}.aligned')
     subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_MTM_FILE}'])
         
 def install_apk():
