@@ -1,2 +1,3 @@
 build*
-factory
+*factory*
+compile_commands.json

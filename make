@@ -55,7 +55,7 @@ ANDROID_MODEL='c++_shared'
 
 ANDROID_TOOLCHAIN: Final[str]=f'{NDK_PATH}/build/cmake/android.toolchain.cmake'
 
-ANDROID_PREBUILT='windows-x86_64' if platform.system() == 'Windows' else linux-x86_64
+ANDROID_PREBUILT='windows-x86_64' if platform.system() == 'Windows' else 'linux-x86_64'
 ANDROID_SHARED: Final[str]=f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-android/lib{ANDROID_MODEL}.so'
 
 ANDROID_MIN: Final[int]=26
@@ -64,7 +64,7 @@ ANDROID_MAX: Final[int]=33
 ANDROID_TARGET: Final[str]=f'android-{ANDROID_MAX}'
 ANDROID_MICRO_ABI: Final[str]='arm64-v8a'
 
-APKSIGNER: Final[str]=f'{BUILD_TOOLS}/'+'apksigner.bat' if platform.system() == 'Windows' else 'apksigner'
+APKSIGNER: Final[str]=f'{BUILD_TOOLS}/'+('apksigner.bat' if platform.system() == 'Windows' else 'apksigner')
 ADB: Final[str]=f'{PLATFORM_TOOLS}/adb'
 ZIPALIGN: Final[str]=f'{BUILD_TOOLS}/zipalign'
 
@@ -113,8 +113,8 @@ def build_dir():
         '-G': 'Ninja'
     }
     
-    FULL_CMAKE = ['{}{}'.format(*c) for c in sorted(CMAKE_BUILD_OPTIONS.items())]
-    
+    FULL_CMAKE: Final[str] = ['{}{}'.format(*c) for c in sorted(CMAKE_BUILD_OPTIONS.items())]
+
     print('CMake options list: ', FULL_CMAKE)
     subprocess.run([CMAKE_BIN] + FULL_CMAKE + ['..'], shell=False)
     os.chdir(CWD)
