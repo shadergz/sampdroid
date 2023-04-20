@@ -1,3 +1,4 @@
 build*
 *factory*
 compile_commands.json
+.cache

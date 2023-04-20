@@ -58,7 +58,7 @@ ANDROID_TOOLCHAIN: Final[str]=f'{NDK_PATH}/build/cmake/android.toolchain.cmake'
 ANDROID_PREBUILT='windows-x86_64' if platform.system() == 'Windows' else 'linux-x86_64'
 ANDROID_SHARED: Final[str]=f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-android/lib{ANDROID_MODEL}.so'
 
-ANDROID_MIN: Final[int]=26
+ANDROID_MIN: Final[int]=31
 ANDROID_MAX: Final[int]=33
 
 ANDROID_TARGET: Final[str]=f'android-{ANDROID_MAX}'
