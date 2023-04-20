@@ -23,7 +23,9 @@ target_sources(mtmobile PRIVATE
     linux_hierarchy.cpp
     outside.cpp
     patches_level.cpp
-    plugin_jni.cpp)
+    menu_handler.cpp
+    plugin_jni.cpp
+    )
 
 execute_process(
     COMMAND git log -1 --format=%h

@@ -8,7 +8,17 @@
 JNIEnv* g_gameEnv;
 uintptr_t g_gameAddr;
 
-jint JNI_OnLoad(JavaVM *vm, [[__maybe_unused__]] void *reserved) {
+extern AArch64_Patcher* patcher_micro;
+
+void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved) 
+{
+    mtmputs(ANDROID_LOG_INFO, "Unload all resources used");
+
+    if (!patcher_micro) 
+        delete patcher_micro;
+}
+
+jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
     mtmputs(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);
     const jint useVersion{JNI_VERSION_1_6};
 
@@ -26,7 +36,7 @@ jint JNI_OnLoad(JavaVM *vm, [[__maybe_unused__]] void *reserved) {
         return -1;
     }
 
-    mtmprintf(ANDROID_LOG_INFO, "libGTASA found in address space: %p", 
+    mtmprintf(ANDROID_LOG_INFO, "libGTASA base image found in address space: (%#lx)", 
         reinterpret_cast<void*>(g_gameAddr));
     
     applyGlobalPatches();

@@ -14,7 +14,7 @@ extern JNIEnv* g_gameEnv;
 
 uintptr_t fhsGetLibrary(const char* shared)
 {
-    static const char* g_mapsFormat{"/proc/%d/maps"};
+    static const char* mapsFormat{"/proc/%d/maps"};
     char* maps{};
     FILE* procMap{};
     
@@ -30,7 +30,7 @@ uintptr_t fhsGetLibrary(const char* shared)
         g_gameEnv->ExceptionClear();
     }
 
-    asprintf(&maps, g_mapsFormat, getpid());
+    asprintf(&maps, mapsFormat, getpid());
     if (!maps) 
         // Also nullptr when converting to void*
         goto finishLoad;
@@ -40,8 +40,8 @@ uintptr_t fhsGetLibrary(const char* shared)
 
     if (AFileDescriptor_getFd(g_gameEnv, jFile) < 2)
     {
-        mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, ", 
-            "cause of %s\n", strerror(errno));
+        mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
+            strerror(errno));
         goto finishLoad;
     }
     char streamBuffer[0x100];
