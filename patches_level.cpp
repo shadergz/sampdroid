@@ -21,7 +21,8 @@ void AArch64_Patcher::rtReplaceMethod(
 void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize)
 {
     const auto baseAddr{unfuckAddr & 0xfffff000u};
-    // We can't change the permission for more than once thread
+    // If page isn't aligned we can't change the permission for more than once page 
+    // without break into multiples
     const auto protect{PROT_READ|PROT_WRITE|PROT_EXEC};
     const auto pageSize{getpagesize()};
     auto countPages = [pageSize](const auto size) -> uintptr_t {

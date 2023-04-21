@@ -84,9 +84,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-b', '--build', action='store_true')
 parser.add_argument('-g', '--genapk', action='store_true')
 parser.add_argument('-i', '--install', action='store_true')
-parser.add_argument('-c', '--clean', action='store_true')
 parser.add_argument('-d', '--devices', action='store_true')
 parser.add_argument('-C', '--connect', type=str)
+parser.add_argument('-l', '--logcat', action='store_true')
+parser.add_argument('-c', '--clean', action='store_true')
 
 args = parser.parse_args()
 
@@ -171,7 +172,13 @@ def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
 
 def install_apk():
-    subprocess.run([ADB, 'install', OUTPUT_MTM_FILE])
+    subprocess.run([ADB, 'install', '-r', OUTPUT_MTM_FILE])
+
+def logcat():
+    try:
+        subprocess.run([ADB, 'logcat', 'MTMobile *:S'])
+    except KeyboardInterrupt:
+        pass
 
 def clean():
     CWD: Final[str] = os.getcwd()
@@ -205,6 +212,9 @@ if args.install:
     if not pathlib.Path(OUTPUT_MTM_FILE).is_file():
         generate_apk()
     install_apk()
+
+if args.logcat:
+    logcat()
 
 if args.clean:
     clean()
