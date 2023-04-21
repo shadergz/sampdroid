@@ -41,7 +41,7 @@ void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize)
 void applyGlobalPatches() 
 {
     patcher_micro = new AArch64_Patcher();
-    patcher_micro->rtReplaceMethod(g_gameAddr+0x00358010,
+    patcher_micro->rtReplaceMethod(g_gameAddr+0x358010,
         (uintptr_t)(MainMenuScreen_AddAllItems_HOOK),
         (uintptr_t*)(&MainMenuScreen_AddAllItems));
     

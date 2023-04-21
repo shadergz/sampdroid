@@ -45,13 +45,9 @@ uintptr_t fhsGetLibrary(const char* shared)
     char streamBuffer[0x100];
     procMap = fdopen(AFileDescriptor_getFd(g_gameEnv, jFile), "r");
     
-    while (fgets(streamBuffer, 
-        sizeof streamBuffer, procMap) != NULL) {
+    while (fgets(streamBuffer, sizeof streamBuffer, procMap) != NULL) {
         if (strstr(streamBuffer, shared)) {
-            mapAddr = (typeof(mapAddr))strtoul(
-                streamBuffer,
-                0, 
-                16);
+            mapAddr = (typeof(mapAddr))strtoul(streamBuffer, 0, 16);
             break;
         }
     }

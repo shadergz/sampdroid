@@ -86,6 +86,7 @@ parser.add_argument('-g', '--genapk', action='store_true')
 parser.add_argument('-i', '--install', action='store_true')
 parser.add_argument('-c', '--clean', action='store_true')
 parser.add_argument('-d', '--devices', action='store_true')
+parser.add_argument('-C', '--connect', type=str)
 
 args = parser.parse_args()
 
@@ -162,7 +163,13 @@ def generate_apk():
     os.remove(f'{OUTPUT_MTM_FILE}.un')
     os.remove(f'{OUTPUT_MTM_FILE}.aligned')
     subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_MTM_FILE}'])
-        
+
+def list_devices():
+    subprocess.run([ADB, 'devices'], shell=False) 
+
+def connect_device(dev_device: str):
+    subprocess.run([ADB, 'connect', dev_device])
+
 def install_apk():
     subprocess.run([ADB, 'install', OUTPUT_MTM_FILE])
 
@@ -180,9 +187,6 @@ def clean():
     for delete in delete_files:
         os.remove(delete)
 
-if args.devices:
-    subprocess.run([ADB, 'devices'], shell=False) 
-
 if args.build and not os.path.exists(BUILD_DIR):
     build_dir()
 
@@ -191,6 +195,12 @@ if args.genapk:
         build_dir()
     generate_apk()  
 
+if args.devices:
+    list_devices()
+
+if args.connect:
+    connect_device(args.connect)
+
 if args.install:
     if not pathlib.Path(OUTPUT_MTM_FILE).is_file():
         generate_apk()
@@ -198,6 +208,3 @@ if args.install:
 
 if args.clean:
     clean()
-    
-
-
