@@ -1,9 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include <stdint.h>
-#include <sys/user.h>
+#include <cstdint>
 
 #include <vector>
 
@@ -12,7 +10,7 @@ public:
     static constexpr uint8_t PATCHER_MIN_TRAMPCOUNT = 8;
 
     AArch64_Patcher() {
-        trampolineBanks.resize(PATCHER_MIN_TRAMPCOUNT);
+        trsBank.resize(PATCHER_MIN_TRAMPCOUNT);
     }
 
     void rtReplaceMethod(const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
@@ -25,13 +23,13 @@ private:
 
         MicroRaw_Trampoline() {
             static_assert(sizeof tRWXData == PAGE_SIZE, "Trampoline data size is wrong! fix now!");
-            unfuckPageRWX(reinterpret_cast<uintptr_t>(tRWXData), sizeof tRWXData);
+            unfuckPageRWX((uintptr_t)(tRWXData), sizeof tRWXData);
         }
 
         __attribute__((__aligned__(PAGE_SIZE))) uint8_t tRWXData[PAGE_SIZE];
     };
 
-    std::vector<MicroRaw_Trampoline> trampolineBanks;
+    std::vector<MicroRaw_Trampoline> trsBank;
 };
 
 void applyGlobalPatches();

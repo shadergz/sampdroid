@@ -1,3 +1,4 @@
+
 #include <patches_level.h>
 #include <menu_handler.h>
 #include <outside.h>
@@ -19,18 +20,21 @@ void AArch64_Patcher::rtReplaceMethod(
 }
 void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize)
 {
-    const auto baseAddr{unfuckAddr & 0x0000};
+    const auto baseAddr{unfuckAddr & 0xfffff000u};
     // We can't change the permission for more than once thread
     const auto protect{PROT_READ|PROT_WRITE|PROT_EXEC};
     const auto pageSize{getpagesize()};
-    uint64_t pageCount = 1;
-    while ((regionSize % pageSize) != 0) {
-        pageCount++;
-        regionSize /= pageSize;
-    }
+    auto countPages = [pageSize](const auto size) -> uintptr_t {
+        uintptr_t count{size / pageSize};
+        if (size % pageSize)
+            count++;
+        return count;
+    };
+    auto count{countPages(regionSize)};
+    mtmprintf(ANDROID_LOG_INFO, "Changing permission of %lu pages in %#lx base address",
+        count, baseAddr);
 
-    mprotect(reinterpret_cast<void*>(baseAddr), 
-        pageCount * pageSize, protect);
+    mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 
 
@@ -38,7 +42,7 @@ void applyGlobalPatches()
 {
     patcher_micro = new AArch64_Patcher();
     patcher_micro->rtReplaceMethod(g_gameAddr+0x00358010,
-        reinterpret_cast<uintptr_t>(MainMenuScreen_AddAllItems_HOOK),
-        reinterpret_cast<uintptr_t*>(&MainMenuScreen_AddAllItems));
+        (uintptr_t)(MainMenuScreen_AddAllItems_HOOK),
+        (uintptr_t*)(&MainMenuScreen_AddAllItems));
     
 }

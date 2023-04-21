@@ -21,8 +21,7 @@ uintptr_t fhsGetLibrary(const char* shared)
     jobject jFile{AFileDescriptor_create(g_gameEnv)};
     uintptr_t mapAddr{};
 
-    if (jFile == nullptr)
-    {
+    if (jFile == nullptr) {
         const jboolean hprob{g_gameEnv->ExceptionCheck()};
         if (!hprob) goto finishLoad;
 
@@ -38,8 +37,7 @@ uintptr_t fhsGetLibrary(const char* shared)
     AFileDescriptor_setFd(g_gameEnv,
         jFile, open(maps, O_RDONLY));
 
-    if (AFileDescriptor_getFd(g_gameEnv, jFile) < 2)
-    {
+    if (AFileDescriptor_getFd(g_gameEnv, jFile) < 2) {
         mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
             strerror(errno));
         goto finishLoad;
@@ -48,10 +46,8 @@ uintptr_t fhsGetLibrary(const char* shared)
     procMap = fdopen(AFileDescriptor_getFd(g_gameEnv, jFile), "r");
     
     while (fgets(streamBuffer, 
-        sizeof streamBuffer, procMap) != NULL) 
-    {
-        if (strstr(streamBuffer, shared))
-        {
+        sizeof streamBuffer, procMap) != NULL) {
+        if (strstr(streamBuffer, shared)) {
             mapAddr = (typeof(mapAddr))strtoul(
                 streamBuffer,
                 0, 
