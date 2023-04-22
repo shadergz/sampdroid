@@ -1,7 +1,7 @@
 #include <menu_handler.h>
 
-// Origin: MainMenuScreen::AddAllItems(MainMenuScreen *this)
-// Parameters: None (MainMenuScreen* this)
+// Method signature: MainMenuScreen::AddAllItems(MainMenuScreen *this)
+// Parameters: 
 
 void (*MainMenuScreen_AddAllItems)(uintptr_t x0);
 void MainMenuScreen_AddAllItems_HOOK(uintptr_t x0)

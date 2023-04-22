@@ -9,13 +9,11 @@
 AArch64_Patcher* patcher_micro;
 extern uintptr_t g_gameAddr;
 
-void AArch64_Patcher::rtReplaceMethod(
-    const uintptr_t method, 
-    const uintptr_t replace, 
+void AArch64_Patcher::rtReplaceMethod(const uintptr_t method, const uintptr_t replace, 
     uintptr_t* saveIn)
 {
-    mtmprintf(ANDROID_LOG_INFO, "Hooking function %#lx with %#lx method, saving in %#lx",
-        method, replace, saveIn);
+    mtmprintf(ANDROID_LOG_INFO, 
+        "Hooking function %#lx with %#lx method, saving in %#lx", method, replace, saveIn);
     
 }
 void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize)
@@ -25,25 +23,24 @@ void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize)
     // without break into multiples
     const auto protect{PROT_READ|PROT_WRITE|PROT_EXEC};
     const auto pageSize{getpagesize()};
-    auto countPages = [pageSize](const auto size) -> uintptr_t {
-        uintptr_t count{size / pageSize};
-        if (size % pageSize)
+    
+    auto countPages = [pageSize](const auto size) -> auto {
+        uintptr_t count{size/pageSize};
+        if (size%pageSize)
             count++;
         return count;
     };
+    
     auto count{countPages(regionSize)};
-    mtmprintf(ANDROID_LOG_INFO, "Changing permission of %lu pages in %#lx base address",
-        count, baseAddr);
-
-    mprotect((void*)(baseAddr), count * pageSize, protect);
+    mtmprintf(ANDROID_LOG_INFO, 
+        "Changing permission of %lu pages in %#lx base address", count, baseAddr);
+    mprotect((void*)(baseAddr), count*pageSize, protect);
 }
 
 
 void applyGlobalPatches() 
 {
     patcher_micro = new AArch64_Patcher();
-    patcher_micro->rtReplaceMethod(g_gameAddr+0x358010,
-        (uintptr_t)(MainMenuScreen_AddAllItems_HOOK),
-        (uintptr_t*)(&MainMenuScreen_AddAllItems));
+    patcher_micro->rtReplaceMethod(g_gameAddr+0x358010, (uintptr_t)(MainMenuScreen_AddAllItems_HOOK), (uintptr_t*)(&MainMenuScreen_AddAllItems));
     
 }

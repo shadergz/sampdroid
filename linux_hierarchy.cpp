@@ -14,33 +14,31 @@ extern JNIEnv* g_gameEnv;
 
 uintptr_t fhsGetLibrary(const char* shared)
 {
-    static const char* mapsFormat{"/proc/%d/maps"};
-    char* maps{};
-    FILE* procMap{};
-    
-    jobject jFile{AFileDescriptor_create(g_gameEnv)};
-    uintptr_t mapAddr{};
-
+    const jobject jFile{AFileDescriptor_create(g_gameEnv)};
     if (jFile == nullptr) {
-        const jboolean hprob{g_gameEnv->ExceptionCheck()};
-        if (!hprob) goto finishLoad;
+        const jboolean hadExc{g_gameEnv->ExceptionCheck()};
+        if (!hadExc) return 0;
 
         g_gameEnv->ExceptionDescribe();
         g_gameEnv->ExceptionClear();
     }
+    static const char* mapsFormat{"/proc/%d/maps"};
+    
+    char* maps{};
+    FILE* procMap{};
+    uintptr_t mapAddr{};
 
     asprintf(&maps, mapsFormat, getpid());
-    if (!maps) 
-        // Also nullptr when converting to void*
-        goto finishLoad;
-    
     AFileDescriptor_setFd(g_gameEnv,
         jFile, open(maps, O_RDONLY));
 
-    if (AFileDescriptor_getFd(g_gameEnv, jFile) < 2) {
+    static constexpr int INVALID_FD = (int)-1;
+    if (AFileDescriptor_getFd(g_gameEnv, jFile) == INVALID_FD) {
         mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
             strerror(errno));
-        goto finishLoad;
+        free(maps);
+        fclose(procMap);
+        g_gameEnv->DeleteLocalRef(jFile);
     }
     char streamBuffer[0x100];
     procMap = fdopen(AFileDescriptor_getFd(g_gameEnv, jFile), "r");
@@ -51,12 +49,10 @@ uintptr_t fhsGetLibrary(const char* shared)
             break;
         }
     }
-
-finishLoad:
     free(maps);
     fclose(procMap);
-
     g_gameEnv->DeleteLocalRef(jFile);
+    
     return mapAddr;
 }
 

@@ -1,4 +1,6 @@
 #include <jni.h>
+#include <sched.h>
+#include <stdlib.h>
 
 #include <outside.h>
 #include <linux_hierarchy.h>
@@ -19,7 +21,10 @@ void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved)
 }
 
 jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
-    mtmputs(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);
+    mtmputs(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);    
+    mtmcout(ANDROID_LOG_INFO, "Loaded thread id {} in core {}", 
+        std::this_thread::get_id(), sched_getcpu());
+    
     const jint useVersion{JNI_VERSION_1_6};
 
     if (vm->GetEnv((void**)(&g_gameEnv), useVersion) != JNI_OK) {
@@ -28,15 +33,12 @@ jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
     }
     // Getting the in memory shared object address space!
     g_gameAddr = fhsGetLibrary("libGTASA.so");
-    
     if (!g_gameAddr) {
         mtmputs(ANDROID_LOG_ERROR, "Can't locate libGTASA.so, MT is halted!");
         return -1;
     }
 
-    mtmprintf(ANDROID_LOG_INFO, "libGTASA base image found in address space: (%#lx)", 
-        reinterpret_cast<void*>(g_gameAddr));
-    
+    mtmprintf(ANDROID_LOG_INFO, "libGTASA.so base image found in address space: (%#lx)", (void*)(g_gameAddr));
     applyGlobalPatches();
     return useVersion;
 }

@@ -172,7 +172,7 @@ def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
 
 def install_apk():
-    subprocess.run([ADB, 'install', '-r', OUTPUT_MTM_FILE])
+    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_MTM_FILE])
 
 def logcat():
     try:
