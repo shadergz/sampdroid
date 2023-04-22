@@ -14,8 +14,8 @@ int mtmprintf(int prio, const char* __restrict format, ...)
     return fret;
 }
 
-int mtmputs(int prio, const char* __restrict msgStr)
+int mtmputs(int prio, const char* __restrict msg_str)
 {
-    const auto wStr{__android_log_write(prio, g_mtmTag, msgStr)};
+    const auto wStr{__android_log_write(prio, g_mtmTag, msg_str)};
     return wStr;
 }

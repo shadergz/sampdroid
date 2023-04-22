@@ -9,20 +9,20 @@
 
 int mtmprintf(int prio, const char* __restrict format, ...);
 
-int mtmputs(int prio, const char* __restrict msgStr);
+int mtmputs(int prio, const char* __restrict msg_str);
 
 template<typename... Args>
 auto mtmcout(int prio, fmt::format_string<Args...> fmt, Args&&... args) {
-    uint64_t fioAllocated{};
-    char* fioPtr{};
+    uint64_t fio_allocated{};
+    char* fio_ptr{};
 
-    // This FILE IO is dynamic allocated and grows up as required
-    FILE* fio{open_memstream(&fioPtr, (size_t*)&fioAllocated)};
+    // this FILE IO is dynamic allocated and grows up as required
+    FILE* fio{open_memstream(&fio_ptr, (size_t*)&fio_allocated)};
     fmt::print(fio, fmt, std::forward<Args>(args)...);
     fclose(fio);
-    // At this point, a null byte has wrote inside of fio string
+    // at this point, a null byte has wrote inside of fio string
 
-    const auto out{mtmputs(prio, fioPtr)};
-    free(fioPtr);
+    const auto out{mtmputs(prio, fio_ptr)};
+    free(fio_ptr);
     return out;
 }
