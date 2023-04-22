@@ -1,20 +1,36 @@
 #pragma once
 
 #include <cstdint>
-#include <cstdint>
 
-#include <vector>
+#include <unistd.h>
+
+#include <android/log.h>
+
+extern const char* g_mtmTag;
 
 class AArch64_Patcher {
 public:
-    static constexpr uint8_t PATCHER_MIN_TRAMPCOUNT = 8;
+    static constexpr uint8_t PATCHER_HOOK_COUNT = 64;
+    static constexpr uint8_t PATCHER_MAX_INST = 5;
+
+    static constexpr uint8_t PATCHER_SYMBOL_NAME = 38;
+    static constexpr uint8_t PATCHER_HOOK_SIZE = 
+        sizeof(uint16_t) + sizeof(uint32_t) +
+        sizeof(uint32_t) * PATCHER_MAX_INST + 
+        sizeof(char[PATCHER_SYMBOL_NAME]);
 
     AArch64_Patcher() {
-        trs_bank.resize(PATCHER_MIN_TRAMPCOUNT);
     }
 
-    void replaceMethod(const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
+    void replaceMethod(const char* sb_name, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
+    uint32_t* getNewTrampoline() noexcept 
+    {
+        if (m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1)
+            __android_log_assert("m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT",
+                g_mtmTag, "our trampoline bank data buffer has exhausted!");
+        return reinterpret_cast<uint32_t*>(m_tr_bank.m_t_RWX_data + m_tr_bank.m_tramindex++);
+    }
 
 private:
     struct MicroRaw_Trampoline {
@@ -22,14 +38,19 @@ private:
         static constexpr uint8_t ARCH_INST_SIZE = 8;
 
         MicroRaw_Trampoline() {
-            static_assert(sizeof t_RWX_data == PAGE_SIZE, "Trampoline data size is wrong! fix now!");
-            unfuckPageRWX((uintptr_t)(t_RWX_data), sizeof t_RWX_data);
+            static_assert(sizeof m_t_RWX_data == PAGE_SIZE, "trampoline data size is wrong! fix now!");
+            static_assert(sizeof m_t_RWX_data / PATCHER_HOOK_SIZE == 
+                PATCHER_HOOK_COUNT, "PAGE_SIZE isn't the desired value!");
+
+            unfuckPageRWX((uintptr_t)(m_t_RWX_data), sizeof m_t_RWX_data);
+
         }
 
-        __attribute__((__aligned__(PAGE_SIZE))) uint8_t t_RWX_data[PAGE_SIZE];
+        __attribute__((__aligned__(PAGE_SIZE))) uint8_t m_t_RWX_data[PAGE_SIZE];
+        uint8_t m_tramindex{};
     };
 
-    std::vector<MicroRaw_Trampoline> trs_bank;
+    MicroRaw_Trampoline m_tr_bank;
 };
 
 void applyGlobalPatches();

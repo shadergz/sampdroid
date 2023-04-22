@@ -16,8 +16,8 @@ uintptr_t fhsGetLibrary(const char* shared)
 {
     const jobject j_file{AFileDescriptor_create(g_game_env)};
     if (j_file == nullptr) {
-        const jboolean hadExc{g_game_env->ExceptionCheck()};
-        if (!hadExc) 
+        const jboolean has_exec{g_game_env->ExceptionCheck()};
+        if (!has_exec) 
             return 0;
 
         g_game_env->ExceptionDescribe();
