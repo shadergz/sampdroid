@@ -13,10 +13,11 @@ public:
     static constexpr uint8_t PATCHER_HOOK_COUNT = 64;
     static constexpr uint8_t PATCHER_MAX_INST = 5;
 
-    static constexpr uint8_t PATCHER_SYMBOL_NAME = 38;
+    static constexpr uint8_t PATCHER_SYMBOL_NAME = 32;
     static constexpr uint8_t PATCHER_HOOK_SIZE = 
-        sizeof(uint16_t) + sizeof(uint32_t) +
-        sizeof(uint32_t) * PATCHER_MAX_INST + 
+        sizeof(uint16_t) + sizeof(uintptr_t) +
+        sizeof(uint8_t)  + sizeof(uint8_t)   +
+        sizeof(uint32_t) * PATCHER_MAX_INST  + 
         sizeof(char[PATCHER_SYMBOL_NAME]);
 
     AArch64_Patcher() {
@@ -27,7 +28,7 @@ public:
     uint32_t* getNewTrampoline() noexcept 
     {
         if (m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1)
-            __android_log_assert("m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT",
+            __android_log_assert("m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1",
                 g_mtmTag, "our trampoline bank data buffer has exhausted!");
         return reinterpret_cast<uint32_t*>(m_tr_bank.m_t_RWX_data + m_tr_bank.m_tramindex++);
     }
