@@ -12,7 +12,8 @@ int mtmprintf(int prio, const char* __restrict format, ...);
 int mtmputs(int prio, const char* __restrict msg_str);
 
 template<typename... Args>
-auto mtmcout(int prio, fmt::format_string<Args...> fmt, Args&&... args) {
+auto mtmcout(int prio, fmt::format_string<Args...> fmt, Args&&... args) 
+{
     uint64_t fio_allocated{};
     char* fio_ptr{};
 

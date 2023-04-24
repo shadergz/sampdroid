@@ -176,7 +176,7 @@ def install_apk():
 
 def logcat():
     try:
-        subprocess.run([ADB, 'logcat', 'MTMobile,stargames.gtasa,*:F, *:S'])
+        subprocess.run([ADB, 'logcat', 'MTMobile,stargames.gtasa,DEBUG, *:S'])
     except KeyboardInterrupt:
         pass
 

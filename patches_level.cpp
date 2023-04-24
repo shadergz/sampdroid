@@ -38,7 +38,8 @@ static_assert(sizeof(Trampoline_Data) == AArch64_Patcher::PATCHER_HOOK_SIZE,
 void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method, 
     const uintptr_t replace, uintptr_t* save_in)
 {
-    if (strlen(sb_name) > sizeof (Trampoline_Data::m_origin_symbolname)) {
+    auto sb_size{strlen(sb_name)};
+    if (sb_size > sizeof (Trampoline_Data::m_origin_symbolname)) {
         mtmprintf(ANDROID_LOG_ERROR, "symbol name %s is langer than the symbol name space!", sb_name);
         *save_in = 0; return;
     }
@@ -47,8 +48,12 @@ void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method,
         "hooking function (%s) %#llx with %#llx method, "
             "saving in %#llx", sb_name, method, replace, save_in);
     auto tr_data{reinterpret_cast<Trampoline_Data*>(getNewTrampoline())};
+    mtmprintf(ANDROID_LOG_INFO, "new trampoline allocated in %p\n", tr_data);
+    
     if (!tr_data) { *save_in = 0; return; }
+    
     static uint16_t tramp_id{};
+    
     tr_data->m_id = tramp_id++;
     tr_data->m_source = method;
     // 0 means an invalid value!
@@ -62,7 +67,7 @@ void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method,
         g_mtmTag, "PATCHER_FRAME_GOBACK isn't indexing the trampoline data as expected, please fix now!");
     }
     // doing the frame backup (we're divorciating now)
-    uint32_t* origin_func{(uint32_t*)method};
+    auto origin_func{(uint32_t*)method};
     *(uint32_t*)(tr_data->m_tr_data+0) = origin_func[0];
     *(uint32_t*)(tr_data->m_tr_data+4) = origin_func[1];
     *(uint32_t*)(tr_data->m_tr_data+8) = origin_func[2];
@@ -70,7 +75,7 @@ void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method,
 
     tr_data->m_inst_count = &origin_func[4] - &origin_func[0];
 
-    // Now we can overwrite the original method frame
+    // now we can overwrite the original method frame
     // making the page readable/writable and executable
     unfuckPageRWX((uintptr_t)origin_func, PAGE_SIZE);
     // ldr x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x8
@@ -85,26 +90,29 @@ void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method,
     *(uint64_t**)(tr_data->m_tr_data+24) = (uint64_t*)((uint64_t)(origin_func+0x4) & (uint64_t)-1);    
     // forcing the CPU to fetch the actual version for both operations 
 
-    mtmprintf(ANDROID_LOG_DEBUG, 
-        "\ttr_data->m_tr_data(16): %#x\n"
-        "\ttr_data->m_tr_data(20): %#x\n"
-        "\ttr_data->m_tr_data(24): %#x\n"
-        "\ttr_data->m_tr_data(28): %#x\n",
+    /*
+    mtmcout(ANDROID_LOG_DEBUG,
+        "┌{0:─^34}┐\n"
+        "│tr_data->m_tr_data(16): 0x{1:08x}│\n"
+        "│tr_data->m_tr_data(20): 0x{2:08x}│\n"
+        "│tr_data->m_tr_data(24): 0x{3:08x}│\n"
+        "│tr_data->m_tr_data(28): 0x{4:08x}│\n"
+        "└{0:─^34}┘\n", 
+        "",
         *(uint32_t*)&tr_data->m_tr_data[16], 
         *(uint32_t*)&tr_data->m_tr_data[20],
         *(uint32_t*)&tr_data->m_tr_data[24],
         *(uint32_t*)&tr_data->m_tr_data[28]);
-    
+    */
     // dumping the residual wrong instructions from the cache
     __builtin___clear_cache((char*)origin_func, (char*)&origin_func[4]);
-
     __builtin___clear_cache((char*)tr_data->m_tr_data, 
         (char*)&tr_data->m_tr_data[sizeof(tr_data->m_tr_data)]);
-        
 
     mtmprintf(ANDROID_LOG_INFO, 
-        "addr %#llx successfully hooked by %#llx, (| %#llx | %u |)",
-        method, replace, tr_data->m_tr_data, tr_data->m_inst_count);
+        "hook on addr %#llx successful installed by %#llx, (| %#llx | %u |)",
+        method, replace, (uintptr_t)tr_data->m_tr_data & 0xffffffffff, 
+        tr_data->m_inst_count);
 
     *save_in = (uintptr_t)(tr_data->m_tr_data);
 }
@@ -113,6 +121,7 @@ void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuck_addr, uint64_t region_size)
     const auto base_addr{unfuck_addr & 0xfffffff000u};
     // if page isn't aligned we can't change the permission for more than once page 
     // without break into multiples
+
     const auto protect{PROT_READ|PROT_WRITE|PROT_EXEC};
     const auto page_size{getpagesize()};
     
@@ -122,17 +131,19 @@ void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuck_addr, uint64_t region_size)
             count++;
         return count;
     };
-    
-    auto count{count_pages(region_size)};
+
+    auto overflow = unfuck_addr & 0xffff ? 1 : 0;
+    auto count{count_pages(region_size) + overflow};
+
     mtmprintf(ANDROID_LOG_INFO, 
         "changing permission of %lu pages in %#llx base address", count, base_addr);
     mprotect((void*)(base_addr), count * page_size, protect);
 }
 
-void applyGlobalPatches()
+void applyOnGamePatches()
 {
     g_patcher_micro = new AArch64_Patcher();
     g_patcher_micro->replaceMethod("Main*::AddAllItems", g_game_addr+0x358010, (uintptr_t)(MainMenuScreen_AddAllItems_HOOK), (uintptr_t*)(&MainMenuScreen_AddAllItems));
-    g_patcher_micro->replaceMethod("NVThreadSpawnProc", g_game_addr+0x332040, (uintptr_t)NVThreadSpawnProc_HOOK, (uintptr_t*)&NVThreadSpawnProc);
+    //g_patcher_micro->replaceMethod("NVThreadSpawnProc", g_game_addr+0x332040, (uintptr_t)NVThreadSpawnProc_HOOK, (uintptr_t*)&NVThreadSpawnProc);
 
 }

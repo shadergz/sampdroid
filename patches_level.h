@@ -54,4 +54,4 @@ private:
     MicroRaw_Trampoline m_tr_bank;
 };
 
-void applyGlobalPatches();
+void applyOnGamePatches();

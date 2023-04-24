@@ -1,3 +1,4 @@
+#include <android/log.h>
 #include <menu_handler.h>
 
 #include <outside.h>
@@ -8,7 +9,8 @@
 void (*MainMenuScreen_AddAllItems)(uintptr_t x0);
 void MainMenuScreen_AddAllItems_HOOK(uintptr_t x0)
 {
-    mtmcout(ANDROID_LOG_INFO, "On (AddAllItems)");
+    mtmprintf(ANDROID_LOG_WARN, "HOOKED: on (AddAllItems), calling %#lx", (uintptr_t)MainMenuScreen_AddAllItems);
+
     // we're running before MainMenuScreen::AddAllItems
     MainMenuScreen_AddAllItems(x0);
 }
