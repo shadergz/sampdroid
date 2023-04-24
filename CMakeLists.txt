@@ -26,6 +26,7 @@ target_sources(mtmobile PRIVATE
     patches_level.cpp
     menu_handler.cpp
     plugin_jni.cpp
+    settings.cpp
     )
 
 execute_process(
