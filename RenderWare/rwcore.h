@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rwlpcore.h"
+#include <RenderWare/rwlpcore.h>
 
 /**
  * \ingroup rwraster
@@ -345,31 +345,31 @@ struct RwImage
 
 extern RwImage* (*RwImageCreate)(RwInt32 width, RwInt32 height,
     RwInt32 depth);
-extern RwBool (*RwImageDestroy)(RwImage * image);
+extern RwBool (*RwImageDestroy)(RwImage *image);
 
 /* Allocating */
-extern RwImage* (*RwImageAllocatePixels)(RwImage * image);
-extern RwImage* (*RwImageFreePixels)(RwImage * image);
+extern RwImage* (*RwImageAllocatePixels)(RwImage *image);
+extern RwImage* (*RwImageFreePixels)(RwImage *image);
 
 /* Converting images */
-extern RwImage* (*RwImageCopy)(RwImage * destImage,
-    const RwImage * sourceImage);
+extern RwImage* (*RwImageCopy)(RwImage *destImage,
+    const RwImage *sourceImage);
 
 /* Resizing images */
-extern RwImage* (*RwImageResize)(RwImage * image, RwInt32 width,
+extern RwImage* (*RwImageResize)(RwImage *image, RwInt32 width,
     RwInt32 height);
 
 /* Producing masks ! */
-extern RwImage* (*RwImageApplyMask)(RwImage * image,
-    const RwImage * mask);
-extern RwImage* (*RwImageMakeMask)(RwImage * image);
+extern RwImage* (*RwImageApplyMask)(RwImage *image,
+    const RwImage *mask);
+extern RwImage* (*RwImageMakeMask)(RwImage *image);
 
 /* Helper functions */
-extern RwImage* (*RwImageReadMaskedImage)(const RwChar * imageName,
-    const RwChar * maskname);
-extern RwImage* (*RwImageRead)(const RwChar * imageName);
-extern RwImage* (*RwImageWrite)(RwImage * image,
-    const RwChar * imageName);
+extern RwImage* (*RwImageReadMaskedImage)(const RwChar *imageName,
+    const RwChar *maskname);
+extern RwImage* (*RwImageRead)(const RwChar *imageName);
+extern RwImage* (*RwImageWrite)(RwImage *image,
+    const RwChar *imageName);
 
 /****************************************************************************
  Global types
@@ -419,16 +419,17 @@ typedef struct RwLLLink  RwLLLink;
 
 struct RwTexture
 {
-    RwRaster           *raster; /** pointer to RwRaster with data */                      //+0
-    void               *dict;   /* Dictionary this texture is in */                       //+4
-    RwLLLink            lInDictionary; /* List of textures in this dictionary */          //+8
+    RwRaster *raster; /** pointer to RwRaster with data */                   //+0
+    void *dict;   /* Dictionary this texture is in */                        //+4
+    RwLLLink lInDictionary; /* List of textures in this dictionary */        //+8
 
-    RwChar              name[rwTEXTUREBASENAMELENGTH];  /* Name of the texture */         //+16
-    RwChar              mask[rwTEXTUREBASENAMELENGTH];  /* Name of the textures mask */   //+48
+    RwChar name[rwTEXTUREBASENAMELENGTH];  /* Name of the texture */         //+16
+    RwChar mask[rwTEXTUREBASENAMELENGTH];  /* Name of the textures mask */   //+48
 
     /* 31 [xxxxxxxx xxxxxxxx vvvvuuuu ffffffff] 0 */
-    RwUInt32            filterAddressing; /* Filtering & addressing mode flags */         //+80
+    RwUInt32 filterAddressing; /* Filtering & addressing mode flags */       //+80
 
-    RwInt32             refCount; /* Reference count, surprisingly enough */              //+84
+    RwInt32 refCount; /* Reference count, surprisingly enough */             //+84
 };
 typedef struct RwTexture RwTexture;
+

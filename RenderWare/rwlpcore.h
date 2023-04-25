@@ -621,3 +621,4 @@ struct RwRGBA
     RwUInt8 blue;   /**< blue component */
     RwUInt8 alpha;  /**< alpha component */
 };
+

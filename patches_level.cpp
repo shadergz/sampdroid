@@ -147,3 +147,4 @@ void applyOnGamePatches()
     //g_patcher_micro->replaceMethod("NVThreadSpawnProc", g_game_addr+0x332040, (uintptr_t)NVThreadSpawnProc_HOOK, (uintptr_t*)&NVThreadSpawnProc);
 
 }
+

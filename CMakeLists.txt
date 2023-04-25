@@ -27,6 +27,8 @@ target_sources(mtmobile PRIVATE
     menu_handler.cpp
     plugin_jni.cpp
     settings.cpp
+
+    RenderWare/RW.cpp
     )
 
 execute_process(
