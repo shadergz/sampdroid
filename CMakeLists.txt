@@ -27,6 +27,7 @@ target_sources(mtmobile PRIVATE
     menu_handler.cpp
     plugin_jni.cpp
     settings.cpp
+    texture_runtime.cpp
 
     RenderWare/RW.cpp
     )

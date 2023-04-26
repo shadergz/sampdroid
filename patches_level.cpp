@@ -1,5 +1,4 @@
 
-#include <android/log.h>
 #include <cstdint>
 
 #include <unistd.h>
