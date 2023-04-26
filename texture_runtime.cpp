@@ -26,7 +26,6 @@ uintptr_t textureGetTexture(const char* texName)
         __builtin_unreachable();
     }
     */
-
     // forcing the engine to keep our texture reference alive!
     loadedTex->refCount++;
     return (uintptr_t)loadedTex;

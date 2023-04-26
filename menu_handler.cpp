@@ -14,9 +14,9 @@ uint32_t (*MainMenuScreen_HasCPSave)();
 
 #pragma pack(push, 1)
 struct MenuSlot_ {
-    RwTexture* button_texure;
-    const char* fep_name;
-    void (*on_pressedcallback)();
+    RwTexture* m_button_texure;
+    const char* m_fep_mask;
+    void (*m_onPressedCallback)();
 };
 
 struct MainMenuScreen_ {
@@ -93,22 +93,22 @@ static void menu_placeButton(
     auto slot_ptr{&menu->m_slot[menu->m_slot_index++]};
     mtmprintf(ANDROID_LOG_INFO, "free slot selected: %llx\n", slot_ptr);
 
-    slot_ptr->button_texure = texture_bt;
-    slot_ptr->fep_name = fep;
+    slot_ptr->m_button_texure = texture_bt;
+    slot_ptr->m_fep_mask = fep;
     
     // selecting the correct button callback
     if (!strncmp(bt_name, BNAME_ON_RESUME, sizeof BNAME_ON_RESUME))
-        slot_ptr->on_pressedcallback = OnResume_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnResume_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_PLAY, sizeof BNAME_ON_PLAY))
-        slot_ptr->on_pressedcallback = OnStartGame_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnStartGame_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_SETTINGS, sizeof BNAME_ON_SETTINGS))
-        slot_ptr->on_pressedcallback = OnSettings_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnSettings_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_BRIEFS, sizeof BNAME_ON_SETTINGS))
-        slot_ptr->on_pressedcallback = OnBriefs_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnBriefs_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_STATS, sizeof BNAME_ON_SETTINGS))
-        slot_ptr->on_pressedcallback = OnStats_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnStats_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_QUIT, sizeof BNAME_ON_SETTINGS))
-        slot_ptr->on_pressedcallback = OnExit_buttonPressed;
+        slot_ptr->m_onPressedCallback = OnExit_buttonPressed;
 
 }
 
