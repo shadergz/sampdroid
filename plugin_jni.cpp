@@ -39,8 +39,9 @@ jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
     }
 
     mtmprintf(ANDROID_LOG_INFO, "libGTASA.so base image found in address space: (%#lx)", (void*)(g_game_addr));
+    
+    // Applying pacthes and hooking some methods
     applyOnGamePatches();
-
     
     return use_version;
 }

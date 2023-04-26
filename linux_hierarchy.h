@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <fcntl.h>
 
 #include <android/file_descriptor_jni.h>

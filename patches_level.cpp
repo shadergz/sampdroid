@@ -1,9 +1,9 @@
 
 #include <android/log.h>
 #include <cstdint>
-#include <stdint.h>
-#include <sys/user.h>
+
 #include <unistd.h>
+#include <sys/user.h>
 #include <sys/mman.h>
 
 #include <patches_level.h>
@@ -35,7 +35,7 @@ static constexpr uint8_t PATCHER_FRAME_GOBACK = offsetof(Trampoline_Data, m_tr_d
 static_assert(sizeof(Trampoline_Data) == AArch64_Patcher::PATCHER_HOOK_SIZE,
     "trampoline struct data size is invalid and must be fixed!");
 
-void AArch64_Patcher::replaceMethod(const char* sb_name, const uintptr_t method, 
+void AArch64_Patcher::placeHookAt(const char* sb_name, const uintptr_t method, 
     const uintptr_t replace, uintptr_t* save_in)
 {
     auto sb_size{strlen(sb_name)};
@@ -140,11 +140,17 @@ void AArch64_Patcher::unfuckPageRWX(uintptr_t unfuck_addr, uint64_t region_size)
     mprotect((void*)(base_addr), count * page_size, protect);
 }
 
+// While the game is loading we need to fixes and hook some functions
 void applyOnGamePatches()
 {
     g_patcher_micro = new AArch64_Patcher();
-    g_patcher_micro->replaceMethod("Main*::AddAllItems", g_game_addr+0x358010, (uintptr_t)(MainMenuScreen_AddAllItems_HOOK), (uintptr_t*)(&MainMenuScreen_AddAllItems));
-    //g_patcher_micro->replaceMethod("NVThreadSpawnProc", g_game_addr+0x332040, (uintptr_t)NVThreadSpawnProc_HOOK, (uintptr_t*)&NVThreadSpawnProc);
+
+    // MenuItem_add is no longer present
+    g_patcher_micro->placeHookAt("AddAllItems", g_game_addr+0x358010, (uintptr_t)(MainMenuScreen_AddAllItems_HOOK), (uintptr_t*)(&MainMenuScreen_AddAllItems));
+    
+    // This hook placement is clashing the game, because it calls our AddAllItems hook
+    // at this point we can't do nested hook! (This should be fixed later)!
+    // g_patcher_micro->placeHookAt("NVThreadSpawnProc", g_game_addr+0x332040, (uintptr_t)NVThreadSpawnProc_HOOK, (uintptr_t*)&NVThreadSpawnProc);
+
 
 }
-

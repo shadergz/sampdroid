@@ -23,7 +23,7 @@ public:
     AArch64_Patcher() {
     }
 
-    void replaceMethod(const char* sb_name, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
+    void placeHookAt(const char* sb_name, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
     uint32_t* getNewTrampoline() noexcept 
     {
@@ -55,3 +55,4 @@ private:
 };
 
 void applyOnGamePatches();
+

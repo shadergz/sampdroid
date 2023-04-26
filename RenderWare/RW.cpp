@@ -8,61 +8,61 @@ RsGlobalType* g_main_RsGlobal;
 
 /* RenderWare/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);
-RwCamera* (*RwCameraEndUpdate)(RwCamera *camera);
-RwCamera* (*RwCameraShowRaster)(RwCamera *camera, void *pDev, RwUInt32 flags);
+RwCamera* (*RwCameraEndUpdate)(RwCamera* camera);
+RwCamera* (*RwCameraShowRaster)(RwCamera* camera, void* pDev, RwUInt32 flags);
 
 RwRaster* (*RwRasterCreate)(RwInt32 width, RwInt32 height, RwInt32 depth, RwInt32 flags);
-RwBool (*RwRasterDestroy)(RwRaster *raster);
-RwRaster* (*RwRasterGetOffset)(RwRaster *raster, RwInt16 *xOffset, RwInt16 *yOffset);
-RwInt32 (*RwRasterGetNumLevels)(RwRaster *raster);
-RwRaster* (*RwRasterSubRaster)(RwRaster *subRaster, RwRaster *raster, RwRect *rect);
-RwRaster* (*RwRasterRenderFast)(RwRaster *raster, RwInt32 x, RwInt32 y);
-RwRaster* (*RwRasterRender)(RwRaster *raster, RwInt32 x, RwInt32 y);
-RwRaster* (*RwRasterRenderScaled)(RwRaster *raster, RwRect *rect);
-RwRaster* (*RwRasterPushContext)(RwRaster *raster);
+RwBool (*RwRasterDestroy)(RwRaster* raster);
+RwRaster* (*RwRasterGetOffset)(RwRaster* raster, RwInt16* xOffset, RwInt16* yOffset);
+RwInt32 (*RwRasterGetNumLevels)(RwRaster* raster);
+RwRaster* (*RwRasterSubRaster)(RwRaster* subRaster, RwRaster* raster, RwRect* rect);
+RwRaster* (*RwRasterRenderFast)(RwRaster* raster, RwInt32 x, RwInt32 y);
+RwRaster* (*RwRasterRender)(RwRaster* raster, RwInt32 x, RwInt32 y);
+RwRaster* (*RwRasterRenderScaled)(RwRaster* raster, RwRect* rect);
+RwRaster* (*RwRasterPushContext)(RwRaster* raster);
 RwRaster* (*RwRasterPopContext)(void);
 RwRaster* (*RwRasterGetCurrentContext)(void);
 RwBool (*RwRasterClear)(RwInt32 pixelValue);
-RwBool (*RwRasterClearRect)(RwRect *rpRect, RwInt32 pixelValue);
-RwRaster* (*RwRasterShowRaster)(RwRaster * raster, void *dev, RwUInt32 flags);
-RwUInt8* (*RwRasterLock)(RwRaster * raster, RwUInt8 level, RwInt32 lockMode);
-RwRaster* (*RwRasterUnlock)(RwRaster *raster);
-RwUInt8* (*RwRasterLockPalette)(RwRaster *raster, RwInt32 lockMode);
-RwRaster* (*RwRasterUnlockPalette)(RwRaster *raster);
+RwBool (*RwRasterClearRect)(RwRect* rpRect, RwInt32 pixelValue);
+RwRaster* (*RwRasterShowRaster)(RwRaster* raster, void* dev, RwUInt32 flags);
+RwUInt8* (*RwRasterLock)(RwRaster* raster, RwUInt8 level, RwInt32 lockMode);
+RwRaster* (*RwRasterUnlock)(RwRaster* raster);
+RwUInt8* (*RwRasterLockPalette)(RwRaster* raster, RwInt32 lockMode);
+RwRaster* (*RwRasterUnlockPalette)(RwRaster* raster);
 RwImage* (*RwImageCreate)(RwInt32 width, RwInt32 height, RwInt32 depth);
-RwBool (*RwImageDestroy)(RwImage *image);
-RwImage* (*RwImageAllocatePixels)(RwImage *image);
-RwImage* (*RwImageFreePixels)(RwImage *image);
-RwImage* (*RwImageCopy)(RwImage * destImage, const RwImage *sourceImage);
-RwImage* (*RwImageResize)(RwImage * image, RwInt32 width, RwInt32 height);
-RwImage* (*RwImageApplyMask)(RwImage *image, const RwImage *mask);
-RwImage* (*RwImageMakeMask)(RwImage *image);
-RwImage* (*RwImageReadMaskedImage)(const RwChar *imageName, const RwChar *maskname);
-RwImage* (*RwImageRead)(const RwChar *imageName);
-RwImage* (*RwImageWrite)(RwImage *image, const RwChar *imageName);
-RwImage* (*RwImageSetFromRaster)(RwImage *image, RwRaster *raster);
-RwRaster* (*RwRasterSetFromImage)(RwRaster *raster, RwImage *image);
-RwRaster* (*RwRasterRead)(const RwChar *filename);
-RwRaster* (*RwRasterReadMaskedRaster)(const RwChar *filename, const RwChar *maskname);
-RwImage* (*RwImageFindRasterFormat)(RwImage *ipImage, RwInt32 nRasterType, RwInt32 *npWidth, RwInt32 *npHeight, RwInt32 *npDepth,RwInt32 *npFormat);
+RwBool (*RwImageDestroy)(RwImage* image);
+RwImage* (*RwImageAllocatePixels)(RwImage* image);
+RwImage* (*RwImageFreePixels)(RwImage* image);
+RwImage* (*RwImageCopy)(RwImage* destImage, const RwImage* sourceImage);
+RwImage* (*RwImageResize)(RwImage* image, RwInt32 width, RwInt32 height);
+RwImage* (*RwImageApplyMask)(RwImage* image, const RwImage* mask);
+RwImage* (*RwImageMakeMask)(RwImage* image);
+RwImage* (*RwImageReadMaskedImage)(const RwChar* imageName, const RwChar* maskname);
+RwImage* (*RwImageRead)(const RwChar* imageName);
+RwImage* (*RwImageWrite)(RwImage* image, const RwChar* imageName);
+RwImage* (*RwImageSetFromRaster)(RwImage* image, RwRaster* raster);
+RwRaster* (*RwRasterSetFromImage)(RwRaster* raster, RwImage* image);
+RwRaster* (*RwRasterRead)(const RwChar* filename);
+RwRaster* (*RwRasterReadMaskedRaster)(const RwChar* filename, const RwChar* maskname);
+RwImage* (*RwImageFindRasterFormat)(RwImage* ipImage, RwInt32 nRasterType, RwInt32* npWidth, RwInt32* npHeight, RwInt32* npDepth, RwInt32* npFormat);
 
 /* RenderWare/rwlpcore.h */
 RwReal (*RwIm2DGetNearScreenZ)(void);
 RwReal (*RwIm2DGetFarScreenZ)(void);
-RwBool (*RwRenderStateGet)(RwRenderState state, void *value);
-RwBool (*RwRenderStateSet)(RwRenderState state, void *value);
-RwBool (*RwIm2DRenderLine)(RwIm2DVertex *vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2);
-RwBool (*RwIm2DRenderTriangle)(RwIm2DVertex *vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2, RwInt32 vert3 );
-RwBool (*RwIm2DRenderPrimitive)(RwPrimitiveType primType, RwIm2DVertex *vertices, RwInt32 numVertices);
-RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex *vertices, RwInt32 numVertices, RwImVertexIndex *indices, RwInt32 numIndices);
+RwBool (*RwRenderStateGet)(RwRenderState state, void* value);
+RwBool (*RwRenderStateSet)(RwRenderState state, void* value);
+RwBool (*RwIm2DRenderLine)(RwIm2DVertex* vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2);
+RwBool (*RwIm2DRenderTriangle)(RwIm2DVertex* vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2, RwInt32 vert3);
+RwBool (*RwIm2DRenderPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices);
+RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices, RwImVertexIndex* indices, RwInt32 numIndices);
 
 /* RenderWare/rtpng.h */
-RwImage* (*RtPNGImageWrite)(RwImage *image, const RwChar *imageName);
-RwImage* (*RtPNGImageRead)(const RwChar *imageName);
+RwImage* (*RtPNGImageWrite)(RwImage* image, const RwChar* imageName);
+RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
 extern uintptr_t g_game_addr;
 
-void loadSA_RWReferences()
+void loadSARWReferences()
 {
     mtmputs(ANDROID_LOG_INFO, "loading RenderWare Graphics engine functions references...");
 
