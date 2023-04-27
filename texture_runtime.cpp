@@ -2,14 +2,12 @@
 #include <cstring>
 #include <cstdint>
 
-#include <android/log.h>
 #include <arm_neon.h>
 
 #include <RenderWare/rwcore.h>
 #include <outside.h>
 #include <texture_runtime.h>
 
-extern const char* g_logtag;
 extern uintptr_t g_game_addr;
 
 uintptr_t textureGetTexture(const char* texName) 
@@ -18,12 +16,9 @@ uintptr_t textureGetTexture(const char* texName)
 
     RwTexture* loadedTex{((RwTexture* (*)(const char*))(g_game_addr+0x286718))(texName)};
     if (!loadedTex) return 0;
-    
-    if (strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH)) {
-        __android_log_assert("strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH)", 
-            g_logtag, "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
-        __builtin_unreachable();
-    }
+
+    MTM_RUNTIME_ASSERT(!strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH),
+        "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
 
     // Forcing the engine to keep our texture reference alive!
     loadedTex->refCount++;

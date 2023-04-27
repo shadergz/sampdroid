@@ -3,8 +3,7 @@
 #include <cstdint>
 
 #include <unistd.h>
-
-#include <android/log.h>
+#include <outside.h>
 
 extern const char* g_logtag;
 
@@ -27,9 +26,8 @@ public:
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
     uint32_t* getNewTrampoline() noexcept 
     {
-        if (m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1)
-            __android_log_assert("m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1",
-                g_logtag, "Our trampoline bank data buffer has exhausted!");
+        MTM_RUNTIME_ASSERT(m_tr_bank.m_tramindex < PATCHER_HOOK_COUNT - 1,
+            "Our trampoline bank data buffer has exhausted!");
         return reinterpret_cast<uint32_t*>(&m_tr_bank.m_t_RWX_data[PATCHER_HOOK_SIZE * m_tr_bank.m_tramindex++]);
     }
 

@@ -1,7 +1,7 @@
 
 #include <outside.h>
 
-const char* g_logtag = "MT-Mobile";
+const char* g_logtag = "MTM";
 
 int mtmprintf(int prio, const char* __restrict format, ...)
 {

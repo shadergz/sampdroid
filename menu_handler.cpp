@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <android/log.h>
 
 #include <RenderWare/rwcore.h>
 #include <menu_handler.h>
@@ -58,18 +57,11 @@ void (*OnBriefs_buttonPressed)();
 void (*OnStats_buttonPressed)();
 void (*OnExit_buttonPressed)();
 
-extern const char* g_logtag;
-
 static void menu_placeButton(
     const char* bt_name, const char fep[8], MainMenuScreen_* menu) 
 {
-    RwTexture* texture_bt{(RwTexture*)textureLoadNew("sa", bt_name)};
-    if (!texture_bt) {
-        __android_log_assert("!texture_bt", g_logtag,
-            "Can't build the menu, some textures hasn't found!");
-        
-        __builtin_unreachable();
-    }
+    RwTexture* texture_bt{(RwTexture*)textureLoadNew("gta3", bt_name)};
+    MTM_RUNTIME_ASSERT(texture_bt != nullptr, "Can't build the menu, some textures hasn't found!");
     
     auto slot_placeholder{menu->m_slot_index};
     mtmprintf(ANDROID_LOG_DEBUG, "Menu slot index: %u\n", slot_placeholder);
@@ -78,17 +70,15 @@ static void menu_placeButton(
     static constexpr uint SLOT_MAX_COUNT{8};
     if (!menu->m_slot) {
         mtmprintf(ANDROID_LOG_DEBUG, "Menu slot doesn't exist, allocating 8 slots now!");
+        // TODO: Maybe the game clashes because of this, the original function allocate with malloc instead of new operator
         menu->m_slot = new MenuSlot_[SLOT_MAX_COUNT];
         // Putting a trap data into it (this has used for debug purposes only!)!
         memset(menu->m_slot, 0xf, sizeof (MenuSlot_) * SLOT_MAX_COUNT);
 
         menu->m_slot_max = SLOT_MAX_COUNT;
     }
-    if (newSlot == menu->m_slot_max) {
-        __android_log_assert("newSlot == menu->m_slot_max", g_logtag,
-            "Can't use a new slot item for store the menu item with name: %s", bt_name);
-        __builtin_unreachable();
-    }
+    MTM_RUNTIME_ASSERT(newSlot < menu->m_slot_max,
+        "Can't use a new slot item for store the menu item with name: %s", bt_name);
 
     auto slot_ptr{&menu->m_slot[menu->m_slot_index++]};
     mtmprintf(ANDROID_LOG_INFO, "Free slot selected: %llx\n", slot_ptr);

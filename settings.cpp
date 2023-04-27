@@ -4,7 +4,6 @@
 #include <mutex>
 
 void (*NVThreadSpawnProc)(uintptr_t x0);
-
 // Count of created threads
 uint16_t g_th_count{};
 std::mutex g_NVlock{};

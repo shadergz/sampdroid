@@ -59,12 +59,9 @@ void AArch64_Patcher::placeHookAt(const char* sb_name, const uintptr_t method,
 
     strncpy(tr_data->m_origin_symbolname, sb_name, 
         sizeof (tr_data->m_origin_symbolname));
-
-    if ((uintptr_t)tr_data->m_tr_data != (uintptr_t)tr_data + PATCHER_FRAME_GOBACK) {
-        __android_log_assert(
-        "(uintptr_t)tr_data->m_tr_data != (uintptr_t)tr_data + PATCHER_FRAME_GOBACK", 
-        g_logtag, "PATCHER_FRAME_GOBACK isn't indexing the trampoline data as expected, please fix now!");
-    }
+    MTM_RUNTIME_ASSERT((uintptr_t)tr_data->m_tr_data == (uintptr_t)tr_data + PATCHER_FRAME_GOBACK, 
+        "PATCHER_FRAME_GOBACK isn't indexing the trampoline data as expected, please fix now!");
+    
     // doing the frame backup (we're divorciating now)
     auto origin_func{(uint32_t*)method};
     *(uint32_t*)(tr_data->m_tr_data+0) = origin_func[0];

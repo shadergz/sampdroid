@@ -11,6 +11,7 @@ JNIEnv* g_game_env;
 uintptr_t g_game_addr;
 
 extern AArch64_Patcher* g_patcher_micro;
+void loadSARWReferences();
 
 void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved) 
 {
@@ -40,6 +41,7 @@ jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
 
     mtmprintf(ANDROID_LOG_INFO, "(libGTASA.so) base image found in address space: (%#lx)", (void*)(g_game_addr));
     
+    loadSARWReferences();
     // Applying pacthes and hooking some methods
     applyOnGamePatches();
     
