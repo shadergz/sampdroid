@@ -12,6 +12,8 @@ void (*MainMenuScreen_AddAllItems)(uintptr_t x0);
 uint32_t (*MainMenuScreen_HasCPSave)();
 
 #pragma pack(push, 1)
+
+
 struct MenuSlot_ {
     RwTexture* m_button_texure;
     const char* m_fep_mask;
@@ -30,8 +32,11 @@ public:
     // Count of available entries inside of m_slot
     uint32_t m_slot_max;
     uint32_t m_slot_index;
+
     MenuSlot_* m_slot;
 };
+
+
 #pragma pack(pop)
 
 static_assert(offsetof(MainMenuScreen_, m_inGameplayScene) == 0x15);
@@ -78,7 +83,7 @@ static void menu_placeButton(
         menu->m_slot_max = SLOT_MAX_COUNT;
     }
     MTM_RUNTIME_ASSERT(newSlot < menu->m_slot_max,
-        "Can't use a new slot item for store the menu item with name: %s", bt_name);
+        "Can't use a slot for store the menu item with name: %s", bt_name);
 
     auto slot_ptr{&menu->m_slot[menu->m_slot_index++]};
     mtmprintf(ANDROID_LOG_INFO, "Free slot selected: %llx\n", slot_ptr);
@@ -147,13 +152,16 @@ void MainMenuScreen_AddAllItems_HOOK(uintptr_t this_x0)
         menu_placeButton(BNAME_ON_SETTINGS, "FEP_OPT", our_inGameMenu);
         menu_placeButton(BNAME_ON_STATS, "FEH_STA", our_inGameMenu);
     
+        // Checking if the player has new messages, whether yes...
         if (*reinterpret_cast<uint64_t*>(g_game_addr+0xca04d0))
+            // Putting the "Briefs" button
             menu_placeButton(BNAME_ON_BRIEFS, "FEH_BRI", our_inGameMenu);
 
         menu_placeButton(BNAME_ON_PLAY, "FEP_STG", our_inGameMenu);
     }
 
     if (our_inGameMenu->m_slot_index + 1 <= our_inGameMenu->m_slot_max)
+        // This action always needed to be successful completed
         menu_placeButton(BNAME_ON_QUIT, "FEP_QUI", our_inGameMenu);
 
 }

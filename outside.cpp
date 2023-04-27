@@ -19,3 +19,4 @@ int mtmputs(int prio, const char* __restrict msg_str)
     const auto wStr{__android_log_write(prio, g_logtag, msg_str)};
     return wStr;
 }
+

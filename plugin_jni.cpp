@@ -47,3 +47,4 @@ jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
     
     return use_version;
 }
+

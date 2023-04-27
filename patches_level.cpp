@@ -17,6 +17,7 @@ extern uintptr_t g_game_addr;
 enum Macro_BranchMode {};
 
 #pragma pack(push, 1)
+
 struct Trampoline_Data {
     uint16_t m_id;
     uintptr_t m_source;
@@ -27,6 +28,7 @@ struct Trampoline_Data {
     char m_origin_symbolname[AArch64_Patcher::PATCHER_SYMBOL_NAME];
     uint8_t m_tr_data[sizeof(uint32_t) * AArch64_Patcher::PATCHER_MAX_INST];
 };
+
 #pragma pack(pop)
 
 static constexpr uint8_t PATCHER_FRAME_GOBACK = offsetof(Trampoline_Data, m_tr_data);
@@ -70,6 +72,8 @@ void AArch64_Patcher::placeHookAt(const char* sb_name, const uintptr_t method,
     *(uint32_t*)(tr_data->m_tr_data+12) = origin_func[3];
 
     tr_data->m_inst_count = &origin_func[4] - &origin_func[0];
+
+    // Installing our payload instructions
 
     /* Now we can overwrite the original method frame
      * making the page readable/writable and executable */
