@@ -114,7 +114,7 @@
     invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
 
     .line 457
-    const-string v0, "mt-mobile"
+    const-string v0, "mt_mobile"
 
     invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
 
