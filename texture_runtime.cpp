@@ -44,7 +44,7 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
         auto dbPtr{&s_dbHandler[0]};
 
         if (!needToOpen) break;
-        // Locating a invalid db pointer to place into it!
+        // Locating an invalid db pointer to place into it!
         if (!*dbPtr) 
             if (++*dbPtr)
                 break;

@@ -11,7 +11,7 @@ std::mutex g_NVlock{};
 void NVThreadSpawnProc_HOOK(uintptr_t x0)
 {
     std::unique_lock<std::mutex> unique(g_NVlock);
-    mtmprintf(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %#u)", g_th_count);
+    mtmprintf(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %u)", g_th_count);
     g_th_count++;
 
     unique.unlock();
