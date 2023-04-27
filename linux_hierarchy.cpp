@@ -32,7 +32,7 @@ uintptr_t fhsGetLibrary(const char* shared)
 
     static constexpr int INVALID_FD = (int)-1;
     if (AFileDescriptor_getFd(g_game_env, j_file) == INVALID_FD) {
-        mtmprintf(ANDROID_LOG_ERROR, "can't open the maps file, cause of %s\n", 
+        mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
             strerror(errno));
         free(maps);
         g_game_env->DeleteLocalRef(j_file);

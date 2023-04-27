@@ -6,10 +6,10 @@
 #include <texture_runtime.h>
 #include <outside.h>
 
-// method signature: MainMenuScreen::AddAllItems(MainMenuScreen *this)
-// parameters: 
+// Method signature: MainMenuScreen::AddAllItems(MainMenuScreen *this)
+// Parameters: 
 void (*MainMenuScreen_AddAllItems)(uintptr_t x0);
-// why CP? Are you kidding with me?!
+// Why CP? are you kidding with me?!
 uint32_t (*MainMenuScreen_HasCPSave)();
 
 #pragma pack(push, 1)
@@ -25,10 +25,10 @@ public:
     bool    m_inGameplayScene;
     uint8_t m_undefined_1[0x42];
 
-    // a slot index identifier, needed to be increased while adding
-    // new items into it!
+    /* A slot index identifier, needed to be increased while adding
+     * new items into it! */
 
-    // count of available entries inside of m_slot
+    // Count of available entries inside of m_slot
     uint32_t m_slot_max;
     uint32_t m_slot_index;
     MenuSlot_* m_slot;
@@ -58,45 +58,45 @@ void (*OnBriefs_buttonPressed)();
 void (*OnStats_buttonPressed)();
 void (*OnExit_buttonPressed)();
 
-extern const char* g_mtmTag;
+extern const char* g_logtag;
 
 static void menu_placeButton(
     const char* bt_name, const char fep[8], MainMenuScreen_* menu) 
 {
     RwTexture* texture_bt{(RwTexture*)textureLoadNew("sa", bt_name)};
     if (!texture_bt) {
-        __android_log_assert("!texture_bt", g_mtmTag,
-            "can't build the menu, some textures hasn't found!");
+        __android_log_assert("!texture_bt", g_logtag,
+            "Can't build the menu, some textures hasn't found!");
         
         __builtin_unreachable();
     }
     
     auto slot_placeholder{menu->m_slot_index};
-    mtmprintf(ANDROID_LOG_DEBUG, "menu slot index: %u\n", slot_placeholder);
+    mtmprintf(ANDROID_LOG_DEBUG, "Menu slot index: %u\n", slot_placeholder);
     const uint32_t newSlot{slot_placeholder + 0x1};
 
-    static constexpr uint SLOT_MAX_COUNT{10};
+    static constexpr uint SLOT_MAX_COUNT{8};
     if (!menu->m_slot) {
-        mtmprintf(ANDROID_LOG_DEBUG, "menu slot are null, allocating 10 slots now!");
+        mtmprintf(ANDROID_LOG_DEBUG, "Menu slot doesn't exist, allocating 8 slots now!");
         menu->m_slot = new MenuSlot_[SLOT_MAX_COUNT];
-        // putting a trap data into it (this has used for debug purposes only!)!
-        // memset(menu->m_slot, 0xf, sizeof (MenuSlot_) * 10);
+        // Putting a trap data into it (this has used for debug purposes only!)!
+        memset(menu->m_slot, 0xf, sizeof (MenuSlot_) * SLOT_MAX_COUNT);
 
         menu->m_slot_max = SLOT_MAX_COUNT;
     }
     if (newSlot == menu->m_slot_max) {
-        __android_log_assert("newSlot == menu->m_slot_max", g_mtmTag,
-            "can't use a new slot item for store the menu item with name: %s", bt_name);
+        __android_log_assert("newSlot == menu->m_slot_max", g_logtag,
+            "Can't use a new slot item for store the menu item with name: %s", bt_name);
         __builtin_unreachable();
     }
 
     auto slot_ptr{&menu->m_slot[menu->m_slot_index++]};
-    mtmprintf(ANDROID_LOG_INFO, "free slot selected: %llx\n", slot_ptr);
+    mtmprintf(ANDROID_LOG_INFO, "Free slot selected: %llx\n", slot_ptr);
 
     slot_ptr->m_button_texure = texture_bt;
     slot_ptr->m_fep_mask = fep;
     
-    // selecting the correct button callback
+    // Selecting the correct button callback
     if (!strncmp(bt_name, BNAME_ON_RESUME, sizeof BNAME_ON_RESUME))
         slot_ptr->m_onPressedCallback = OnResume_buttonPressed;
     else if (!strncmp(bt_name, BNAME_ON_PLAY, sizeof BNAME_ON_PLAY))
@@ -115,20 +115,19 @@ static void menu_placeButton(
 void MainMenuScreen_AddAllItems_HOOK(uintptr_t this_x0)
 {
     mtmputs(ANDROID_LOG_WARN, "MenuHook: on (AddAllItems)!");
-    mtmprintf(ANDROID_LOG_INFO, "discarding the original function %#llx", 
-        MainMenuScreen_AddAllItems);
+    // mtmprintf(ANDROID_LOG_INFO, "Discarding the original function %#llx", MainMenuScreen_AddAllItems);
 
     *(uintptr_t*)&MainMenuScreen_HasCPSave = g_game_addr+0x35a680;
-    // it's seems that the original function is trying to detect if we are at
-    // the main game screen or in gameplay game screen scene (Like when we open the map 
-    // while in gameplay)
-    // 1. [x0 + 0x15] has a value (boolean) that determine this!
-    //    it's clearly a boolean value
-    //    mov        x19, this
-    //    ldrb       w8, [x19, #0x15]
+    /* It's seems that the original function is trying to detect if we are at
+     * the main game screen or in gameplay game screen scene (Like when we open the map 
+     * while in gameplay)
+     * 1. [x0 + 0x15] has a value (boolean) that determine this!
+     *    it's clearly a boolean value
+     *    mov        x19, this
+     *    ldrb       w8, [x19, #0x15] */
 
     MainMenuScreen_* our_inGameMenu{reinterpret_cast<MainMenuScreen_*>(this_x0)};
-    mtmprintf(ANDROID_LOG_INFO, "MenuHook: MainMenuScreen structure location: %llx\n", our_inGameMenu);
+    mtmprintf(ANDROID_LOG_INFO, "MenuHook: menu structure location: %llx\n", our_inGameMenu);
     
     *reinterpret_cast<uintptr_t*>(&OnResume_buttonPressed)    = g_game_addr+0x35a0f8;
     *reinterpret_cast<uintptr_t*>(&OnStartGame_buttonPressed) = g_game_addr+0x35a31c;
@@ -140,12 +139,12 @@ void MainMenuScreen_AddAllItems_HOOK(uintptr_t this_x0)
     
     *reinterpret_cast<uintptr_t*>(&OnExit_buttonPressed)      = g_game_addr+0x35a758;
 
-    mtmputs(ANDROID_LOG_INFO, "MenuHook: Placing on game menu buttons");
+    mtmputs(ANDROID_LOG_INFO, "MenuHook: placing on game menu buttons");
 
     if (__builtin_expect(!our_inGameMenu->m_inGameplayScene, 0)) {
-        // we're in the main menu, the user can choice between SAMP or MTA
-        mtmputs(ANDROID_LOG_WARN, "MenuHook: Placing Main Menu \"Resume\" button");
-        // for place the "Resume button we need to check if there's a Save Game already"
+        // We're in the main menu, the user can choice between SAMP or MTA
+        mtmputs(ANDROID_LOG_WARN, "MenuHook: placing Main Menu (Resume) button");
+        // For place the "Resume button we need to check if there's a Save Game already"
         uint32_t hasSave{MainMenuScreen_HasCPSave()};
         if (hasSave & 1)
             menu_placeButton(BNAME_ON_RESUME, "FEP_RES", our_inGameMenu);

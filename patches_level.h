@@ -6,7 +6,7 @@
 
 #include <android/log.h>
 
-extern const char* g_mtmTag;
+extern const char* g_logtag;
 
 class AArch64_Patcher {
 public:
@@ -29,7 +29,7 @@ public:
     {
         if (m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1)
             __android_log_assert("m_tr_bank.m_tramindex == PATCHER_HOOK_COUNT - 1",
-                g_mtmTag, "our trampoline bank data buffer has exhausted!");
+                g_logtag, "Our trampoline bank data buffer has exhausted!");
         return reinterpret_cast<uint32_t*>(&m_tr_bank.m_t_RWX_data[PATCHER_HOOK_SIZE * m_tr_bank.m_tramindex++]);
     }
 
@@ -39,7 +39,7 @@ private:
         static constexpr uint8_t ARCH_INST_SIZE = 8;
 
         MicroRaw_Trampoline() {
-            static_assert(sizeof m_t_RWX_data == PAGE_SIZE, "trampoline data size is wrong! fix now!");
+            static_assert(sizeof m_t_RWX_data == PAGE_SIZE, "Trampoline data size is wrong! fix now!");
             static_assert(sizeof m_t_RWX_data / PATCHER_HOOK_SIZE == 
                 PATCHER_HOOK_COUNT, "PAGE_SIZE isn't the desired value!");
 

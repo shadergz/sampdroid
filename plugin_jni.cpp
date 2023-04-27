@@ -6,7 +6,7 @@
 #include <linux_hierarchy.h>
 #include <patches_level.h>
 
-// this env is specific by the calling thread and shouldn't be shared
+// This env is specific by the calling thread and shouldn't be shared
 JNIEnv* g_game_env;
 uintptr_t g_game_addr;
 
@@ -14,7 +14,7 @@ extern AArch64_Patcher* g_patcher_micro;
 
 void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved) 
 {
-    mtmputs(ANDROID_LOG_INFO, "unload all resources used");
+    mtmputs(ANDROID_LOG_INFO, "Unload all resources used");
 
     if (!g_patcher_micro) 
         delete g_patcher_micro;
@@ -22,25 +22,25 @@ void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved)
 
 jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
     mtmputs(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);    
-    mtmcout(ANDROID_LOG_INFO, "loaded thread id {} in core {}", 
+    mtmcout(ANDROID_LOG_INFO, "Loaded thread id {} in core {}", 
         std::this_thread::get_id(), sched_getcpu());
     
     const jint use_version{JNI_VERSION_1_6};
 
     if (vm->GetEnv((void**)(&g_game_env), use_version) != JNI_OK) {
-        mtmputs(ANDROID_LOG_ERROR, "can't get the JNI interface!");
+        mtmputs(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
     }
-    // getting the in memory shared object address space!
+    // Getting the in memory shared object address space!
     g_game_addr = fhsGetLibrary("libGTASA.so");
     if (!g_game_addr) {
-        mtmputs(ANDROID_LOG_ERROR, "can't locate libGTASA.so, MT is halted!");
+        mtmputs(ANDROID_LOG_ERROR, "Can't locate libGTASA.so, MT is halted!");
         return -1;
     }
 
-    mtmprintf(ANDROID_LOG_INFO, "libGTASA.so base image found in address space: (%#lx)", (void*)(g_game_addr));
+    mtmprintf(ANDROID_LOG_INFO, "(libGTASA.so) base image found in address space: (%#lx)", (void*)(g_game_addr));
     
-    // applying pacthes and hooking some methods
+    // Applying pacthes and hooking some methods
     applyOnGamePatches();
     
     return use_version;

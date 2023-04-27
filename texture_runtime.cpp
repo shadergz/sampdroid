@@ -9,24 +9,23 @@
 #include <outside.h>
 #include <texture_runtime.h>
 
-extern const char* g_mtmTag;
+extern const char* g_logtag;
 extern uintptr_t g_game_addr;
 
 uintptr_t textureGetTexture(const char* texName) 
 {
-    mtmprintf(ANDROID_LOG_INFO, "loading new texture with name %s", texName);
+    mtmprintf(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
 
     RwTexture* loadedTex{((RwTexture* (*)(const char*))(g_game_addr+0x286718))(texName)};
     if (!loadedTex) return 0;
     
-    /*
     if (strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH)) {
-        __android_log_assert("!strncasecmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH)", 
-            g_mtmTag, "wrong RwTexture type detected, mem str: %s", loadedTex->name);
+        __android_log_assert("strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH)", 
+            g_logtag, "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
         __builtin_unreachable();
     }
-    */
-    // forcing the engine to keep our texture reference alive!
+
+    // Forcing the engine to keep our texture reference alive!
     loadedTex->refCount++;
     return (uintptr_t)loadedTex;
 }
@@ -34,9 +33,9 @@ uintptr_t textureGetTexture(const char* texName)
 uintptr_t textureLoadNew(const char* dbName, const char* textureName)
 {
     // TextureDatabaseRuntime::GetDatabase(char const*)
-    // the game handler all resource inside multiples databases
-    // we need to get the texture from the correct database name
-    // we can also implements our owns database!
+    /* The game handler all resource inside multiples databases
+     * we need to get the texture from the correct database name
+     * we can also implements our owns database! */
 
     static const char* mt_db[]{"mtsamp", "mtmta"};
     auto needToOpen{
@@ -50,7 +49,7 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
         auto dbPtr{&s_dbHandler[0]};
 
         if (!needToOpen) break;
-        // locating a invalid db pointer to place into it!
+        // Locating a invalid db pointer to place into it!
         if (!*dbPtr) 
             if (++*dbPtr)
                 break;
@@ -59,7 +58,7 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
         *dbPtr = reinterpret_cast<TextureDatabaseRuntime*>(dbClass);
 
         if (!*dbPtr) {
-            mtmprintf(ANDROID_LOG_INFO, "database not found: %s\n", dbName);
+            mtmprintf(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
             return 0;
         }
 
@@ -68,7 +67,7 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
 
     const uintptr_t loadedTexture{textureGetTexture(textureName)};
     if (!strncasecmp(dbName, "CLEAN", 6)) {
-        // unregistring the databases, isn't no needed to keep it's openned
+        // Unregistring the databases, isn't no needed to keep it's openned
 
         if (*(s_dbHandler+0))
             ((void (*)(TextureDatabaseRuntime*))(g_game_addr+0x2866a4))(*(s_dbHandler+0));
@@ -83,10 +82,10 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
     }
     
     if (loadedTexture)
-        mtmprintf(ANDROID_LOG_INFO, "texture %s from database %s loaded at %#llx\n",
+        mtmprintf(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
             textureName, dbName, loadedTexture);
     else
-        mtmprintf(ANDROID_LOG_INFO, "texture %s not found in database %s\n",
+        mtmprintf(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
             textureName, dbName);
 
     return loadedTexture;

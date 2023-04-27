@@ -71,10 +71,10 @@ ZIPALIGN: Final[str]=f'{BUILD_TOOLS}/zipalign'
 BUILD_TYPES: Final[tuple]=('Release', 'Debug')
 BUILD_DIR: Final[str]='{}.{}'.format(build_in, 'dbg' if enb_debug == True else 'rel')
 
-MTM_VERSION: Final[str]='0.0.1'
+MTM_VERSION: Final[str]='0.0.2'
 APK_OUT: Final[str]=f'{install_in}/gtasabase'
 
-LIB_BASENAME: Final[str]='mtm'
+LIB_BASENAME: Final[str]='mt-mobile'
 
 OUTPUT_MTM_FILE: Final[str]=f'{install_in}/{LIB_BASENAME.upper()}-v{MTM_VERSION}.apk'
 MALICIOUS_SMALI: Final[str]='GTASA.smali'
@@ -176,7 +176,7 @@ def install_apk():
 
 def logcat():
     try:
-        subprocess.run([ADB, 'logcat', 'MTMobile,stargames.gtasa,DEBUG, *:S'])
+        subprocess.run([ADB, 'logcat', 'MT-Mobile,stargames.gtasa,DEBUG, *:S'])
     except KeyboardInterrupt:
         pass
 

@@ -64,7 +64,7 @@ extern uintptr_t g_game_addr;
 
 void loadSARWReferences()
 {
-    mtmputs(ANDROID_LOG_INFO, "loading RenderWare Graphics engine functions references...");
+    mtmputs(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions references...");
 
     /* RenderWare/skeleton.h */
     g_main_RsGlobal = (RsGlobalType*)(g_game_addr+0);
