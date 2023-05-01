@@ -1,8 +1,8 @@
 
 #include <outside.h>
 
-#include <RenderWare/rwcore.h>
-#include <RenderWare/skeleton.h>
+#include <renderware/rwcore.h>
+#include <renderware/skeleton.h>
 
 RsGlobalType* g_main_RsGlobal;
 

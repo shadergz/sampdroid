@@ -26,10 +26,10 @@ target_sources(mtmobile PRIVATE
     patches_level.cpp
     menu_handler.cpp
     plugin_jni.cpp
-    settings.cpp
+    nv_threads.cpp
     texture_runtime.cpp
 
-    RenderWare/RW.cpp
+    renderware/engine_refs.cpp
     )
 
 execute_process(

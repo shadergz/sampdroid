@@ -74,7 +74,7 @@ BUILD_DIR: Final[str]='{}.{}'.format(build_in, 'dbg' if enb_debug == True else '
 MTM_VERSION: Final[str]='0.0.3'
 APK_OUT: Final[str]=f'{install_in}/gtasabase'
 
-LIB_BASENAME: Final[str]='mt_mobile'
+LIB_BASENAME: Final[str]='mt4m'
 
 OUTPUT_MTM_FILE: Final[str]=f'{install_in}/{LIB_BASENAME.upper()}-v{MTM_VERSION}.apk'
 MALICIOUS_SMALI: Final[str]='GTASA.smali'

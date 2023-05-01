@@ -9,7 +9,7 @@
 #include <outside.h>
 
 #include <menu_handler.h>
-#include <settings.h>
+#include <nv_threads.h>
 
 AArch64_Patcher* g_patcher_micro;
 extern uintptr_t g_game_addr;

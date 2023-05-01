@@ -4,7 +4,7 @@
 
 #include <arm_neon.h>
 
-#include <RenderWare/rwcore.h>
+#include <renderware/rwcore.h>
 #include <outside.h>
 #include <texture_runtime.h>
 

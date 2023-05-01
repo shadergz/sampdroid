@@ -1,4 +1,4 @@
-#include <settings.h>
+#include <nv_threads.h>
 #include <outside.h>
 
 #include <mutex>
@@ -15,6 +15,6 @@ void NVThreadSpawnProc_HOOK(uintptr_t x0)
     g_th_count++;
 
     unique.unlock();
-
+    
     NVThreadSpawnProc(x0);
 }
