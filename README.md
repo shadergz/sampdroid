@@ -1,4 +1,4 @@
-# MtMobile 
+# mt4mobile 
 
 An experimental implementation of MTA and SAMP for GTA SA v210 aarch64 (for more details look at OpenSA repo)
 
@@ -9,3 +9,8 @@ An experimental implementation of MTA and SAMP for GTA SA v210 aarch64 (for more
 - [ ] Load our 3 (three) texture databases at startup
 - [ ] Produce two database directories (we need to some tools)
 - [ ] To hook InitialiseRenderWare() (`On ARMv7a game version`) and to load our texture databases (for samp and mta) into the engine RenderWare memory space (The renderware will try to load all database from a relative path inside of .../files/texdb/`DATABASE_NAME`)
+
+## Done
+
+- [x] Hooking aarch64 functions
+

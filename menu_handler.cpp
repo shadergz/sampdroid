@@ -1,6 +1,6 @@
 #include <cstdint>
 
-#include <RenderWare/rwcore.h>
+#include <rwrefs/rwcore.h>
 #include <menu_handler.h>
 #include <texture_runtime.h>
 #include <outside.h>

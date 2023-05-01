@@ -1,12 +1,12 @@
 
 #include <outside.h>
 
-#include <renderware/rwcore.h>
-#include <renderware/skeleton.h>
+#include <rwrefs/rwcore.h>
+#include <rwrefs/skeleton.h>
 
-RsGlobalType* g_main_RsGlobal;
+RsGlobalType* g_rsGlobal;
 
-/* RenderWare/rwcore.h */
+/* rwrefs/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);
 RwCamera* (*RwCameraEndUpdate)(RwCamera* camera);
 RwCamera* (*RwCameraShowRaster)(RwCamera* camera, void* pDev, RwUInt32 flags);
@@ -56,7 +56,7 @@ RwBool (*RwIm2DRenderTriangle)(RwIm2DVertex* vertices, RwInt32 numVertices, RwIn
 RwBool (*RwIm2DRenderPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices);
 RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices, RwImVertexIndex* indices, RwInt32 numIndices);
 
-/* RenderWare/rtpng.h */
+/* rwrefs/rtpng.h */
 RwImage* (*RtPNGImageWrite)(RwImage* image, const RwChar* imageName);
 RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
@@ -66,10 +66,10 @@ void loadSARWReferences()
 {
     mtmputs(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions references...");
 
-    /* RenderWare/skeleton.h */
-    g_main_RsGlobal = (RsGlobalType*)(g_game_addr+0);
+    /* rwrefs/skeleton.h */
+    g_rsGlobal = (RsGlobalType*)(g_game_addr+0);
 
-    /* RenderWare/rwcore.h */
+    /* rwrefs/rwcore.h */
     *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_game_addr+0);
@@ -109,7 +109,7 @@ void loadSARWReferences()
     *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_game_addr+0);
 
-    /* RenderWare/rwlpcore.h */
+    /* rwrefs/rwlpcore.h */
     *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_game_addr+0);
@@ -119,7 +119,7 @@ void loadSARWReferences()
     *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_game_addr+0);
 
-    /* RenderWare/rtpng.h */
+    /* rwrefs/rtpng.h */
     *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_game_addr+0);
     *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_game_addr+0);
 }
