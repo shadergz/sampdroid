@@ -7,8 +7,8 @@ An experimental implementation of MTA and SAMP for GTA SA v210 aarch64 (for more
 
 ## Todo
 - [ ] Load our 3 (three) texture databases at startup
-- [ ] Produce two database directories (we need to some tools)
-- [ ] To hook InitialiseRenderWare() (`On ARMv7a game version`) and to load our texture databases (for samp and mta) into the engine RenderWare memory space (The renderware will try to load all database from a relative path inside of .../files/texdb/`DATABASE_NAME`)
+- [ ] Produce two database directories (we need to take advantage of all game texture database system, given a facilities to the user to load or replace game objects and textures)
+- [ ] To hook InitializeRenderWare() (`On ARMv7a game version`) and to load our texture databases (for samp and mta) into the engine RenderWare memory space (The renderware will try to load all database from a relative path inside of .../files/texdb/`DATABASE_NAME`)
 
 ## Done
 

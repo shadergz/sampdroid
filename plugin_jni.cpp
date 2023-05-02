@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <sched.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <outside.h>
 #include <linux_hierarchy.h>

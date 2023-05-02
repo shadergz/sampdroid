@@ -18,7 +18,7 @@ enum Macro_BranchMode {};
 
 #pragma pack(push, 1)
 
-struct Trampoline_Data {
+struct Trampoline_Content {
     uint16_t m_id;
     uintptr_t m_source;
     // Count of instructions replaced inside the origin and placed inside of our trampoline
@@ -31,16 +31,16 @@ struct Trampoline_Data {
 
 #pragma pack(pop)
 
-static constexpr uint8_t PATCHER_FRAME_GOBACK = offsetof(Trampoline_Data, m_tr_data);
+static constexpr uint8_t PATCHER_FRAME_GOBACK = offsetof(Trampoline_Content, m_tr_data);
 
-static_assert(sizeof(Trampoline_Data) == AArch64_Patcher::PATCHER_HOOK_SIZE,
+static_assert(sizeof(Trampoline_Content) == AArch64_Patcher::PATCHER_HOOK_SIZE,
     "Trampoline struct data size is invalid and must be fixed!");
 
 void AArch64_Patcher::placeHookAt(const char* sb_name, const uintptr_t method, 
     const uintptr_t replace, uintptr_t* save_in)
 {
     auto sb_size{strlen(sb_name)};
-    if (sb_size > sizeof (Trampoline_Data::m_origin_symbolname)) {
+    if (sb_size > sizeof (Trampoline_Content::m_origin_symbolname)) {
         mtmprintf(ANDROID_LOG_ERROR, "Symbol name %s is langer than the symbol name space!", sb_name);
         *save_in = 0; return;
     }
@@ -48,7 +48,7 @@ void AArch64_Patcher::placeHookAt(const char* sb_name, const uintptr_t method,
     mtmprintf(ANDROID_LOG_INFO, 
         "Hooking function (%s) %#llx with %#llx method, "
             "saving in %#llx", sb_name, method, replace, save_in);
-    auto tr_data{reinterpret_cast<Trampoline_Data*>(getNewTrampoline())};
+    auto tr_data{reinterpret_cast<Trampoline_Content*>(getNewTrampoline())};
     mtmprintf(ANDROID_LOG_INFO, "New trampoline allocated in %p\n", tr_data);
     
     if (!tr_data) { *save_in = 0; return; }

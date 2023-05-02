@@ -46,7 +46,7 @@ RwRaster* (*RwRasterRead)(const RwChar* filename);
 RwRaster* (*RwRasterReadMaskedRaster)(const RwChar* filename, const RwChar* maskname);
 RwImage* (*RwImageFindRasterFormat)(RwImage* ipImage, RwInt32 nRasterType, RwInt32* npWidth, RwInt32* npHeight, RwInt32* npDepth, RwInt32* npFormat);
 
-/* RenderWare/rwlpcore.h */
+/* rwrefs/rwlpcore.h */
 RwReal (*RwIm2DGetNearScreenZ)(void);
 RwReal (*RwIm2DGetFarScreenZ)(void);
 RwBool (*RwRenderStateGet)(RwRenderState state, void* value);

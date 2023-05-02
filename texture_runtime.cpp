@@ -32,22 +32,23 @@ uintptr_t textureLoadNew(const char* dbName, const char* textureName)
      * we need to get the texture from the correct database name
      * we can also implements our owns database! */
 
-    static const char* mt_db[]{"mtsamp", "mtmta"};
-    auto needToOpen{
-        !strncasecmp(dbName, mt_db[0], strlen(mt_db[0])) ||
-        !strncasecmp(dbName, mt_db[1], strlen(mt_db[1]))};
-
+    static const char* mt_db[]{"mt4m", "playerside", "serverside"};
+    bool needToOpen{false};
+    for (auto mtPrivateDb : mt_db) {
+        if (!strncasecmp(dbName, mtPrivateDb, strlen(mtPrivateDb)))
+            needToOpen = true;
+    }
+    
     struct TextureDatabaseRuntime { uintptr_t* db_handler; };
-    static TextureDatabaseRuntime* s_dbHandler[0x2]{};   
+    static TextureDatabaseRuntime* s_dbHandler[std::size(mt_db)]{};
 
     for (;;) {
         auto dbPtr{&s_dbHandler[0]};
 
         if (!needToOpen) break;
         // Locating an invalid db pointer to place into it!
-        if (!*dbPtr) 
-            if (++*dbPtr)
-                break;
+        while (!*dbPtr) dbPtr++;
+        if (dbPtr >= &dbPtr[std::size(s_dbHandler)]) break;
 
         uintptr_t dbClass{((uintptr_t (*)(const char*))(g_game_addr+0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<TextureDatabaseRuntime*>(dbClass);
