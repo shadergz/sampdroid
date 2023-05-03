@@ -3,18 +3,24 @@
 
 #include <mutex>
 
-void (*NVThreadSpawnProc)(uintptr_t x0);
-// Count of created threads
-uint16_t g_th_count{};
-std::mutex g_NVlock{};
+namespace Mt4Global {
+void (*g_NVThreadSpawnProc)(uintptr_t x0);
+}
 
-void NVThreadSpawnProc_HOOK(uintptr_t x0)
+// Count of created threads
+static uint16_t thCount{};
+static std::mutex NVLock{};
+
+namespace Mt4Mimic {
+void NVThreadSpawnProc(uintptr_t x0)
 {
-    std::unique_lock<std::mutex> unique(g_NVlock);
-    mtmprintf(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %u)", g_th_count);
-    g_th_count++;
+    std::unique_lock<std::mutex> unique(NVLock);
+    Mt4Log::printflike(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
+    thCount++;
 
     unique.unlock();
     
-    NVThreadSpawnProc(x0);
+    Mt4Global::g_NVThreadSpawnProc(x0);
+}
+
 }

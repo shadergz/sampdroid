@@ -1,3 +1,4 @@
+#include "texture_runtime.h"
 #include <jni.h>
 #include <sched.h>
 #include <cstdlib>
@@ -7,44 +8,55 @@
 #include <patches_level.h>
 
 // This env is specific by the calling thread and shouldn't be shared
-JNIEnv* g_game_env;
-uintptr_t g_game_addr;
 
-extern AArch64_Patcher* g_patcher_micro;
-void loadSARWReferences();
+namespace Mt4Global {
+JNIEnv* g_gameEnv;
+uintptr_t g_gameAddr;
 
-void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved) 
-{
-    mtmputs(ANDROID_LOG_INFO, "Unload all resources used");
-
-    if (!g_patcher_micro) 
-        delete g_patcher_micro;
+extern AArch64_Patcher* g_patcherMicro;
 }
 
-jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved) {
-    mtmputs(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);    
-    mtmcout(ANDROID_LOG_INFO, "Loaded thread id {} in core {}", 
+namespace JNIOrigin {
+using namespace Mt4Global;
+
+extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM *vm, [[maybe_unused]] void *reserved) 
+{
+    Mt4Log::putslike(ANDROID_LOG_INFO, "Unload all resources used");
+
+    if (!g_patcherMicro) 
+        delete g_patcherMicro;
+    
+    if (g_textureDatabase)
+        delete g_textureDatabase;
+}
+
+extern "C" jint JNI_OnLoad(JavaVM *vm, [[maybe_unused]] void *reserved)
+{
+    Mt4Log::putslike(ANDROID_LOG_INFO, "MTM has started, build date: " __DATE__ " " __TIME__);    
+    Mt4Log::coutlike(ANDROID_LOG_INFO, "Loaded thread id {} in core {}", 
         std::this_thread::get_id(), sched_getcpu());
     
     const jint use_version{JNI_VERSION_1_6};
 
-    if (vm->GetEnv((void**)(&g_game_env), use_version) != JNI_OK) {
-        mtmputs(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
+    if (vm->GetEnv((void**)(&g_gameEnv), use_version) != JNI_OK) {
+        Mt4Log::putslike(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
     }
     // Getting the in memory shared object address space!
-    g_game_addr = fhsGetLibrary("libGTASA.so");
-    if (!g_game_addr) {
-        mtmputs(ANDROID_LOG_ERROR, "Can't locate libGTASA.so, MT is halted!");
+    g_gameAddr = Mt4Fs::getLibrary("libGTASA.so");
+    if (!g_gameAddr) {
+        Mt4Log::putslike(ANDROID_LOG_ERROR, "Can't locate libGTASA.so, MT is halted!");
         return -1;
     }
 
-    mtmprintf(ANDROID_LOG_INFO, "(libGTASA.so) base image found in address space: (%#lx)", (void*)(g_game_addr));
+    Mt4Log::printflike(ANDROID_LOG_INFO, "(libGTASA.so) base image found in address space: (%#lx)", 
+        (void*)(g_gameAddr));
     
-    loadSARWReferences();
-    // Applying pacthes and hooking some methods
-    applyOnGamePatches();
+    // Applying patches and hooking some methods
+    Mt4Patches::applyOnGame();
     
     return use_version;
+}
+
 }
 

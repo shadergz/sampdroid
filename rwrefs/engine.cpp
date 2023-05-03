@@ -4,8 +4,6 @@
 #include <rwrefs/rwcore.h>
 #include <rwrefs/skeleton.h>
 
-RsGlobalType* g_rsGlobal;
-
 /* rwrefs/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);
 RwCamera* (*RwCameraEndUpdate)(RwCamera* camera);
@@ -60,66 +58,75 @@ RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex* v
 RwImage* (*RtPNGImageWrite)(RwImage* image, const RwChar* imageName);
 RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
-extern uintptr_t g_game_addr;
+namespace Mt4Global {
+RsGlobalType* g_rsGlobal;
 
-void loadSARWReferences()
+extern uintptr_t g_gameAddr;
+}
+
+namespace Mt4RW {
+using namespace Mt4Global;
+
+void initSAReferences()
 {
-    mtmputs(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions references...");
+    Mt4Log::putslike(ANDROID_LOG_INFO, "Initializing RenderWare Graphics engine functions references...");
 
     /* rwrefs/skeleton.h */
-    g_rsGlobal = (RsGlobalType*)(g_game_addr+0);
+    g_rsGlobal = (RsGlobalType*)(g_gameAddr+0);
 
     /* rwrefs/rwcore.h */
-    *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_game_addr+0);
+    *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr+0);
 
-    *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterDestroy)              = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterGetOffset)            = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterGetNumLevels)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterSubRaster)            = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterRenderFast)           = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterRender)               = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterRenderScaled)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterPushContext)          = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterPopContext)           = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterGetCurrentContext)    = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterClear)                = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterClearRect)            = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterShowRaster)           = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterLock)                 = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterUnlock)               = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterLockPalette)          = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterUnlockPalette)        = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageCreate)                = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageDestroy)               = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageAllocatePixels)        = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageFreePixels)            = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageCopy)                  = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageResize)                = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageApplyMask)             = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageMakeMask)              = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageReadMaskedImage)       = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageRead)                  = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageWrite)                 = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageSetFromRaster)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterSetFromImage)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterRead)                 = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_game_addr+0);
+    *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterDestroy)              = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterGetOffset)            = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterGetNumLevels)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterSubRaster)            = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterRenderFast)           = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterRender)               = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterRenderScaled)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterPushContext)          = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterPopContext)           = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterGetCurrentContext)    = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterClear)                = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterClearRect)            = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterShowRaster)           = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterLock)                 = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterUnlock)               = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterLockPalette)          = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterUnlockPalette)        = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageCreate)                = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageDestroy)               = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageAllocatePixels)        = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageFreePixels)            = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageCopy)                  = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageResize)                = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageApplyMask)             = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageMakeMask)              = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageReadMaskedImage)       = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageRead)                  = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageWrite)                 = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageSetFromRaster)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterSetFromImage)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterRead)                 = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_gameAddr+0);
 
     /* rwrefs/rwlpcore.h */
-    *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwRenderStateSet)             = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwIm2DRenderLine)             = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwIm2DRenderTriangle)         = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_game_addr+0);
+    *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwRenderStateSet)             = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwIm2DRenderLine)             = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwIm2DRenderTriangle)         = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_gameAddr+0);
 
     /* rwrefs/rtpng.h */
-    *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_game_addr+0);
-    *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_game_addr+0);
+    *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_gameAddr+0);
+    *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_gameAddr+0);
+}
+
 }

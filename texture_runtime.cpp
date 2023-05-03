@@ -8,16 +8,23 @@
 #include <outside.h>
 #include <texture_runtime.h>
 
-extern uintptr_t g_game_addr;
+namespace Mt4Global {
+extern uintptr_t g_gameAddr;
+}
 
-uintptr_t textureGetTexture(const char* texName) 
+namespace Mt4Global {
+class TextureDatabaseRuntime* g_textureDatabase;
+}
+
+uintptr_t TextureDatabaseRuntime::GetTexture(const char* texName) 
 {
-    mtmprintf(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
+    Mt4Log::printflike(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
 
-    RwTexture* loadedTex{((RwTexture* (*)(const char*))(g_game_addr+0x286718))(texName)};
-    if (!loadedTex) return 0;
+    RwTexture* loadedTex{((RwTexture* (*)(const char*))(Mt4Global::g_gameAddr+0x286718))(texName)};
+    if (!loadedTex) 
+        return 0;
 
-    MTM_RUNTIME_ASSERT(!strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH),
+    MT4LOG_RUNTIME_ASSERT(!strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH),
         "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
 
     // Forcing the engine to keep our texture reference alive!
@@ -25,65 +32,70 @@ uintptr_t textureGetTexture(const char* texName)
     return (uintptr_t)loadedTex;
 }
 
-uintptr_t textureLoadNew(const char* dbName, const char* textureName)
+uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char* textureName)
 {
     // TextureDatabaseRuntime::GetDatabase(char const*)
     /* The game handler all resource inside multiples databases
      * we need to get the texture from the correct database name
      * we can also implements our owns database! */
 
-    static const char* mt_db[]{"mt4m", "playerside", "serverside"};
+    static const char* mtDB[]{
+        "mt4m", 
+        "playerside", 
+        "serverside"};
+    
     bool needToOpen{false};
-    for (auto mtPrivateDb : mt_db) {
+    for (auto mtPrivateDb : mtDB) {
         if (!strncasecmp(dbName, mtPrivateDb, strlen(mtPrivateDb)))
             needToOpen = true;
     }
     
-    struct TextureDatabaseRuntime { uintptr_t* db_handler; };
-    static TextureDatabaseRuntime* s_dbHandler[std::size(mt_db)]{};
+    struct NativeTDRHandler { uintptr_t* dbHandler; };
+    static NativeTDRHandler* dbHandler[std::size(mtDB)]{};
 
     for (;;) {
-        auto dbPtr{&s_dbHandler[0]};
+        auto dbPtr{&dbHandler[0]};
 
         if (!needToOpen) break;
         // Locating an invalid db pointer to place into it!
         while (!*dbPtr) dbPtr++;
-        if (dbPtr >= &dbPtr[std::size(s_dbHandler)]) break;
+        if (dbPtr >= &dbPtr[std::size(dbHandler)]) break;
 
-        uintptr_t dbClass{((uintptr_t (*)(const char*))(g_game_addr+0x0287af4))(dbName)};
-        *dbPtr = reinterpret_cast<TextureDatabaseRuntime*>(dbClass);
+        uintptr_t dbClass{((uintptr_t (*)(const char*))(Mt4Global::g_gameAddr+0x0287af4))(dbName)};
+        *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
 
         if (!*dbPtr) {
-            mtmprintf(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
+            Mt4Log::printflike(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
             return 0;
         }
 
-        ((void (*)(TextureDatabaseRuntime*))(g_game_addr+0x2865d8))(*dbPtr);
+        ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2865d8))(*dbPtr);
     }
 
-    const uintptr_t loadedTexture{textureGetTexture(textureName)};
+    const uintptr_t loadedTexture{GetTexture(textureName)};
     if (!strncasecmp(dbName, "CLEAN", 6)) {
         // Unregistring the databases, isn't no needed to keep it's openned
 
-        if (*(s_dbHandler+0))
-            ((void (*)(TextureDatabaseRuntime*))(g_game_addr+0x2866a4))(*(s_dbHandler+0));
-        if (*(s_dbHandler+1))
-            ((void (*)(TextureDatabaseRuntime*))(g_game_addr+0x2866a4))(*(s_dbHandler+1));
+        if (*(dbHandler+0))
+            ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2866a4))(*(dbHandler+0));
+        if (*(dbHandler+1))
+            ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2866a4))(*(dbHandler+1));
         
         uint8x16_t cl{};
         veorq_u8(cl, cl);
-        vst1q_u8(reinterpret_cast<uint8_t*>(s_dbHandler), cl);
+        vst1q_u8(reinterpret_cast<uint8_t*>(dbHandler), cl);
 
         return 0;
     }
     
     if (loadedTexture)
-        mtmprintf(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
+        Mt4Log::printflike(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
             textureName, dbName, loadedTexture);
     else
-        mtmprintf(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
+        Mt4Log::printflike(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
             textureName, dbName);
 
     return loadedTexture;
 }
+
 

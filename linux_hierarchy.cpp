@@ -10,49 +10,56 @@
 #include <linux_hierarchy.h>
 #include <outside.h>
 
-extern JNIEnv* g_game_env;
+namespace Mt4Global {
+extern JNIEnv* g_gameEnv;
+}
 
-uintptr_t fhsGetLibrary(const char* shared)
+namespace Mt4Fs {
+using namespace Mt4Global;
+
+uintptr_t getLibrary(const char* shared)
 {
-    const jobject j_file{AFileDescriptor_create(g_game_env)};
-    if (j_file == nullptr) {
-        const jboolean has_exec{g_game_env->ExceptionCheck()};
-        if (!has_exec) 
+    const jobject jsideFile{AFileDescriptor_create(g_gameEnv)};
+    if (jsideFile == nullptr) {
+        const jboolean hasExec{g_gameEnv->ExceptionCheck()};
+        if (!hasExec) 
             return 0;
 
-        g_game_env->ExceptionDescribe();
-        g_game_env->ExceptionClear();
+        g_gameEnv->ExceptionDescribe();
+        g_gameEnv->ExceptionClear();
     }
-    static const char* maps_format{"/proc/%d/maps"};
+    static const char* mapsFormat{"/proc/%d/maps"};
     char* maps{};
 
-    asprintf(&maps, maps_format, getpid());
-    AFileDescriptor_setFd(g_game_env,
-        j_file, open(maps, O_RDONLY));
+    asprintf(&maps, mapsFormat, getpid());
+    AFileDescriptor_setFd(g_gameEnv,
+        jsideFile, open(maps, O_RDONLY));
 
     static constexpr int INVALID_FD = (int)-1;
-    if (AFileDescriptor_getFd(g_game_env, j_file) == INVALID_FD) {
-        mtmprintf(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
+    if (AFileDescriptor_getFd(g_gameEnv, jsideFile) == INVALID_FD) {
+        Mt4Log::printflike(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", 
             strerror(errno));
         free(maps);
-        g_game_env->DeleteLocalRef(j_file);
+        g_gameEnv->DeleteLocalRef(jsideFile);
 
         return 0;
     }
-    char stream_buffer[0x100];
-    uintptr_t map_addr{};
-    FILE* proc_map{fdopen(AFileDescriptor_getFd(g_game_env, j_file), "r")};
+    char streamBuffer[0x100];
+    uintptr_t mapAddr{};
+    FILE* procMap{fdopen(AFileDescriptor_getFd(g_gameEnv, jsideFile), "r")};
     
-    while (fgets(stream_buffer, sizeof stream_buffer, proc_map) != NULL) {
-        if (strstr(stream_buffer, shared)) {
-            map_addr = (typeof(map_addr))strtoul(stream_buffer, 0, 16);
+    while (fgets(streamBuffer, sizeof streamBuffer, procMap) != NULL) {
+        if (strstr(streamBuffer, shared)) {
+            mapAddr = (typeof(mapAddr))strtoul(streamBuffer, 0, 16);
             break;
         }
     }
     free(maps);
-    fclose(proc_map);
-    g_game_env->DeleteLocalRef(j_file);
+    fclose(procMap);
+    g_gameEnv->DeleteLocalRef(jsideFile);
     
-    return map_addr;
+    return mapAddr;
+}
+
 }
 
