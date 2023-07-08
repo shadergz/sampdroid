@@ -13,9 +13,8 @@ add_library(saclient MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
 # RTTI is enable by default for ensure a better and safety object's handler
-target_compile_options(saclient PRIVATE -Wall -Wextra -fno-rtti
-    $<$<CONFIG:Release>:-ffunction-sections;-fdata-sections>)
-target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections;-Ofast;-DNDEBUG>)
+target_compile_options(saclient PRIVATE -Wall -Wextra -fno-rtti $<$<CONFIG:Release>:-Ofast;-DNDEBUG>)
+target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
 
 target_sources(saclient PRIVATE
     linux_hierarchy.cpp
