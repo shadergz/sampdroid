@@ -6,6 +6,7 @@ namespace saglobal {
 }
 
 namespace salog {
+#ifndef NDEBUG
     int printFormat(int prio, const char* __restrict format, ...)
     {
         va_list var;
@@ -19,8 +20,8 @@ namespace salog {
     
     int print(int prio, const char* __restrict msgStr)
     {
-      const auto wrResult{__android_log_write(prio, saglobal::g_logTag, msgStr)};
-      return wrResult;
+        const auto wrResult{__android_log_write(prio, saglobal::g_logTag, msgStr)};
+        return wrResult;
     }
     
     void assertAbort(const char* cond, const char* fileName, 
@@ -37,5 +38,18 @@ namespace salog {
     
         __android_log_assert(cond, saglobal::g_logTag, "%s:%d -> %s", fileName, line, assertBuffer);
     }
+#else
+    int printFormat([[maybe_unused]] int prio, [[maybe_unused]] const char* __restrict format, ...)
+    {
+        return 0;
+    }
+    int print([[maybe_unused]] int prio, [[maybe_unused]] const char* __restrict msgStr)
+    {
+        return 0;
+    }
+    void assertAbort([[maybe_unused]] const char* cond, [[maybe_unused]] const char* fileName,
+        [[maybe_unused]] int line, [[maybe_unused]] const char* __restrict format, ...) {}
+
+#endif
     
 }

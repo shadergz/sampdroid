@@ -6,7 +6,9 @@
 #include <cstdio>
 #include <utility>
 
+#ifndef NDEBUG
 #include <fmt/std.h>
+#endif
 
 namespace saglobal {
     extern const char* g_logTag;
@@ -16,6 +18,7 @@ namespace salog {
     int printFormat(int prio, const char* __restrict format, ...);
     int print(int prio, const char* __restrict msg_str);
 
+    #ifndef NDEBUG
     template<typename... Args>
     auto coutFmt(int prio, fmt::format_string<Args...> fmt, Args&&... args)
     {
@@ -32,6 +35,14 @@ namespace salog {
         free(fioPtr);
         return out;
     }
+    #else
+    template<typename... Args>
+    auto coutFmt([[maybe_unused]] int prio, [[maybe_unused]] const char* const formatUnused,
+                 [[maybe_unused]] Args&&... args)
+    {
+        return 0;
+    }
+    #endif
 
     void assertAbort(const char* cond, const char* fileName,
         int line, const char* __restrict format, ...);

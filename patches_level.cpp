@@ -122,7 +122,7 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     auto count{countPages(region_size) + overflow};
 
     salog::printFormat(ANDROID_LOG_INFO, "Changing permission of %lu pages in %#llx base address",
-                       count, baseAddr);
+        count, baseAddr);
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 

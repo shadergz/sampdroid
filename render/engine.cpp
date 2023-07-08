@@ -71,10 +71,10 @@ namespace sarw {
     {
         salog::print(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions references...");
 
-        /* rwrefs/skeleton.h */
+        /* render/skeleton.h */
         g_rsGlobal = (RsGlobalType*)(g_gameAddr+0);
 
-        /* rwrefs/rwcore.h */
+        /* render/rwcore.h */
         *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr+0);
@@ -114,7 +114,7 @@ namespace sarw {
         *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_gameAddr+0);
 
-        /* rwrefs/rwlpcore.h */
+        /* render/rwlpcore.h */
         *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_gameAddr+0);
@@ -124,7 +124,7 @@ namespace sarw {
         *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_gameAddr+0);
 
-        /* rwrefs/rtpng.h */
+        /* render/rtpng.h */
         *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_gameAddr+0);
     }

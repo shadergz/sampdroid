@@ -15,7 +15,7 @@ add_library(clientsa MODULE)
 # RTTI is enable by default for ensure a better and safety object's handler
 target_compile_options(clientsa PRIVATE -Wall -Wextra -frtti
     $<$<CONFIG:Release>:-ffunction-sections;-fdata-sections>)
-target_link_options(clientsa PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
+target_link_options(clientsa PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections;-DNDEBUG>)
 
 target_sources(clientsa PRIVATE
     linux_hierarchy.cpp
@@ -38,7 +38,7 @@ execute_process(
 set(SAMOBILE_PROJECTVERSION ${client_PROJECT_VERSION}.${GIT_HASH})
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(clientsa m fmt::fmt log nativehelper)
+target_link_libraries(clientsa m log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
 set_target_properties(clientsa PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
 target_include_directories(clientsa PRIVATE ${samobile_SOURCE_DIR})
 
