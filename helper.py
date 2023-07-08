@@ -63,7 +63,7 @@ BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 SAMOBILE_VERSION: Final[str] = '0.0.3'
 APK_OUT: Final[str] = f'{install_in}/gtasabase'
 
-LIB_BASENAME: Final[str] = 'clientsa'
+LIB_BASENAME: Final[str] = 'saclient'
 
 OUTPUT_SAMOBILE_FILE: Final[str] = f'{install_in}/{LIB_BASENAME}-v{SAMOBILE_VERSION}.apk'
 MALICIOUS_SMALI: Final[str] = 'GTASA.smali'
@@ -159,8 +159,8 @@ def install_apk():
     subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_SAMOBILE_FILE])
 def logcat():
     try:
-        # subprocess.run([ADB, 'logcat', 'SAMOBILE,stargames.gtasa,DEBUG, *:S'])
-        subprocess.run([ADB, 'logcat', 'clientsa,DEBUG,*:S'])
+        # subprocess.run([ADB, 'logcat', 'saclient,stargames.gtasa,DEBUG, *:S'])
+        subprocess.run([ADB, 'logcat', 'saclient,DEBUG,*:S'])
     except KeyboardInterrupt:
         pass
 def clean():

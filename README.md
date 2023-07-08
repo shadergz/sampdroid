@@ -1,5 +1,5 @@
-# samobile
-An experimental implementation of MTA and SAMP for GTA SA v210 AArch64 (for more details look at OpenSA repo)
+# SAMobile
+An experimental impl of MTA and SAMP for GTA SA v210 AArch64 (for more details look at OpenSA repo)
 
 ## Project aims
 - Complete replacement of build69 (SAMP for ARMv7 GTASA v1.8 that has deprecated)

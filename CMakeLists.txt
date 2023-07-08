@@ -4,20 +4,20 @@ option(SAMOBILE_OUTRELDIR "Local installation directory path")
 option(SAMOBILE_SHARED_NAME "Output core library's name")
 option(SAMOBILE_VERSION "Implementation version")
 
-project(samobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
+project(SAMobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS On)
-add_library(clientsa MODULE)
+add_library(saclient MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
 # RTTI is enable by default for ensure a better and safety object's handler
-target_compile_options(clientsa PRIVATE -Wall -Wextra -frtti
+target_compile_options(saclient PRIVATE -Wall -Wextra -fno-rtti
     $<$<CONFIG:Release>:-ffunction-sections;-fdata-sections>)
-target_link_options(clientsa PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections;-DNDEBUG>)
+target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections;-Ofast;-DNDEBUG>)
 
-target_sources(clientsa PRIVATE
+target_sources(saclient PRIVATE
     linux_hierarchy.cpp
     log_client.cpp
     patches_level.cpp
@@ -35,11 +35,11 @@ execute_process(
     OUTPUT_VARIABLE GIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(SAMOBILE_PROJECTVERSION ${client_PROJECT_VERSION}.${GIT_HASH})
+set(SAMOBILE_PROJECTVERSION ${saclient_PROJECT_VERSION}.${GIT_HASH})
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(clientsa m log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
-set_target_properties(clientsa PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
-target_include_directories(clientsa PRIVATE ${samobile_SOURCE_DIR})
+target_link_libraries(saclient m log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
+set_target_properties(saclient PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
+target_include_directories(saclient PRIVATE ${SAMobile_SOURCE_DIR})
 
-install(TARGETS clientsa LIBRARY DESTINATION ${samobile_SOURCE_DIR}/${SAMOBILE_OUTRELDIR})
+install(TARGETS saclient LIBRARY DESTINATION ${SAMobile_SOURCE_DIR}/${SAMOBILE_OUTRELDIR})

@@ -2,7 +2,7 @@
 #include <log_client.h>
 
 namespace saglobal {
-    const char* g_logTag = "clientsa";
+    const char* g_logTag = "saclient";
 }
 
 namespace salog {
