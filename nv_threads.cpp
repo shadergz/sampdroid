@@ -1,26 +1,26 @@
+
 #include <nv_threads.h>
-#include <outside.h>
+#include <log_client.h>
 
 #include <mutex>
 
-namespace Mt4Global {
-void (*g_NVThreadSpawnProc)(uintptr_t x0);
+namespace saglobal {
+    void (*g_NVThreadSpawnProc)(uintptr_t x0);
 }
 
 // Count of created threads
 static uint16_t thCount{};
-static std::mutex NVLock{};
+static std::mutex nvLock{};
 
-namespace Mt4Mimic {
-void NVThreadSpawnProc(uintptr_t x0)
-{
-    std::unique_lock<std::mutex> unique(NVLock);
-    Mt4Log::printflike(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
-    thCount++;
+namespace samimic {
+    void NVThreadSpawnProc(uintptr_t x0)
+    {
+        std::unique_lock<std::mutex> nvWaitLocker(nvLock);
+        salog::printFormat(ANDROID_LOG_WARN, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
+        thCount++;
 
-    unique.unlock();
-    
-    Mt4Global::g_NVThreadSpawnProc(x0);
-}
+        nvWaitLocker.unlock();
 
+        saglobal::g_NVThreadSpawnProc(x0);
+    }
 }

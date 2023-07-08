@@ -5,7 +5,7 @@
 
 #include <android/file_descriptor_jni.h>
 
-namespace Mt4Fs {
-uintptr_t getLibrary(const char* shared);
+namespace safs {
+    uintptr_t getLibrary(const char* shared);
 
 }

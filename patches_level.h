@@ -3,9 +3,9 @@
 #include <cstdint>
 
 #include <unistd.h>
-#include <outside.h>
+#include <log_client.h>
 
-class AArch64_Patcher {
+class AArch64Patcher {
 public:
     static constexpr uint8_t PATCHER_HOOK_COUNT = 64;
     static constexpr uint8_t PATCHER_MAX_INST = 7;
@@ -17,16 +17,16 @@ public:
         sizeof(char[PATCHER_SYMBOL_NAME])    +
         sizeof(uint32_t) * PATCHER_MAX_INST; 
 
-    AArch64_Patcher() {
+    AArch64Patcher() {
     }
 
     void placeHookAt(const char* sbName, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn); 
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
     uint32_t* getNewTrampoline() noexcept 
     {
-        MT4LOG_RUNTIME_ASSERT(m_trBank.m_tramIndex < PATCHER_HOOK_COUNT - 1,
+        SALOG_ASSERT(m_trBank.m_tIndex < PATCHER_HOOK_COUNT - 1,
             "Our trampoline bank data buffer has exhausted!");
-        return reinterpret_cast<uint32_t*>(&m_trBank.m_tRWXData[PATCHER_HOOK_SIZE * m_trBank.m_tramIndex++]);
+        return reinterpret_cast<uint32_t*>(&m_trBank.m_tRWXData[PATCHER_HOOK_SIZE * m_trBank.m_tIndex++]);
     }
 
 private:
@@ -44,14 +44,14 @@ private:
         }
 
         __attribute__((__aligned__(PAGE_SIZE))) uint8_t m_tRWXData[PAGE_SIZE];
-        uint8_t m_tramIndex{};
+        uint8_t m_tIndex{};
     };
 
     MicroRaw_Trampoline m_trBank;
 };
 
-namespace Mt4Patches {
-void applyOnGame();
+namespace sapatch {
+    void applyOnGame();
 
 }
 

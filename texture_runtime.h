@@ -10,6 +10,6 @@ public:
 
 };
 
-namespace Mt4Global {
-extern class TextureDatabaseRuntime* g_textureDatabase;
+namespace saglobal {
+    extern class TextureDatabaseRuntime* g_textureDatabase;
 }

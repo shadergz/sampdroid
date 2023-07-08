@@ -4,27 +4,24 @@
 
 #include <arm_neon.h>
 
-#include <rwrefs/rwcore.h>
-#include <outside.h>
+#include <render/rwcore.h>
+#include <log_client.h>
 #include <texture_runtime.h>
 
-namespace Mt4Global {
-extern uintptr_t g_gameAddr;
+namespace saglobal {
+    extern uintptr_t g_gameAddr;
+    class TextureDatabaseRuntime* g_textureDatabase;
 }
 
-namespace Mt4Global {
-class TextureDatabaseRuntime* g_textureDatabase;
-}
-
-uintptr_t TextureDatabaseRuntime::GetTexture(const char* texName) 
+uintptr_t TextureDatabaseRuntime::GetTexture(const char* texName)
 {
-    Mt4Log::printflike(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
+    salog::printFormat(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
 
-    RwTexture* loadedTex{((RwTexture* (*)(const char*))(Mt4Global::g_gameAddr+0x286718))(texName)};
+    RwTexture* loadedTex{((RwTexture* (*)(const char*))(saglobal::g_gameAddr+0x286718))(texName)};
     if (!loadedTex) 
         return 0;
 
-    MT4LOG_RUNTIME_ASSERT(!strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH),
+    SALOG_ASSERT(!strncmp(loadedTex->name, texName, rwTEXTUREBASENAMELENGTH),
         "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
 
     // Forcing the engine to keep our texture reference alive!
@@ -40,7 +37,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
      * we can also implements our owns database! */
 
     static const char* mtDB[]{
-        "mt4m", 
+        "client",
         "playerside", 
         "serverside"};
     
@@ -61,25 +58,25 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         while (!*dbPtr) dbPtr++;
         if (dbPtr >= &dbPtr[std::size(dbHandler)]) break;
 
-        uintptr_t dbClass{((uintptr_t (*)(const char*))(Mt4Global::g_gameAddr+0x0287af4))(dbName)};
+        uintptr_t dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr+0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
 
         if (!*dbPtr) {
-            Mt4Log::printflike(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
+            salog::printFormat(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
             return 0;
         }
 
-        ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2865d8))(*dbPtr);
+        ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr+0x2865d8))(*dbPtr);
     }
 
     const uintptr_t loadedTexture{GetTexture(textureName)};
-    if (!strncasecmp(dbName, "CLEAN", 6)) {
+    if (!strncasecmp(dbName, "clean", 6)) {
         // Unregistring the databases, isn't no needed to keep it's openned
 
         if (*(dbHandler+0))
-            ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2866a4))(*(dbHandler+0));
+            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr+0x2866a4))(*(dbHandler+0));
         if (*(dbHandler+1))
-            ((void (*)(NativeTDRHandler*))(Mt4Global::g_gameAddr+0x2866a4))(*(dbHandler+1));
+            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr+0x2866a4))(*(dbHandler+1));
         
         uint8x16_t cl{};
         veorq_u8(cl, cl);
@@ -89,10 +86,10 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
     
     if (loadedTexture)
-        Mt4Log::printflike(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
+        salog::printFormat(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
             textureName, dbName, loadedTexture);
     else
-        Mt4Log::printflike(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
+        salog::printFormat(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
             textureName, dbName);
 
     return loadedTexture;

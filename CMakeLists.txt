@@ -1,35 +1,32 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(MTM_OUTRELDIR "Local installation directory path")
-option(MTM_LIBNAME "Output core MTM library's name")
-option(MTM_VERSION "Implementation version")
+option(SAMOBILE_OUTRELDIR "Local installation directory path")
+option(SAMOBILE_SHARED_NAME "Output core library's name")
+option(SAMOBILE_VERSION "Implementation version")
 
-project(mt4mobile VERSION ${MTM_VERSION} LANGUAGES CXX)
+project(samobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS On)
-
-add_library(mt4mobile SHARED)
+add_library(clientsa MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
-
-
 # RTTI is enable by default for ensure a better and safety object's handler
-target_compile_options(mt4mobile PRIVATE -Wall -Wextra -frtti
+target_compile_options(clientsa PRIVATE -Wall -Wextra -frtti
     $<$<CONFIG:Release>:-ffunction-sections;-fdata-sections>)
-target_link_options(mt4mobile PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
+target_link_options(clientsa PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
 
-target_sources(mt4mobile PRIVATE 
+target_sources(clientsa PRIVATE
     linux_hierarchy.cpp
-    outside.cpp
+    log_client.cpp
     patches_level.cpp
     menu_handler.cpp
     plugin_jni.cpp
     nv_threads.cpp
     texture_runtime.cpp
 
-    rwrefs/engine.cpp
+    render/engine.cpp
     )
 
 execute_process(
@@ -38,12 +35,11 @@ execute_process(
     OUTPUT_VARIABLE GIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(MTM_PROJECTVERSION ${mt4mobile_PROJECT_VERSION}.${GIT_HASH})
-
+set(SAMOBILE_PROJECTVERSION ${client_PROJECT_VERSION}.${GIT_HASH})
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(mt4mobile m fmt::fmt log nativehelper)
-set_target_properties(mt4mobile PROPERTIES OUTPUT_NAME ${MTM_LIBNAME})
-target_include_directories(mt4mobile PRIVATE ${mt4mobile_SOURCE_DIR})
+target_link_libraries(clientsa m fmt::fmt log nativehelper)
+set_target_properties(clientsa PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
+target_include_directories(clientsa PRIVATE ${samobile_SOURCE_DIR})
 
-install(TARGETS mt4mobile LIBRARY DESTINATION ${mt4mobile_SOURCE_DIR}/${MTM_OUTRELDIR})
+install(TARGETS clientsa LIBRARY DESTINATION ${samobile_SOURCE_DIR}/${SAMOBILE_OUTRELDIR})

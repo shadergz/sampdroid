@@ -1,13 +1,13 @@
 
 #include <cstdint>
 
-namespace Mt4Mimic {
-class CGame {
+namespace samimic {
+    class CGame {
 
-    CGame();
-    ~CGame();
+        CGame();
+        ~CGame();
 
-    char* InitialiseRenderWare();
-};
+        char* InitialiseRenderWare();
+    };
 
 }
