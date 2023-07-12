@@ -43,7 +43,7 @@ void AArch64Patcher::placeHookAt(const std::string_view sbName, const uintptr_t 
     }
     auto trampoline{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
     if (!trampoline)
-      return;
+        return;
     
     salog::printFormat(ANDROID_LOG_INFO, "New trampoline allocated in %p\n", trampoline);
     static uint16_t trampId{};
@@ -59,7 +59,7 @@ void AArch64Patcher::placeHookAt(const std::string_view sbName, const uintptr_t 
     
     // Doing the frame backup (we're divorciating now)
     auto originFunc{reinterpret_cast<uint32_t*>(method)};
-    uint32_t* trContext{reinterpret_cast<uint32_t*>(trampoline->m_tContent.data())};
+    auto trContext{reinterpret_cast<uint8_t*>(trampoline->m_tContent.data())};
 
     *(uint32_t*)(trContext + 0) = originFunc[0];
     *(uint32_t*)(trContext + 4) = originFunc[1];
@@ -86,7 +86,7 @@ void AArch64Patcher::placeHookAt(const std::string_view sbName, const uintptr_t 
     // Dumping the residual wrong instructions from the cache
     __builtin___clear_cache((char*)originFunc, (char*)&originFunc[4]);
     __builtin___clear_cache((char*)trampoline->m_tContent.data(),
-        (char*)&trampoline->m_tContent[trampoline->m_tContent.size()]);
+        (char*)&trampoline->m_tContent + sizeof(trampoline->m_tContent));
     *saveIn = (uintptr_t)(trContext);
 
     salog::printFormat(ANDROID_LOG_INFO, "Hook on addr %#llx successful installed by %#llx, (| %#llx | %u |)",
@@ -112,8 +112,8 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     auto overflow = unfuckAddr & 0xffff ? 1 : 0;
     auto count{countPages(region_size) + overflow};
 
-    salog::printFormat(ANDROID_LOG_INFO, "Changing permission of %lu pages in %#llx base address",
-        count, baseAddr);
+    salog::printFormat(ANDROID_LOG_INFO,
+        "Changing permission of %lu pages in %#llx base address", count, baseAddr);
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 

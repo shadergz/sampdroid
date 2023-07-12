@@ -32,8 +32,8 @@ public:
 
 private:
     struct MicroRaw_Trampoline {
-        static constexpr uint8_t ARCH_MAX_INST = 10;
-        static constexpr uint8_t ARCH_INST_SIZE = 8;
+        static constexpr uint8_t ARCH_MAX_INST{10};
+        static constexpr uint8_t ARCH_INST_SIZE{8};
 
         MicroRaw_Trampoline() {
             static_assert(sizeof m_tRWXData == PAGE_SIZE, "Trampoline data size is wrong! fix now!");
@@ -43,11 +43,11 @@ private:
 
         }
 
-        __attribute__((__aligned__(PAGE_SIZE))) std::array<uint8_t, PAGE_SIZE> m_tRWXData;
+        alignas(PAGE_SIZE) std::array<uint8_t, PAGE_SIZE> m_tRWXData;
         uint8_t m_tIndex{};
     };
 
-    MicroRaw_Trampoline m_trBank;
+    MicroRaw_Trampoline m_trBank{};
 };
 
 namespace sapatch {

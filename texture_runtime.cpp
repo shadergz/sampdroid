@@ -87,10 +87,10 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const std::string_view dbName,
     
     if (loadedTexture)
         salog::printFormat(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
-            textureName, dbName, loadedTexture);
+            textureName.data(), dbName.data(), loadedTexture);
     else
         salog::printFormat(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
-            textureName, dbName);
+            textureName.data(), dbName.data());
 
     return loadedTexture;
 }
