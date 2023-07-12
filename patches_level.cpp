@@ -1,13 +1,8 @@
-
-#include <cstdint>
-
-#include <unistd.h>
-#include <sys/user.h>
-#include <sys/mman.h>
+#include <cstring>
+#include <array>
 
 #include <patches_level.h>
 #include <texture_runtime.h>
-#include <log_client.h>
 
 #include <menu_handler.h>
 #include <nv_threads.h>
@@ -20,7 +15,6 @@ namespace saglobal {
 enum MicroBranchMode {};
 
 #pragma pack(push, 1)
-
 struct TrampolineContext {
     uint16_t m_id;
     uintptr_t m_source;
@@ -28,32 +22,28 @@ struct TrampolineContext {
     uint8_t m_instCount;
     uint8_t m_mode;
 
-    char m_symbName[AArch64Patcher::PATCHER_SYMBOL_NAME];
-    uint8_t m_tContent[sizeof(uint32_t) * AArch64Patcher::PATCHER_MAX_INST];
+    std::array<char, AArch64Patcher::PATCHER_SYMBOL_NAME> m_symbName;
+    std::array<uint8_t, sizeof(uint32_t) * AArch64Patcher::PATCHER_MAX_INST> m_tContent;
 };
 
 #pragma pack(pop)
-
-static constexpr uint8_t PATCHER_FRAME_GOBACK = offsetof(TrampolineContext, m_tContent);
-
+static constexpr uint8_t PATCHER_FRAME_GOBACK{offsetof(TrampolineContext, m_tContent)};
 static_assert(sizeof(TrampolineContext) == AArch64Patcher::PATCHER_HOOK_SIZE,
     "Trampoline struct data size is invalid and must be fixed!");
 
-void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
+void AArch64Patcher::placeHookAt(const std::string_view sbName, const uintptr_t method,
     const uintptr_t replace, uintptr_t* saveIn)
 {
-    auto sbSize{strlen(sbName)};
-    *saveIn = 0;
-
-    if (sbSize > sizeof TrampolineContext::m_symbName) {
-        salog::printFormat(ANDROID_LOG_ERROR, "Symbol name %s is langer than the symbol name space!", sbName);
-        return;
-    }
-
     salog::printFormat(ANDROID_LOG_INFO, "Hooking function (%s) %#llx with %#llx method, "
         "saving in %#llx", sbName, method, replace, saveIn);
+    *saveIn = {};
+    if (sbName.size() > sizeof TrampolineContext::m_symbName) {
+        salog::printFormat(ANDROID_LOG_ERROR, "Symbol name %s is larger than the symbol name space!", sbName);
+        return;
+    }
     auto trampoline{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
-    if (!trampoline) return;
+    if (!trampoline)
+      return;
     
     salog::printFormat(ANDROID_LOG_INFO, "New trampoline allocated in %p\n", trampoline);
     static uint16_t trampId{};
@@ -62,45 +52,46 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
     trampoline->m_source = method;
     // 0 means an invalid value!
 
-    strncpy(trampoline->m_symbName, sbName, sizeof (trampoline->m_symbName));
-    SALOG_ASSERT((uintptr_t)trampoline->m_tContent == (uintptr_t)trampoline + PATCHER_FRAME_GOBACK,
+    std::strncpy(trampoline->m_symbName.data(), sbName.data(), trampoline->m_symbName.size());
+    SALOG_ASSERT(trampoline->m_tContent.data() ==
+        reinterpret_cast<uint8_t*>(trampoline) + PATCHER_FRAME_GOBACK,
         "PATCHER_FRAME_GOBACK isn't indexing the trampoline data as expected please fix now!");
     
-    // doing the frame backup (we're divorciating now)
+    // Doing the frame backup (we're divorciating now)
     auto originFunc{reinterpret_cast<uint32_t*>(method)};
-    *(uint32_t*)(trampoline->m_tContent+0) = originFunc[0];
-    *(uint32_t*)(trampoline->m_tContent+4) = originFunc[1];
-    *(uint32_t*)(trampoline->m_tContent+8) = originFunc[2];
-    *(uint32_t*)(trampoline->m_tContent+12) = originFunc[3];
+    uint32_t* trContext{reinterpret_cast<uint32_t*>(trampoline->m_tContent.data())};
+
+    *(uint32_t*)(trContext + 0) = originFunc[0];
+    *(uint32_t*)(trContext + 4) = originFunc[1];
+    *(uint32_t*)(trContext + 8) = originFunc[2];
+    *(uint32_t*)(trContext + 12) = originFunc[3];
 
     trampoline->m_instCount = &originFunc[4] - &originFunc[0];
 
     // Installing our payload instructions
-
     /* Now we can overwrite the original method frame
      * making the page readable/writable and executable */
     unfuckPageRWX(reinterpret_cast<uintptr_t>(originFunc), PAGE_SIZE);
     // ldr x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x8
-    *(originFunc+0) = __builtin_bswap32(0x51000058);
+    *(originFunc + 0) = __builtin_bswap32(0x51000058);
     // br x17
-    *(originFunc+1) = __builtin_bswap32(0x20021fd6); 
+    *(originFunc + 1) = __builtin_bswap32(0x20021fd6);
 
-    *(uint64_t**)(originFunc+2) = (uint64_t*)(replace & (uint64_t)-1);
+    *(uint64_t**)(originFunc + 2) = (uint64_t*)(replace & (uint64_t)-1);
     /* At this point, the trampoline has the 4 instructions from the origin instruction
      * and the original instruction has a jump to your hook method */
-    *(uint64_t*)(trampoline->m_tContent+16) = (uint64_t)__builtin_bswap64(0x5100005820021fd6);
-    *(uint64_t**)(trampoline->m_tContent+24) = (uint64_t*)((uint64_t)(originFunc+0x4) & (uint64_t)-1);
+    *(uint64_t*)(trContext + 16) = (uint64_t)__builtin_bswap64(0x5100005820021fd6);
+    *(uint64_t**)(trContext + 24) = (uint64_t*)((uint64_t)(originFunc + 0x4) & (uint64_t)-1);
     // Forcing the CPU to fetch the actual version for both operations 
     // Dumping the residual wrong instructions from the cache
     __builtin___clear_cache((char*)originFunc, (char*)&originFunc[4]);
-    __builtin___clear_cache((char*)trampoline->m_tContent,
-        (char*)&trampoline->m_tContent[sizeof(trampoline->m_tContent)]);
+    __builtin___clear_cache((char*)trampoline->m_tContent.data(),
+        (char*)&trampoline->m_tContent[trampoline->m_tContent.size()]);
+    *saveIn = (uintptr_t)(trContext);
 
     salog::printFormat(ANDROID_LOG_INFO, "Hook on addr %#llx successful installed by %#llx, (| %#llx | %u |)",
-        method, replace, (uintptr_t)trampoline->m_tContent & 0xffffffffff,
+        method, replace, (uintptr_t)trContext & 0xffffffffff,
         trampoline->m_instCount);
-
-    *saveIn = (uintptr_t)(trampoline->m_tContent);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
 {
@@ -108,7 +99,7 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     /* If page isn't aligned we can't change the permission for more than once page 
      * without break into multiples */
 
-    const auto protect{PROT_READ|PROT_WRITE|PROT_EXEC};
+    const auto protect{PROT_READ | PROT_WRITE | PROT_EXEC};
     const auto pageSize{getpagesize()};
     
     auto countPages = [pageSize](const auto size) -> auto {
@@ -137,11 +128,11 @@ namespace sapatch {
         g_textureDatabase = new TextureDatabaseRuntime();
 
         // MenuItem_add is no longer present
-        g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr+0x358010,
+        g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010,
             (uintptr_t)samimic::MainMenuScreen_AddAllItems,
             (uintptr_t*)&saglobal::g_MainMenuScreen_AddAllItems);
     
-        g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr+0x332040,
+        g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040,
             (uintptr_t)samimic::NVThreadSpawnProc,
             (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
     }

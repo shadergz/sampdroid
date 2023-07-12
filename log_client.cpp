@@ -1,55 +1,58 @@
+#include <array>
 
 #include <log_client.h>
 
 namespace saglobal {
-    const char* g_logTag = "saclient";
+    const std::string_view g_logTag = "saclient";
 }
 
 namespace salog {
+    using namespace saglobal;
+
 #ifndef NDEBUG
-    int printFormat(int prio, const char* __restrict format, ...)
+    int printFormat(int prio, const std::string_view format, ...)
     {
         va_list var;
         va_start(var, format);
     
-        const auto fRet{__android_log_vprint(prio, saglobal::g_logTag, format, var)};
+        const auto droidRet{__android_log_vprint(prio, g_logTag.data(), format.data(), var)};
         va_end(var);
     
-        return fRet;
+        return droidRet;
     }
     
-    int print(int prio, const char* __restrict msgStr)
+    int print(int prio, const std::string_view msgStr)
     {
-        const auto wrResult{__android_log_write(prio, saglobal::g_logTag, msgStr)};
-        return wrResult;
+        const auto androidResult{__android_log_write(prio, g_logTag.data(), msgStr.data())};
+        return androidResult;
     }
     
-    void assertAbort(const char* cond, const char* fileName, 
-        int line, const char* __restrict format, ...)
+#else
+    int printFormat([[maybe_unused]] int prio, [[maybe_unused]] const std::string_view format, ...)
     {
-        thread_local char assertBuffer[0x5f];
-        if (!cond)
+        return 0;
+    }
+    int print([[maybe_unused]] int prio, [[maybe_unused]] const std::string_view msgStr)
+    {
+        return 0;
+    }
+#endif
+
+    void assertAbort(const std::string_view cond, const std::string_view fileName,
+        int line, const std::string_view format, ...)
+    {
+        thread_local std::array<char, 0x5f> assertBuffer;
+        if (!cond.data())
             return;
-        
+
         va_list va;
         va_start(va, format);
-        vsnprintf(assertBuffer, sizeof assertBuffer, format, va);
+        vsnprintf(assertBuffer.data(), assertBuffer.size(), format.data(), va);
         va_end(va);
-    
-        __android_log_assert(cond, saglobal::g_logTag, "%s:%d -> %s", fileName, line, assertBuffer);
-    }
-#else
-    int printFormat([[maybe_unused]] int prio, [[maybe_unused]] const char* __restrict format, ...)
-    {
-        return 0;
-    }
-    int print([[maybe_unused]] int prio, [[maybe_unused]] const char* __restrict msgStr)
-    {
-        return 0;
-    }
-    void assertAbort([[maybe_unused]] const char* cond, [[maybe_unused]] const char* fileName,
-        [[maybe_unused]] int line, [[maybe_unused]] const char* __restrict format, ...) {}
 
-#endif
+        __android_log_assert(nullptr, g_logTag.data(), "ASSERTATION: By %s in %s:%d -> %s",
+            cond.data(), fileName.data(), line, assertBuffer.data());
+        std::terminate();
+    }
     
 }

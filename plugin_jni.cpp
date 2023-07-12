@@ -1,4 +1,3 @@
-
 #include <jni.h>
 #include <sched.h>
 
@@ -13,7 +12,6 @@
 #include <texture_runtime.h>
 
 // This env is specific by the calling thread and shouldn't be shared
-
 namespace saglobal {
     JNIEnv* g_gameEnv;
     uintptr_t g_gameAddr;
@@ -37,7 +35,7 @@ uint getPackageIdentifier(std::span<char> packageNameId)
     auto thEnv{saglobal::g_gameEnv};
     auto gtasaClass{thEnv->FindClass("android/app/Application")};
     jclass threadClass{thEnv->FindClass("android/app/ActivityThread")};
-
+    
     jmethodID getNameMid{thEnv->GetMethodID(gtasaClass, "getPackageName", "()Ljava/lang/String;")};
     jmethodID threadMid{thEnv->GetStaticMethodID(threadClass,
         "currentActivityThread", "()Landroid/app/ActivityThread;")};
@@ -47,6 +45,7 @@ uint getPackageIdentifier(std::span<char> packageNameId)
     jobject GTASAobj{thEnv->CallObjectMethod(activityThreadObj, getGTASAMid)};
 
     auto GTASAid{static_cast<jstring>(thEnv->CallObjectMethod(GTASAobj, getNameMid))};
+
     const char* redable{thEnv->GetStringUTFChars(GTASAid, nullptr)};
     auto packStrLen{strlen(redable)};
 
@@ -62,10 +61,9 @@ uint getPackageIdentifier(std::span<char> packageNameId)
     return packStrLen;
 }
 
-//__attribute__((visibility("hidden"))) void saMobileFault(int signal, siginfo_t* info, void* threadCtx) {}
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
-    salog::print(ANDROID_LOG_INFO, "SAMobile has started, build date: " __DATE__ " " __TIME__);
+    salog::print(ANDROID_LOG_INFO, "SAMobile has loaded, build date: " __DATE__ " " __TIME__);
     salog::coutFmt(ANDROID_LOG_INFO, "Loaded thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
 
@@ -75,15 +73,14 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
         salog::print(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
     }
+    std::array<char, 40> gtasaPackage;
+    if (getPackageIdentifier(gtasaPackage)) {
+      if (gtasaPackage.data() != std::string_view("com.rockstargames.gtasa"))
+        std::terminate();
+    }
+
     JavaVMAttachArgs auxThread{.version = useVersion, .name = "SAMobileMain"};
     vm->AttachCurrentThread(&saglobal::g_gameEnv, &auxThread);
-
-    /*
-    struct sigaction faultSignal{.sa_flags = SA_SIGINFO, .sa_sigaction = saMobileFault};
-    std::memset(&faultSignal, 0, sizeof(struct sigaction));
-    sigaction(SIGSEGV, &faultSignal, nullptr);
-    */
-
     // Getting the in memory shared object address space!
     saglobal::g_gameAddr = safs::getLibrary("libGTASA.so");
     if (!saglobal::g_gameAddr) {

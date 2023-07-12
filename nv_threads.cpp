@@ -1,18 +1,18 @@
+#include <mutex>
 
 #include <nv_threads.h>
 #include <log_client.h>
 
-#include <mutex>
-
 namespace saglobal {
     void (*g_NVThreadSpawnProc)(uintptr_t x0);
 }
-
 // Count of created threads
 static uint16_t thCount{};
 static std::mutex nvLock{};
 
 namespace samimic {
+    using namespace saglobal;
+
     void NVThreadSpawnProc(uintptr_t x0)
     {
         std::unique_lock<std::mutex> nvWaitLocker(nvLock);
@@ -21,6 +21,6 @@ namespace samimic {
 
         nvWaitLocker.unlock();
 
-        saglobal::g_NVThreadSpawnProc(x0);
+        g_NVThreadSpawnProc(x0);
     }
 }

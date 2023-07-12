@@ -28,9 +28,9 @@ namespace samimic
 
         using TextureDatabaseFormat = int;
 
-        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr+0x28771c))("samobile", false, 5);
-        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr+0x28771c))("playerside", false, 5);
-        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr+0x28771c))("serverside", false, 5);
+        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr + 0x28771c))("samobile", false, 5);
+        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr + 0x28771c))("playerside", false, 5);
+        ((int64_t (*)(const char*, bool, TextureDatabaseFormat))(saglobal::g_gameAddr + 0x28771c))("serverside", false, 5);
 
         return nullptr;
     }

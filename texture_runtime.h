@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstdint>
+#include <string_view>
 
 class TextureDatabaseRuntime {
 public:
-    uintptr_t GetTexture(const char* texName);
+    uintptr_t GetTexture(const std::string_view texName);
 
-    uintptr_t textureLoadNew(const char* dbName, const char* textureName);
+    uintptr_t textureLoadNew(const std::string_view dbName, const std::string_view textureName);
 
 };
 

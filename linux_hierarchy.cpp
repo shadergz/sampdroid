@@ -3,6 +3,9 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <string_view>
+#include <array>
+
 #include <unistd.h>
 #include <malloc.h>
 #include <jni.h>
@@ -17,7 +20,7 @@ namespace saglobal {
 namespace safs {
     using namespace saglobal;
 
-    uintptr_t getLibrary(const char* shared)
+    uintptr_t getLibrary(const std::string_view shared)
     {
         const jobject jsideFile{AFileDescriptor_create(g_gameEnv)};
         if (jsideFile == nullptr) {
@@ -28,13 +31,11 @@ namespace safs {
             g_gameEnv->ExceptionDescribe();
             g_gameEnv->ExceptionClear();
         }
-        static const char* mapsFormat{"/proc/%d/maps"};
+        static const auto mapsFormat{"/proc/%d/maps"};
         char* maps{};
 
         asprintf(&maps, mapsFormat, getpid());
-        AFileDescriptor_setFd(g_gameEnv,
-            jsideFile, open(maps, O_RDONLY));
-
+        AFileDescriptor_setFd(g_gameEnv, jsideFile, open(maps, O_RDONLY));
         static constexpr int INVALID_FD{-1};
         if (AFileDescriptor_getFd(g_gameEnv, jsideFile) == INVALID_FD) {
             salog::printFormat(ANDROID_LOG_ERROR, "Can't open the maps file, cause of %s\n", strerror(errno));
@@ -43,13 +44,14 @@ namespace safs {
 
             return 0;
         }
-        char streamBuffer[0x100];
+
+        std::array<char, 0x100> streamBuffer;
         uintptr_t mapAddr{};
         auto procMap{fdopen(AFileDescriptor_getFd(g_gameEnv, jsideFile), "r")};
 
-        while (fgets(streamBuffer, sizeof streamBuffer, procMap) != NULL) {
-            if (strstr(streamBuffer, shared)) {
-                mapAddr = (typeof(mapAddr))strtoul(streamBuffer, 0, 16);
+        while (fgets(streamBuffer.data(), streamBuffer.size(), procMap)) {
+            if (strstr(streamBuffer.data(), shared.data())) {
+                mapAddr = (typeof(mapAddr))strtoul(streamBuffer.data(), 0, 16);
                 break;
             }
         }
