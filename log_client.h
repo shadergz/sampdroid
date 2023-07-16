@@ -3,20 +3,20 @@
 #include <android/log.h>
 #include <cstdio>
 
-#include <string_view>
 #include <utility>
+#include <string_view>
 
 #ifndef NDEBUG
 #include <fmt/std.h>
 #endif
 
 namespace saglobal {
-    extern const std::string_view g_logTag;
+    extern const char* g_logTag;
 }
 
 namespace salog {
-    int printFormat(int prio, const std::string_view format, ...);
-    int print(int prio, const std::string_view msgStr);
+    int printFormat(int prio, const char* format, ...);
+    int print(int prio, const char* msgStr);
 
     #ifndef NDEBUG
     template<typename... Args>
@@ -44,8 +44,8 @@ namespace salog {
     }
     #endif
 
-    void assertAbort(const std::string_view cond, const std::string_view fileName,
-        int line, const std::string_view format, ...);
+    void assertAbort(const char* cond, const char* fileName,
+        int line, const char* format, ...);
 }
 
 #define SALOG_ASSERT(cond, fmt, ...)\

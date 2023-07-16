@@ -11,17 +11,21 @@
 #include <patches_level.h>
 #include <texture_runtime.h>
 
-// This env is specific by the calling thread and shouldn't be shared
 namespace saglobal {
+    // This env is specific by the calling thread and shouldn't be shared
     JNIEnv* g_gameEnv;
+    // Game engine, base address
     uintptr_t g_gameAddr;
+    // OpenAL's address space, we will use later to direct produce sound wout contact the game engine
+    // will be useful when a sound overlay is needed
+    uintptr_t g_audioBackend;
 
     extern AArch64Patcher* g_patcherMicro;
 }
 
 extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM* vm, [[maybe_unused]] void* reserved)
 {
-    salog::print(ANDROID_LOG_INFO, "Unload all resources used");
+    salog::print(ANDROID_LOG_INFO, "Unload all used resources");
 
     if (!saglobal::g_patcherMicro)
         delete saglobal::g_patcherMicro;
@@ -63,15 +67,18 @@ uint getPackageIdentifier(std::span<char> packageNameId)
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
+    using namespace saglobal;
+
     salog::print(ANDROID_LOG_INFO, "SAMobile has loaded, build date: " __DATE__ " " __TIME__);
-    salog::coutFmt(ANDROID_LOG_INFO, "Loaded thread id {} in core {}",
+    salog::coutFmt(ANDROID_LOG_INFO, "Loaded by thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
 
     const jint useVersion{JNI_VERSION_1_6};
 
-    if (vm->GetEnv(reinterpret_cast<void**>(&saglobal::g_gameEnv), useVersion) != JNI_OK) {
+    if (vm->GetEnv(reinterpret_cast<void**>(&g_gameEnv), useVersion) != JNI_OK) {
         salog::print(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
+        return JNI_ERR;
     }
     std::array<char, 40> gtasaPackage;
     if (getPackageIdentifier(gtasaPackage)) {
@@ -79,17 +86,16 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
         std::terminate();
     }
 
-    JavaVMAttachArgs auxThread{.version = useVersion, .name = "SAMobileMain"};
-    vm->AttachCurrentThread(&saglobal::g_gameEnv, &auxThread);
-    // Getting the in memory shared object address space!
-    saglobal::g_gameAddr = safs::getLibrary("libGTASA.so");
-    if (!saglobal::g_gameAddr) {
-        salog::print(ANDROID_LOG_ERROR, "Can't find libGTASA.so, SAMobile is being halted!");
-        return -1;
-    }
+    JavaVMAttachArgs clientThread{.version = useVersion, .name = "*SaClient*"};
+    vm->AttachCurrentThread(&g_gameEnv, &clientThread);
+    // Fetches in memory GTASA base library address (where exatcly JVM has loaded the game engine)
+    g_gameAddr = safs::getLibrary("libGTASA.so");
+    g_audioBackend = safs::getLibrary("libOpenAL64.so");
 
-    salog::printFormat(ANDROID_LOG_INFO, "(libGTASA.so) base image in address "
-        "region: (%#lx)", saglobal::g_gameAddr);
+    SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
+        "SAMobile is being halted now :[");
+    salog::printFormat(ANDROID_LOG_INFO, "Native libraries base region address found in:\n"
+        "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 
     // Applying patches and hooking some methods
     sapatch::applyOnGame();

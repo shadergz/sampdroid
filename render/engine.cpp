@@ -4,7 +4,7 @@
 
 #include <log_client.h>
 
-/* rwrefs/rwcore.h */
+/* render/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);
 RwCamera* (*RwCameraEndUpdate)(RwCamera* camera);
 RwCamera* (*RwCameraShowRaster)(RwCamera* camera, void* pDev, RwUInt32 flags);
@@ -44,7 +44,7 @@ RwRaster* (*RwRasterRead)(const RwChar* filename);
 RwRaster* (*RwRasterReadMaskedRaster)(const RwChar* filename, const RwChar* maskname);
 RwImage* (*RwImageFindRasterFormat)(RwImage* ipImage, RwInt32 nRasterType, RwInt32* npWidth, RwInt32* npHeight, RwInt32* npDepth, RwInt32* npFormat);
 
-/* rwrefs/rwlpcore.h */
+/* render/rwlpcore.h */
 RwReal (*RwIm2DGetNearScreenZ)(void);
 RwReal (*RwIm2DGetFarScreenZ)(void);
 RwBool (*RwRenderStateGet)(RwRenderState state, void* value);
@@ -54,7 +54,7 @@ RwBool (*RwIm2DRenderTriangle)(RwIm2DVertex* vertices, RwInt32 numVertices, RwIn
 RwBool (*RwIm2DRenderPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices);
 RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices, RwImVertexIndex* indices, RwInt32 numIndices);
 
-/* rwrefs/rtpng.h */
+/* render/rtpng.h */
 RwImage* (*RtPNGImageWrite)(RwImage* image, const RwChar* imageName);
 RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
@@ -64,7 +64,7 @@ namespace saglobal {
     extern uintptr_t g_gameAddr;
 }
 
-namespace sarw {
+namespace sarender {
     using namespace saglobal;
 
     void initSaReferences()

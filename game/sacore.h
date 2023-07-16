@@ -7,7 +7,7 @@ namespace samimic {
         CGame();
         ~CGame();
 
-        char* InitialiseRenderWare();
+        const char* InitialiseRenderWare();
     };
 
 }

@@ -1,10 +1,8 @@
 #include <cstdint>
 #include <array>
-#include <string_view>
 
 #include <render/rwcore.h>
 #include <menu_handler.h>
-#include <string_view>
 #include <texture_runtime.h>
 #include <log_client.h>
 
@@ -43,14 +41,14 @@ static_assert(offsetof(MainMenuScreen, m_slotMax) == 0x58);
 static_assert(offsetof(MainMenuScreen, m_slotIndex) == 0x5c);
 static_assert(offsetof(MainMenuScreen, m_slot) == 0x60);
 
-static constexpr std::string_view bNameOnResume{"menu_mainresume"};
-static constexpr std::string_view bNameOnPlay{"menu_mainplay"};
-static constexpr std::string_view bNameOnSettings{"menu_mainsettings"};
+static const char bNameOnResume[]{"menu_mainresume"};
+static const char bNameOnPlay[]{"menu_mainplay"};
+static const char bNameOnSettings[]{"menu_mainsettings"};
 
-static constexpr std::string_view bNameOnBriefs{"menu_mainbriefs"};
+static const char bNameOnBriefs[]{"menu_mainbriefs"};
 
-static constexpr std::string_view bNameOnStats{"menu_mainstats"};
-static constexpr std::string_view bNameOnQuit{"menu_mainquit"};
+static const char bNameOnStats[]{"menu_mainstats"};
+static const char bNameOnQuit[]{"menu_mainquit"};
 
 static void (*OnResume_buttonPressed)();
 static void (*OnStartGame_buttonPressed)();
@@ -59,11 +57,9 @@ static void (*OnBriefs_buttonPressed)();
 static void (*OnStats_buttonPressed)();
 static void (*OnExit_buttonPressed)();
 
-namespace samobile {
+namespace saclient {
     void menuOnInit() {}
-}
-
-namespace samimic {
+	
     [[maybe_unused]] static void OnMultiplayer_buttonPressed()
     {
         if (saglobal::g_playMultiplayer)
@@ -71,20 +67,20 @@ namespace samimic {
 
         const time_t t{time(nullptr)};
         struct tm* tm{localtime(&t)};
-        std::array<char, 0x1f> tMsg;
-        strftime(tMsg.data(), tMsg.size(), "%c", tm);
+        std::array<char, 0x1f> timeBf;
+        strftime(timeBf.data(), timeBf.size(), "%c", tm);
 
         saglobal::g_playMultiplayer = true;
-        samobile::menuOnInit();
+        menuOnInit();
 
-        salog::printFormat(ANDROID_LOG_DEBUG, "Multiplayer button selected from menu at %s, enjoy!", tMsg);
+        salog::printFormat(ANDROID_LOG_DEBUG, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
     }
 }
 
-static void menu_placeButton(const std::string_view btName, const std::string_view fep, MainMenuScreen* menu)
+static void menu_placeButton(const char* buttonName, const char* fep, MainMenuScreen* menu)
 {
-    auto textureButton{(RwTexture*)saglobal::g_textureDatabase->textureLoadNew("gta3", btName)};
-    SALOG_ASSERT(textureButton != nullptr, "Can't build the menu, some textures hasn't found!");
+    auto textureButton{(RwTexture*)saglobal::g_textureDatabase->textureLoadNew("gta3", buttonName)};
+    SALOG_ASSERT(textureButton, "Can't build the menu, some texture hasn't found!");
 
     auto slotPlaceholder{menu->m_slotIndex};
     salog::printFormat(ANDROID_LOG_DEBUG, "Menu slot index: %u\n", slotPlaceholder);
@@ -97,31 +93,30 @@ static void menu_placeButton(const std::string_view btName, const std::string_vi
         // instead of new operator
         menu->m_slot = new MenuSlot[SLOT_MAX_COUNT];
         // Putting a trap data into it (this has used for debug purposes only!)!
-        std::memset(menu->m_slot, 0xf, sizeof (MenuSlot) * SLOT_MAX_COUNT);
+        std::memset(menu->m_slot, 0xf, sizeof(MenuSlot) * SLOT_MAX_COUNT);
 
         menu->m_slotMax = SLOT_MAX_COUNT;
     }
-    SALOG_ASSERT(newSlot < menu->m_slotMax,
-        "Can't use a slot for store a menu item with name: %s", btName.data());
-
-    auto slotPtr{&menu->m_slot[menu->m_slotIndex++]};
+    SALOG_ASSERT(newSlot < menu->m_slotMax, "Can't use a slot for store a menu item with name: %s", buttonName);
+    auto slotPtr{&(menu->m_slot[menu->m_slotIndex++])};
     salog::printFormat(ANDROID_LOG_INFO, "Free slot selected in addr: %llx\n", slotPtr);
 
     slotPtr->m_buttonTexure = textureButton;
     // Our library will live for entire game scenes, this may not be a memory leak
-    slotPtr->m_fepMask = fep.data();
-    // Selecting the correct button callback
-    if (btName == bNameOnResume)
+    slotPtr->m_fepMask = fep;
+
+    // Selecting the correct button callback handler
+    if (!std::strncmp(buttonName, bNameOnResume, sizeof(bNameOnResume)))
         slotPtr->m_onPressedCallback = OnResume_buttonPressed;
-    else if (btName == bNameOnPlay)
+    else if (!std::strncmp(buttonName, bNameOnPlay, sizeof(bNameOnPlay)))
         slotPtr->m_onPressedCallback = OnStartGame_buttonPressed;
-    else if (btName == bNameOnSettings)
+    else if (!std::strncmp(buttonName, bNameOnSettings, sizeof(bNameOnSettings)))
         slotPtr->m_onPressedCallback = OnSettings_buttonPressed;
-    else if (btName == bNameOnBriefs)
+    else if (!std::strncmp(buttonName, bNameOnBriefs, sizeof(bNameOnBriefs)))
         slotPtr->m_onPressedCallback = OnBriefs_buttonPressed;
-    else if (btName == bNameOnStats)
+    else if (!std::strncmp(buttonName, bNameOnStats, sizeof(bNameOnStats)))
         slotPtr->m_onPressedCallback = OnStats_buttonPressed;
-    else if (btName == bNameOnQuit)
+    else if (!std::strncmp(buttonName, bNameOnQuit, sizeof(bNameOnQuit)))
         slotPtr->m_onPressedCallback = OnExit_buttonPressed;
 }
 
@@ -139,6 +134,7 @@ namespace samimic {
     {
         salog::print(ANDROID_LOG_WARN, "MenuHook: on (AddAllItems)!");
         *(uintptr_t*)&MainMenuScreen_HasCPSave = g_gameAddr + 0x35a680;
+
         auto ourInGameMenu{reinterpret_cast<MainMenuScreen*>(this_x0)};
         salog::printFormat(ANDROID_LOG_INFO, "MenuHook: menu structure location: %llx\n", ourInGameMenu);
 
@@ -179,7 +175,7 @@ namespace samimic {
             menu_placeButton(bNameOnPlay, "FEP_STG", ourInGameMenu);
         }
 
-        if ((ourInGameMenu->m_slotIndex + 1) <= ourInGameMenu->m_slotMax) {
+        if (ourInGameMenu->m_slotIndex + 1 <= ourInGameMenu->m_slotMax) {
             // This action always needed to be successful completed
             menu_placeButton(bNameOnQuit, "FEP_QUI", ourInGameMenu);
         }

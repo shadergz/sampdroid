@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string_view>
 #include <array>
 
 #include <unistd.h>
@@ -21,7 +20,7 @@ public:
     };
     AArch64Patcher() {}
 
-    void placeHookAt(const std::string_view sbName, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn);
+    void placeHookAt(const char* sbName, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn);
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
     auto getNewTrampoline() noexcept 
     {

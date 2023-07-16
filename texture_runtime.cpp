@@ -6,7 +6,6 @@
 
 #include <render/rwcore.h>
 #include <log_client.h>
-#include <string_view>
 #include <texture_runtime.h>
 
 namespace saglobal {
@@ -14,14 +13,14 @@ namespace saglobal {
     class TextureDatabaseRuntime* g_textureDatabase;
 }
 
-uintptr_t TextureDatabaseRuntime::GetTexture(const std::string_view texName)
+uintptr_t TextureDatabaseRuntime::GetTexture(const char* textureName)
 {
-    salog::printFormat(ANDROID_LOG_INFO, "Loading new texture with name %s", texName);
-    auto loadedTex{((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(texName.data())};
+    salog::printFormat(ANDROID_LOG_INFO, "Loading new texture with name %s in memory", textureName);
+    auto loadedTex{((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(textureName)};
     if (!loadedTex)
         return 0;
 
-    SALOG_ASSERT(!std::strncmp(loadedTex->name, texName.data(), rwTEXTUREBASENAMELENGTH),
+    SALOG_ASSERT(!std::strncmp(loadedTex->name, textureName, rwTEXTUREBASENAMELENGTH),
         "Wrong RwTexture type detected, mem str: %s", loadedTex->name);
 
     // Forcing the engine to keep our texture reference alive!
@@ -29,25 +28,25 @@ uintptr_t TextureDatabaseRuntime::GetTexture(const std::string_view texName)
     return (uintptr_t)loadedTex;
 }
 
-uintptr_t TextureDatabaseRuntime::textureLoadNew(const std::string_view dbName,
-    const std::string_view textureName)
+uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char* textureName)
 {
-    // TextureDatabaseRuntime::GetDatabase(char const*)
-    /* The game handler all resource inside multiples databases
-     * we need to get the texture from the correct database name
-     * we can also implements our owns database! */
-    static const std::string_view mtDB[]{
-        "client",
+    // TextureDatabaseRuntime::GetDatabase(char const*), The game handler all resource inside multiples
+    // databases, we need to get the texture from the correct database name, we can also
+    // implements our owns databases
+    static const char* mtDB[]{
+        "samobile",
         "playerside", 
         "serverside"};
     
     bool needToOpen{false};
     for (auto mtPrivateDb : mtDB) {
-        if (mtPrivateDb == dbName)
+        if (!std::strncmp(mtPrivateDb, dbName, strlen(dbName)))
             needToOpen = true;
     }
     
-    struct NativeTDRHandler { uintptr_t* dbHandler; };
+    struct NativeTDRHandler {
+        uintptr_t* m_dbHandler;
+    };
     static NativeTDRHandler* dbHandler[std::size(mtDB)]{};
 
     for (;;) {
@@ -55,12 +54,12 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const std::string_view dbName,
         if (!needToOpen)
             break;
         // Locating an invalid db pointer to place into it!
-        while (!*dbPtr)
+        while (!*dbPtr && dbPtr < &dbHandler[std::size(dbHandler)])
             dbPtr++;
         if (dbPtr >= &dbPtr[std::size(dbHandler)])
           break;
 
-        auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName.data())};
+        auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
             salog::printFormat(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
@@ -71,12 +70,15 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const std::string_view dbName,
     }
 
     const auto loadedTexture{GetTexture(textureName)};
-    if (dbName == "clean") {
+    static const char cleanTrigger[]{"clean"};
+    if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {
         // Unregistring the databases, isn't no needed to keep it's openned
-        if (*(dbHandler + 0))
-            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0));
-        if (*(dbHandler + 1))
-            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 1));
+        if (*(dbHandler + 0x0))
+            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x0));
+        if (*(dbHandler + 0x1))
+            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x1));
+        if (*(dbHandler + 0x2))
+          ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
         
         uint8x16_t cl{};
         veorq_u8(cl, cl);
@@ -87,10 +89,9 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const std::string_view dbName,
     
     if (loadedTexture)
         salog::printFormat(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
-            textureName.data(), dbName.data(), loadedTexture);
+            textureName, dbName, loadedTexture);
     else
-        salog::printFormat(ANDROID_LOG_INFO, "Texture %s not found in database %s\n",
-            textureName.data(), dbName.data());
+        salog::printFormat(ANDROID_LOG_INFO, "Texture %s not found in database %s\n", textureName, dbName);
 
     return loadedTexture;
 }

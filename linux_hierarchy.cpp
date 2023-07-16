@@ -3,7 +3,6 @@
 #include <cstring>
 #include <cstdlib>
 
-#include <string_view>
 #include <array>
 
 #include <unistd.h>
@@ -20,7 +19,7 @@ namespace saglobal {
 namespace safs {
     using namespace saglobal;
 
-    uintptr_t getLibrary(const std::string_view shared)
+    uintptr_t getLibrary(const char* shared)
     {
         const jobject jsideFile{AFileDescriptor_create(g_gameEnv)};
         if (jsideFile == nullptr) {
@@ -30,6 +29,8 @@ namespace safs {
 
             g_gameEnv->ExceptionDescribe();
             g_gameEnv->ExceptionClear();
+
+            std::terminate();
         }
         static const auto mapsFormat{"/proc/%d/maps"};
         char* maps{};
@@ -50,7 +51,7 @@ namespace safs {
         auto procMap{fdopen(AFileDescriptor_getFd(g_gameEnv, jsideFile), "r")};
 
         while (fgets(streamBuffer.data(), streamBuffer.size(), procMap)) {
-            if (strstr(streamBuffer.data(), shared.data())) {
+            if (strstr(streamBuffer.data(), shared)) {
                 mapAddr = (typeof(mapAddr))strtoul(streamBuffer.data(), 0, 16);
                 break;
             }
