@@ -10,8 +10,7 @@ namespace saglobal {
     extern uintptr_t g_gameAddr;
 }
 
-namespace samimic
-{
+namespace samimi {
     CGame::CGame() {}
     CGame::~CGame() {}
 

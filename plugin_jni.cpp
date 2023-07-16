@@ -11,6 +11,9 @@
 #include <patches_level.h>
 #include <texture_runtime.h>
 
+#include <ui/userint.h>
+#include <main_thread.h>
+
 namespace saglobal {
     // This env is specific by the calling thread and shouldn't be shared
     JNIEnv* g_gameEnv;
@@ -21,17 +24,27 @@ namespace saglobal {
     uintptr_t g_audioBackend;
 
     extern AArch64Patcher* g_patcherMicro;
+    extern UiClientUser* g_playerUi;
+
+    extern std::atomic<bool> g_clientHasInitiliazed;
 }
 
 extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM* vm, [[maybe_unused]] void* reserved)
 {
+    using namespace saglobal;
     salog::print(ANDROID_LOG_INFO, "Unload all used resources");
 
-    if (!saglobal::g_patcherMicro)
-        delete saglobal::g_patcherMicro;
+    if (g_playerUi)
+        delete g_playerUi;
+    if (g_patcherMicro)
+        delete g_patcherMicro;
 
-    if (saglobal::g_textureDatabase)
-        delete saglobal::g_textureDatabase;
+    if (g_textureDatabase)
+        delete g_textureDatabase;
+
+    if (g_clientHasInitiliazed) {
+
+    }
 }
 
 uint getPackageIdentifier(std::span<char> packageNameId)
@@ -82,12 +95,12 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     }
     std::array<char, 40> gtasaPackage;
     if (getPackageIdentifier(gtasaPackage)) {
-      if (gtasaPackage.data() != std::string_view("com.rockstargames.gtasa"))
-        std::terminate();
+        if (gtasaPackage.data() != std::string_view("com.rockstargames.gtasa"))
+            std::terminate();
     }
 
-    JavaVMAttachArgs clientThread{.version = useVersion, .name = "*SaClient*"};
-    vm->AttachCurrentThread(&g_gameEnv, &clientThread);
+    JavaVMAttachArgs attachThread{.version = useVersion, .name = "*SaClient*"};
+    vm->AttachCurrentThread(&g_gameEnv, &attachThread);
     // Fetches in memory GTASA base library address (where exatcly JVM has loaded the game engine)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
@@ -99,6 +112,10 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     // Applying patches and hooking some methods
     sapatch::applyOnGame();
+
+    pthread_t clientThread;
+    pthread_create(&clientThread, nullptr, saclient::enterMainLoop, nullptr);
+
 
     return useVersion;
 }

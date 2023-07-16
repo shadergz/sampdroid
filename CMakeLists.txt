@@ -23,10 +23,11 @@ target_sources(saclient PRIVATE
     plugin_jni.cpp
     nv_threads.cpp
     texture_runtime.cpp
+    main_thread.cpp
 
     render/engine.cpp
     game/sacore.cpp
-    )
+    ui/userint.cpp)
 
 execute_process(COMMAND git log -1 --format=%h
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}

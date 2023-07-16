@@ -1,5 +1,8 @@
 #include <cstdint>
 #include <array>
+#include <atomic>
+
+#include <pthread.h>
 
 #include <render/rwcore.h>
 #include <menu_handler.h>
@@ -10,6 +13,9 @@ namespace saglobal {
     bool g_playMultiplayer{false};
     void (*g_MainMenuScreen_AddAllItems)(uintptr_t x0);
     extern uintptr_t g_gameAddr;
+
+
+    extern std::atomic<bool> g_clientIsRunning;
 }
 
 // Why CP? are you kidding with me?!
@@ -57,24 +63,32 @@ static void (*OnBriefs_buttonPressed)();
 static void (*OnStats_buttonPressed)();
 static void (*OnExit_buttonPressed)();
 
+
 namespace saclient {
-    void menuOnInit() {}
-	
-    [[maybe_unused]] static void OnMultiplayer_buttonPressed()
-    {
-        if (saglobal::g_playMultiplayer)
-            return;
+    extern pthread_cond_t g_multCond;
+    extern pthread_mutex_t g_multExclusive;
+}
 
-        const time_t t{time(nullptr)};
-        struct tm* tm{localtime(&t)};
-        std::array<char, 0x1f> timeBf;
-        strftime(timeBf.data(), timeBf.size(), "%c", tm);
+static void menuOnInit()
+{
+    pthread_mutex_lock(&saclient::g_multExclusive);
+    pthread_cond_broadcast(&saclient::g_multCond);
+}
 
-        saglobal::g_playMultiplayer = true;
-        menuOnInit();
+[[maybe_unused]] static void OnMultiplayer_buttonPressed()
+{
+    if (saglobal::g_playMultiplayer)
+        return;
 
-        salog::printFormat(ANDROID_LOG_DEBUG, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
-    }
+    const time_t t{time(nullptr)};
+    struct tm* tm{localtime(&t)};
+    std::array<char, 0x1f> timeBf;
+    strftime(timeBf.data(), timeBf.size(), "%c", tm);
+
+    saglobal::g_playMultiplayer = true;
+    menuOnInit();
+
+    salog::printFormat(ANDROID_LOG_DEBUG, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
 }
 
 static void menu_placeButton(const char* buttonName, const char* fep, MainMenuScreen* menu)
