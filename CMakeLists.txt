@@ -9,12 +9,15 @@ project(SAMobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS On)
+
+set(SRC_DIR ${SAMobile_SOURCE_DIR})
 add_library(saclient MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
 # RTTI is enable by default for ensure a better and safety objects handle
-target_compile_options(saclient PRIVATE -Wall -Wextra -frtti $<$<CONFIG:Release>:-Ofast;-DNDEBUG>)
-target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
+add_compile_options("-Wall -Wextra -frtti $<$<CONFIG:Release>:-Ofast;-DNDEBUG>")
+add_link_options("$<$<CONFIG:Release>:-s;-Wl,--gc-sections>")
+
 target_sources(saclient PRIVATE
     linux_hierarchy.cpp
     log_client.cpp
@@ -29,6 +32,17 @@ target_sources(saclient PRIVATE
     game/sacore.cpp
     ui/userint.cpp)
 
+add_library(vendor_imgui STATIC
+    ${SRC_DIR}/vendor/imgui/imgui_draw.cpp
+    ${SRC_DIR}/vendor/imgui/imgui_tables.cpp
+    ${SRC_DIR}/vendor/imgui/imgui_widgets.cpp
+    ${SRC_DIR}/vendor/imgui/imgui.cpp)
+
+target_include_directories(vendor_imgui INTERFACE
+    # Does #include <imgui/imgui.h> be available for us
+    $<BUILD_INTERFACE:${SRC_DIR}/vendor>
+    $<INSTALL_INTERFACE:imgui>)
+
 execute_process(COMMAND git log -1 --format=%h
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     OUTPUT_VARIABLE GIT_HASH
@@ -37,8 +51,8 @@ execute_process(COMMAND git log -1 --format=%h
 set(SAMOBILE_PROJECTVERSION ${saclient_PROJECT_VERSION}.${GIT_HASH})
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(saclient log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
+target_link_libraries(saclient vendor_imgui log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
 set_target_properties(saclient PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
-target_include_directories(saclient PRIVATE ${SAMobile_SOURCE_DIR})
+target_include_directories(saclient PRIVATE ${SRC_DIR})
 
 install(TARGETS saclient LIBRARY DESTINATION ${SAMobile_SOURCE_DIR}/${SAMOBILE_OUTRELDIR})
