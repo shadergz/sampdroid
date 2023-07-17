@@ -115,7 +115,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     pthread_t clientThread;
     pthread_create(&clientThread, nullptr, saclient::enterMainLoop, nullptr);
-
+    // This thread should fall to the end, before game itself starts
 
     return useVersion;
 }

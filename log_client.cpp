@@ -42,14 +42,15 @@ namespace salog {
         int line, const char* format, ...)
     {
         thread_local std::array<char, 0x5f> assertBuffer;
-        if (!cond) return;
+        if (!cond) 
+            return;
 
         va_list va;
         va_start(va, format);
         vsnprintf(assertBuffer.data(), assertBuffer.size(), format, va);
         va_end(va);
 
-        __android_log_assert(nullptr, g_logTag, "ASSERTATION: By %s in %s:%d -> %s", cond, fileName,
+        __android_log_assert(nullptr, g_logTag, "ASSERTION: By %s in %s:%d -> %s", cond, fileName,
             line, assertBuffer.data());
         std::terminate();
     }

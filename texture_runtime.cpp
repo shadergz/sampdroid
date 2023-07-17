@@ -34,7 +34,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     // databases, we need to get the texture from the correct database name, we can also
     // implements our owns databases
     static const char* mtDB[]{
-        "samobile",
+        "client",
         "playerside", 
         "serverside"};
     

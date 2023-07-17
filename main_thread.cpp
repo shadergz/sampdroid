@@ -15,7 +15,6 @@ namespace saglobal {
 }
 
 namespace saclient {
-
     using namespace saglobal;
 
     pthread_cond_t g_multCond;
@@ -25,6 +24,8 @@ namespace saclient {
     {
         pthread_cond_destroy(&g_multCond);
         pthread_mutex_destroy(&g_multExclusive);
+
+        g_clientIsRunning = false;
     }
 
     void* enterMainLoop([[maybe_unused]] void* unused)
@@ -40,15 +41,17 @@ namespace saclient {
         pthread_cond_wait(&g_multCond, &g_multExclusive);
         
         salog::print(ANDROID_LOG_INFO, "Multiplayer game thread has continued");
-        
+        g_clientIsRunning = true;
+
         for (;;) {
-            g_clientIsRunning = true;
-            
+            // Main Multiplayer indepedent thread loop      
             const struct timespec requestWait{.tv_sec = 10};
             nanosleep(&requestWait, nullptr);
         }
-        
-        
+
+        exitingFromGame();
+
+        pthread_exit(nullptr);
         return nullptr;
     }
 
