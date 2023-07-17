@@ -11,11 +11,11 @@ An experimental impl of MTA and SAMP for GTA SA v210 AArch64 (for more details l
     "install_dir": "factory",
     "build_basedir": "build",
 
-    "enable_debug": true,
+    "enable_debug": false,
 
     "baseapk_file": "SharedContents/GTASAv210.apk",
 
-    "apktool_program": "Tools/apktool_2.7.0.jar",
+    "apktool_program": "Tools/apktool_2.8.0.jar",
 
     "android_keypath_env": "ANDROID_KEY_FILEPATH",
     "android_keyalias_env": "ANDROID_KEY_ALIAS",

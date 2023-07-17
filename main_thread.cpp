@@ -44,7 +44,7 @@ namespace saclient {
         for (;;) {
             g_clientIsRunning = true;
             
-            struct timespec requestWait{.tv_sec = 10};
+            const struct timespec requestWait{.tv_sec = 10};
             nanosleep(&requestWait, nullptr);
         }
         
