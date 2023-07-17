@@ -8,7 +8,7 @@ UiClientUser::UiClientUser()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io{ImGui::GetIO()};
+    [[maybe_unused]] ImGuiIO& io{ImGui::GetIO()};
 
     // Dark mode isn't enable by default
     ImGui::StyleColorsDark();

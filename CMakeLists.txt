@@ -15,8 +15,9 @@ add_library(saclient MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
 # RTTI is enable by default for ensure a better and safety objects handle
-add_compile_options("-Wall -Wextra -frtti $<$<CONFIG:Release>:-Ofast;-DNDEBUG>")
-add_link_options("$<$<CONFIG:Release>:-s;-Wl,--gc-sections>")
+target_compile_options(saclient PRIVATE -Wall -Werror -frtti 
+    $<$<CONFIG:Release>:-Ofast;-DNDEBUG>)
+target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
 
 target_sources(saclient PRIVATE
     linux_hierarchy.cpp
@@ -34,8 +35,6 @@ target_sources(saclient PRIVATE
 
 add_library(vendor_imgui STATIC
     ${SRC_DIR}/vendor/imgui/imgui_draw.cpp
-    ${SRC_DIR}/vendor/imgui/imgui_tables.cpp
-    ${SRC_DIR}/vendor/imgui/imgui_widgets.cpp
     ${SRC_DIR}/vendor/imgui/imgui.cpp)
 
 target_include_directories(vendor_imgui INTERFACE
