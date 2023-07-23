@@ -2040,6 +2040,10 @@
     invoke-super {p0}, Lcom/wardrumstudios/utils/WarMedia;->onStart()V
 
     .line 317
+    sget-object v0, Lcom/rockstargames/gtasa/GTASA;->gtasaSelf:Lcom/rockstargames/gtasa/GTASA;
+    invoke-virtual {v0}, Lcom/rockstargames/gtasa/GTASA;->JVMSaMobileReady()V
+
+    .line 318
     iget-boolean v0, p0, Lcom/rockstargames/gtasa/GTASA;->isInSocialClub:Z
 
     if-nez v0, :cond_0
@@ -2152,4 +2156,7 @@
 .end method
 
 .method public native setCurrentScreenSize(II)V
+.end method
+
+.method public native JVMSaMobileReady()V
 .end method

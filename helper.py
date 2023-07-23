@@ -159,8 +159,7 @@ def install_apk():
     subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_SAMOBILE_FILE])
 def logcat():
     try:
-        # subprocess.run([ADB, 'logcat', 'saclient,stargames.gtasa,DEBUG, *:S'])
-        subprocess.run([ADB, 'logcat', 'saclient,DEBUG,*:S'])
+        subprocess.run([ADB, 'logcat', 'saclient,stargames.gtasa,DEBUG, *:S'])
     except KeyboardInterrupt:
         pass
 def clean():

@@ -4,6 +4,9 @@
 
 #include <log_client.h>
 
+bool ImGui_ImplRenderWare_Init();
+void ImGui_ImplRenderWare_Shutdown();
+
 UiClientUser::UiClientUser()
 {
     IMGUI_CHECKVERSION();
@@ -15,10 +18,14 @@ UiClientUser::UiClientUser()
     salog::printFormat(ANDROID_LOG_INFO, "GUI: ImGUI version in use %d: %s", 
         IMGUI_VERSION_NUM, IMGUI_VERSION);
 
+    //ImGui_ImplRenderWare_Init();
+
 }
 UiClientUser::~UiClientUser()
 {
-    salog::print(ANDROID_LOG_INFO, "GUI system is been shutdown now!");
+    salog::print(ANDROID_LOG_INFO, "GUI: System is been shutdown now!");
+    
+    //ImGui_ImplRenderWare_Shutdown();
     ImGui::DestroyContext();
 
 }

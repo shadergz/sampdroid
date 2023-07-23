@@ -69,7 +69,7 @@ namespace sarender {
 
     void initSaReferences()
     {
-        salog::print(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions references...");
+        salog::print(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions reference...");
 
         /* render/skeleton.h */
         g_rsGlobal = (RsGlobalType*)(g_gameAddr+0);

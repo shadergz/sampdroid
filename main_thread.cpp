@@ -30,18 +30,17 @@ namespace saclient {
 
     void* enterMainLoop([[maybe_unused]] void* unused)
     {
-        pthread_cond_init(&g_multCond, nullptr);
-        pthread_mutex_init(&g_multExclusive, nullptr);
-        
-        g_clientHasInitiliazed = true;
-        g_playerUi = new UiClientUser();
-        
-        // Waiting for player press the Multiplayer button
+        g_clientHasInitiliazed = true;        
+        salog::print(ANDROID_LOG_INFO, "Main thread has started!");
+
         pthread_mutex_lock(&g_multExclusive);
         pthread_cond_wait(&g_multCond, &g_multExclusive);
         
-        salog::print(ANDROID_LOG_INFO, "Multiplayer game thread has continued");
+        // Waiting for the player press the Start button
+        g_playerUi = new UiClientUser();
+
         g_clientIsRunning = true;
+        salog::print(ANDROID_LOG_INFO, "Multiplayer game thread has continued");
 
         for (;;) {
             // Main Multiplayer indepedent thread loop      

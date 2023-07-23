@@ -62,18 +62,7 @@ static void (*OnSettings_buttonPressed)();
 static void (*OnBriefs_buttonPressed)();
 static void (*OnStats_buttonPressed)();
 static void (*OnExit_buttonPressed)();
-
-
-namespace saclient {
-    extern pthread_cond_t g_multCond;
-    extern pthread_mutex_t g_multExclusive;
-}
-
-static void menuOnInit()
-{
-    pthread_mutex_lock(&saclient::g_multExclusive);
-    pthread_cond_broadcast(&saclient::g_multCond);
-}
+static void menuOnInit() {}
 
 [[maybe_unused]] static void OnMultiplayer_buttonPressed()
 {
