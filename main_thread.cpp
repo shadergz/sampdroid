@@ -35,12 +35,17 @@ namespace saclient {
 
         pthread_mutex_lock(&g_multExclusive);
         pthread_cond_wait(&g_multCond, &g_multExclusive);
-        
-        // Waiting for the player press the Start button
-        g_playerUi = new UiClientUser();
+
+        // We're in onStart() JVM from GTASA class
+        // Our JNI_OnLoad function has already completed its execution
 
         g_clientIsRunning = true;
         salog::print(ANDROID_LOG_INFO, "Multiplayer game thread has continued");
+
+        pthread_cond_wait(&g_multCond, &g_multExclusive);
+
+        // Waiting for the player press the Start button
+        g_playerUi = new UiClientUser();
 
         for (;;) {
             // Main Multiplayer indepedent thread loop      

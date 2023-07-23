@@ -1,7 +1,5 @@
-#include <android/log.h>
-#include <imgui/imgui.h>
-
 #include <log_client.h>
+#include <jvm_helper.h>
 
 #include <render/rwlpcore.h>
 #include <render/skeleton.h>
@@ -24,12 +22,20 @@ bool ImGui_ImplRenderWare_Init()
 {
     auto& io{ImGui::GetIO()};
 
-    const Vec2 displaySize{
+    const Vec2 dsp{
         saglobal::g_rsGlobal->maximumWidth, 
         saglobal::g_rsGlobal->maximumHeight};
+    const ImVec2 displaySz(static_cast<float>(dsp.xWidth), 
+        static_cast<float>(dsp.yHeight));
     
-    io.DisplaySize = ImVec2(displaySize.xWidth, displaySize.yHeight);
-    salog::printFormat(ANDROID_LOG_INFO, "GUI: Client display size: Width = %u, Height = %u\n", 
+    salog::printFormat(ANDROID_LOG_DEBUG, "Renderware screen size: %fW - %fH", displaySz.x, displaySz.y);
+
+    if (displaySz.x > 1)
+        io.DisplaySize = displaySz;
+    else
+        io.DisplaySize = sajvm::getScreenSize();
+    
+    salog::printFormat(ANDROID_LOG_INFO, "GUI: Client display size: Width = %f, Height = %f", 
         io.DisplaySize.x, io.DisplaySize.y);
 
     return true;

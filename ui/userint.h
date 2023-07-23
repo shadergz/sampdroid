@@ -3,6 +3,7 @@
 class UiClientUser {
 public:
     UiClientUser();
+    
     ~UiClientUser();
     
 };

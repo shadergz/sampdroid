@@ -72,8 +72,12 @@ namespace sarender {
         salog::print(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions reference...");
 
         /* render/skeleton.h */
-        g_rsGlobal = (RsGlobalType*)(g_gameAddr+0);
-
+        g_rsGlobal = (RsGlobalType*)(g_gameAddr + 0xc9b320);
+        salog::printFormat(ANDROID_LOG_DEBUG, 
+            "1. App Name: %s\n"
+            "2. Maximum FPS: %u\n",
+            g_rsGlobal->appName, g_rsGlobal->maxFPS);
+        
         /* render/rwcore.h */
         *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr+0);
         *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr+0);

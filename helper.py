@@ -60,7 +60,7 @@ ZIPALIGN: Final[str] = f'{BUILD_TOOLS}/zipalign'
 BUILD_TYPES: Final[tuple] = ('Release', 'Debug')
 BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 
-SAMOBILE_VERSION: Final[str] = '0.0.3'
+SAMOBILE_VERSION: Final[str] = '0.0.4'
 APK_OUT: Final[str] = f'{install_in}/gtasabase'
 
 LIB_BASENAME: Final[str] = 'saclient'

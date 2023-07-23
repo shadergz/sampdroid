@@ -5,6 +5,8 @@
 #include <texture_runtime.h>
 
 #include <menu_handler.h>
+#include <game/game_objects.h>
+
 #include <nv_threads.h>
 
 namespace saglobal {
@@ -75,29 +77,36 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
     // making the page readable/writable and executable
     unfuckPageRWX(reinterpret_cast<uintptr_t>(originFunc), PAGE_SIZE);
     // ldr x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x8
+    
     *(originFunc + 0) = __builtin_bswap32(0x51000058);
+    
     // br x17
     *(originFunc + 1) = __builtin_bswap32(0x20021fd6);
 
     *(uint64_t**)(originFunc + 2) = (uint64_t*)(replace & (uint64_t)-1);
     // At this point, the trampoline has the 4 instructions from the origin instruction
     // and the original instruction has a jump to your hook method
+    
     *(uint64_t*)(trContext + 16) = (uint64_t)__builtin_bswap64(0x5100005820021fd6);
+    
     *(uint64_t**)(trContext + 24) = (uint64_t*)((uint64_t)(originFunc + 0x4) & (uint64_t)-1);
+    
     // Forcing the CPU to fetch the actual version for both operations 
     // Dumping the residual wrong instructions from the cache
-    __builtin___clear_cache((char*)originFunc, (char*)&originFunc[4]);
     __builtin___clear_cache((char*)hookableCtx->m_content.data(),
         (char*)&hookableCtx->m_content + sizeof(hookableCtx->m_content));
+    
+    __builtin___clear_cache((char*)originFunc, (char*)&originFunc[4]);
+
     *saveIn = (uintptr_t)(trContext);
 
-    salog::printFormat(ANDROID_LOG_INFO, "Hook on addr %#llx successful installed by %#llx, (| %#llx | %u |)",
+    salog::printFormat(ANDROID_LOG_INFO, "Hook on addr %#llx success installed by %#llx, (| %#llx | %u |)",
         method, replace, (uintptr_t)trContext & 0xffffffffff, hookableCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
 {
     const auto baseAddr{unfuckAddr & 0xfffffff000u};
-    /* If page isn't aligned we can't change the permission for more than once page 
+    /* If page isn't aligned we can't change the permission for more than one page 
      * without break into multiples */
 
     const auto protect{PROT_READ | PROT_WRITE | PROT_EXEC};
@@ -117,9 +126,8 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 
-// While the game is loading we need to fixes and hook some functions
+// While the game isn't loaded yet we need to fixes and hook some functions
 namespace sapatch {
-
     using namespace saglobal;
 
     void applyOnGame()
@@ -131,10 +139,16 @@ namespace sapatch {
         g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010,
             (uintptr_t)samimic::MainMenuScreen_AddAllItems,
             (uintptr_t*)&saglobal::g_MainMenuScreen_AddAllItems);
-    
+
+        g_patcherMicro->placeHookAt("InitRenderWare", g_gameAddr + 0x55b668,
+            (uintptr_t)samimic::CGame_InitializeRenderWare,
+            (uintptr_t*)&saglobal::g_CGame_InitializeRenderWare);
+
+        /*
         g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040,
             (uintptr_t)samimic::NVThreadSpawnProc,
             (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
+        */
     }
 
 }

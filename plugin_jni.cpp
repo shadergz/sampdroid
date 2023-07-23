@@ -1,8 +1,4 @@
-#include <android/log.h>
-#include <jni.h>
 #include <sched.h>
-
-#include <span>
 #include <thread>
 
 #include <cstdlib>
@@ -13,11 +9,13 @@
 #include <texture_runtime.h>
 
 #include <ui/userint.h>
+#include <jvm_helper.h>
 #include <main_thread.h>
 
 namespace saglobal {
     // This env is specific by the calling thread and shouldn't be shared
     JNIEnv* g_gameEnv;
+    jobject g_gtaSA;
     // Game engine, base address
     uintptr_t g_gameAddr;
     // OpenAL's address space, we will use later to direct produce sound wout contact the game engine
@@ -53,40 +51,10 @@ extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM* vm, [[maybe_unused]] void*
     }
 }
 
-uint getPackageIdentifier(std::span<char> packageNameId)
-{
-    auto thEnv{saglobal::g_gameEnv};
-    auto gtasaClass{thEnv->FindClass("android/app/Application")};
-    jclass threadClass{thEnv->FindClass("android/app/ActivityThread")};
-    
-    jmethodID getNameMid{thEnv->GetMethodID(gtasaClass, "getPackageName", "()Ljava/lang/String;")};
-    jmethodID threadMid{thEnv->GetStaticMethodID(threadClass,
-        "currentActivityThread", "()Landroid/app/ActivityThread;")};
-
-    jobject activityThreadObj{thEnv->CallStaticObjectMethod(threadClass, threadMid)};
-    jmethodID getGTASAMid{thEnv->GetMethodID(threadClass, "getApplication", "()Landroid/app/Application;")};
-    jobject GTASAobj{thEnv->CallObjectMethod(activityThreadObj, getGTASAMid)};
-
-    auto GTASAid{static_cast<jstring>(thEnv->CallObjectMethod(GTASAobj, getNameMid))};
-
-    const char* redable{thEnv->GetStringUTFChars(GTASAid, nullptr)};
-    auto packStrLen{strlen(redable)};
-
-    std::strncpy(packageNameId.data(), redable, packageNameId.size());
-
-    thEnv->ReleaseStringUTFChars(GTASAid, redable);
-    thEnv->DeleteLocalRef(GTASAid);
-    thEnv->DeleteLocalRef(GTASAobj);
-    thEnv->DeleteLocalRef(activityThreadObj);
-    thEnv->DeleteLocalRef(threadClass);
-    thEnv->DeleteLocalRef(gtasaClass);
-
-    return packStrLen;
-}
-
 extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_JVMSaMobileReady(
-    [[maybe_unused]] JNIEnv* env, [[maybe_unused]] jobject gtaCtx) 
+    [[maybe_unused]] JNIEnv* env, jobject gtaClass) 
 {
+    saglobal::g_gtaSA = gtaClass;
     salog::print(ANDROID_LOG_INFO, "JVMSaMobileReady() has been called from JVM");
 
     pthread_mutex_lock(&saclient::g_multExclusive);
@@ -111,8 +79,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
         vm->DetachCurrentThread();
         return JNI_ERR;
     }
+    
     std::array<char, 40> gtasaPackage;
-    if (getPackageIdentifier(gtasaPackage)) {
+    if (sajvm::getPackageIdentifier(gtasaPackage)) {
         if (gtasaPackage.data() != std::string_view("com.rockstargames.gtasa"))
             std::terminate();
     }

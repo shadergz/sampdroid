@@ -28,9 +28,12 @@ target_sources(saclient PRIVATE
     nv_threads.cpp
     texture_runtime.cpp
     main_thread.cpp
+    jvm_helper.cpp
 
     render/engine.cpp
-    game/sacore.cpp
+    
+    game/game_objects.cpp
+
     ui/userint.cpp
     ui/imgui_rw.cpp)
 
