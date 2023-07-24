@@ -15,7 +15,7 @@ struct Vec2 {
 
 void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* draw_data)
 {
-
+    [[maybe_unused]] auto& globalIo{ImGui::GetIO()};
 }
 
 bool ImGui_ImplRenderWare_Init()
@@ -28,12 +28,12 @@ bool ImGui_ImplRenderWare_Init()
     const ImVec2 displaySz(static_cast<float>(dsp.xWidth), 
         static_cast<float>(dsp.yHeight));
     
-    salog::printFormat(ANDROID_LOG_DEBUG, "Renderware screen size: %fW - %fH", displaySz.x, displaySz.y);
-
     if (displaySz.x > 1)
         io.DisplaySize = displaySz;
     else
         io.DisplaySize = sajvm::getScreenSize();
+    // Updates to the screen size will only appear when the next frame buffer is rendered
+    //ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
     
     salog::printFormat(ANDROID_LOG_INFO, "GUI: Client display size: Width = %f, Height = %f", 
         io.DisplaySize.x, io.DisplaySize.y);

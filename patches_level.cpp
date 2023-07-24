@@ -18,17 +18,16 @@ enum MicroBranchMode {};
 
 #pragma pack(push, 1)
 struct TrampolineContext {
-    uint16_t m_id;
+    uint m_id;
     uintptr_t m_source;
     // Count of instructions replaced inside the origin and placed inside of our trampoline
-    uint8_t m_instCount;
-    uint8_t m_mode;
+    unsigned char m_instCount;
 
     std::array<char, AArch64Patcher::PATCHER_SYMBOL_NAME> m_symbolName;
     std::array<uint8_t, sizeof(uint32_t) * AArch64Patcher::PATCHER_MAX_INST> m_content;
 };
-
 #pragma pack(pop)
+
 static constexpr uint8_t PATCHER_FRAME_GOBACK{offsetof(TrampolineContext, m_content)};
 static_assert(sizeof(TrampolineContext) == AArch64Patcher::PATCHER_HOOK_SIZE,
     "Trampoline struct data size is invalid and must be fixed!");
@@ -100,7 +99,7 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 
     *saveIn = (uintptr_t)(trContext);
 
-    salog::printFormat(ANDROID_LOG_INFO, "Hook on addr %#llx success installed by %#llx, (| %#llx | %u |)",
+    salog::printFormat(ANDROID_LOG_INFO, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
         method, replace, (uintptr_t)trContext & 0xffffffffff, hookableCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
@@ -144,11 +143,9 @@ namespace sapatch {
             (uintptr_t)samimic::CGame_InitializeRenderWare,
             (uintptr_t*)&saglobal::g_CGame_InitializeRenderWare);
 
-        /*
         g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040,
             (uintptr_t)samimic::NVThreadSpawnProc,
             (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
-        */
     }
 
 }

@@ -10,12 +10,12 @@
 class AArch64Patcher {
 public:
     static constexpr uint8_t PATCHER_HOOK_COUNT{64};
-    static constexpr uint8_t PATCHER_MAX_INST{7};
+    static constexpr uint8_t PATCHER_MAX_INST{8};
 
-    static constexpr uint8_t PATCHER_SYMBOL_NAME{24};
+    static constexpr uint8_t PATCHER_SYMBOL_NAME{19};
     static constexpr uint8_t PATCHER_HOOK_SIZE{
-        sizeof(uint16_t) + sizeof(uintptr_t) +
-        sizeof(uint8_t) + sizeof(uint8_t) + sizeof(char[PATCHER_SYMBOL_NAME]) +
+        sizeof(uint) + sizeof(uintptr_t) +
+        sizeof(unsigned char) + sizeof(char[PATCHER_SYMBOL_NAME]) +
         sizeof(uint32_t) * PATCHER_MAX_INST
     };
     AArch64Patcher() {}
