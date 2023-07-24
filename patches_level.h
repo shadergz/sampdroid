@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <array>
+#include <random>
 
 #include <unistd.h>
 #include <sys/mman.h>
@@ -30,6 +31,11 @@ public:
     }
 
 private:
+    std::random_device m_device;
+    std::mt19937_64 m_nemesis{m_device()};
+
+    std::uniform_int_distribution<uint> m_randomDist{0, UINT16_MAX};
+
     struct MicroRaw_Trampoline {
         static constexpr uint8_t ARCH_MAX_INST{10};
         static constexpr uint8_t ARCH_INST_SIZE{8};

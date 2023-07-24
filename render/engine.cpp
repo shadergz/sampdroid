@@ -75,7 +75,7 @@ namespace sarender {
         g_rsGlobal = (RsGlobalType*)(g_gameAddr + 0xc9b320);
         salog::printFormat(ANDROID_LOG_DEBUG, 
             "1. App Name: %s\n"
-            "2. Maximum FPS: %u\n",
+            "2. Maximum FPS: %u",
             g_rsGlobal->appName, g_rsGlobal->maxFPS);
         
         /* render/rwcore.h */

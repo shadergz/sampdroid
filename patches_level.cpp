@@ -51,9 +51,8 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
         return;
     
     salog::printFormat(ANDROID_LOG_INFO, "New trampoline allocated in %p\n", hookableCtx);
-    static uint16_t trampId{};
     
-    hookableCtx->m_id = trampId++;
+    hookableCtx->m_id = m_randomDist(m_nemesis);
     hookableCtx->m_source = method;
     // 0 means an invalid value!
 

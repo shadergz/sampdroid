@@ -23,7 +23,7 @@ UiClientUser::UiClientUser()
 
     ImGui_ImplRenderWare_Init();
     
-    auto& style = ImGui::GetStyle();
+    auto& style{ImGui::GetStyle()};
     style.WindowBorderSize = 0.0f;
 
 
