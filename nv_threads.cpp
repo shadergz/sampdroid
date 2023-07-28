@@ -6,11 +6,12 @@
 namespace saglobal {
     void (*g_NVThreadSpawnProc)(uintptr_t x0);
 }
-// Count of created threads
-static uint16_t thCount{};
-static std::mutex nvLock{};
 
 namespace samimic {
+    // Count of created threads
+    static uint16_t thCount{};
+    static std::mutex nvLock{};
+
     using namespace saglobal;
 
     void NVThreadSpawnProc(uintptr_t x0)

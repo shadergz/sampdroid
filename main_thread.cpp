@@ -42,9 +42,9 @@ namespace saclient {
         g_clientIsRunning = true;
         salog::print(salog::LogId::Debug, "Multiplayer game thread has continued");
 
+        // Waiting for the player press the Start button
         pthread_cond_wait(&g_multCond, &g_multExclusive);
 
-        // Waiting for the player press the Start button
         g_playerUi = new UiClientUser();
 
         for (;;) {

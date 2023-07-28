@@ -37,7 +37,7 @@ UiClientUser::UiClientUser()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    [[maybe_unused]] auto& io{ImGui::GetIO()};
+    auto& io{ImGui::GetIO()};
 
     // Dark mode isn't enable by default
     ImGui::StyleColorsDark();
@@ -61,7 +61,8 @@ UiClientUser::UiClientUser()
     };
 
     for (auto font : SaFontRefs) {
-        if (!font) break;
+        if (!font) 
+            break;
         
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDrive, font->m_fontName);
@@ -73,16 +74,15 @@ UiClientUser::UiClientUser()
         if (font->m_isRequired && !(isFound = access(font->m_fontPathBuffer, R_OK | F_OK) == 0)) {
             salog::printFormat(salog::LogId::Error, "Couldn't load font with name %s", font->m_fontName);
             std::terminate();
-
-            continue;
         }
 
-        if (isFound)
-            font->m_fontObject = io.Fonts->AddFontFromFileTTF(font->m_fontPathBuffer, 
-                m_inScreenfontSize, nullptr, ranges);
+        if (!isFound)
+            continue;
+        
+        font->m_fontObject = io.Fonts->AddFontFromFileTTF(font->m_fontPathBuffer, 
+            m_inScreenfontSize, nullptr, ranges);
         
         m_loadedFonts.push_back(font);
-
         salog::printFormat(salog::LogId::Info, "New SA font with name %s successful loaded", font->m_fontName);
 
     }

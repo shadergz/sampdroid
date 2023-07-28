@@ -15,27 +15,27 @@ static const char* logcatTag = "saclient";
 
 // This wrapper class is used to ensure that the file will be fclose()'d at the end of this library's lifetime
 class LogFile {
-    public:
+public:
     ~LogFile() {
-        if (logFile)
-            fclose(logFile);
+        if (m_logFile)
+            fclose(m_logFile);
     }
     void operator=(std::FILE* filePtr) {
-        logFile = filePtr;
+        m_logFile = filePtr;
     }
 
     auto operator*() {
-        return logFile;
+        return m_logFile;
     }
 
-    private:
-    std::FILE* logFile;
+private:
+    std::FILE* m_logFile;
 
 };
 
-static LogFile logFile{};
-
 namespace salog {
+    static LogFile logFile{};
+
     using namespace saglobal;
 
     [[gnu::always_inline]] inline void checkLogFile() {
