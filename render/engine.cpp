@@ -69,11 +69,11 @@ namespace sarender {
 
     void initSaReferences()
     {
-        salog::print(ANDROID_LOG_INFO, "Loading RenderWare Graphics engine functions reference...");
+        salog::print(salog::LogId::Info, "Loading RenderWare Graphics engine functions reference...");
 
         /* render/skeleton.h */
         g_rsGlobal = (RsGlobalType*)(g_gameAddr + 0xc9b320);
-        salog::printFormat(ANDROID_LOG_DEBUG, 
+        salog::printFormat(salog::LogId::Debug, 
             "1. App Name: %s\n"
             "2. Maximum FPS: %u",
             g_rsGlobal->appName, g_rsGlobal->maxFPS);

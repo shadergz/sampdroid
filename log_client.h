@@ -10,17 +10,19 @@
 #include <fmt/std.h>
 #endif
 
-namespace saglobal {
-    extern const char* g_logTag;
-}
-
 namespace salog {
-    int printFormat(int prio, const char* format, ...);
-    int print(int prio, const char* msgStr);
+    enum LogId {
+        Info = ANDROID_LOG_INFO,
+        Debug = ANDROID_LOG_DEBUG,
+        Error = ANDROID_LOG_ERROR,
+    };
+
+    int printFormat(LogId prio, const char* format, ...);
+    int print(LogId prio, const char* msgStr);
 
     #ifndef NDEBUG
     template<typename... Args>
-    auto coutFmt(int prio, fmt::format_string<Args...> fmt, Args&&... args)
+    auto coutFmt(LogId prio, fmt::format_string<Args...> fmt, Args&&... args)
     {
         uint64_t fioAllocated{};
         char* fioPtr{};
@@ -37,7 +39,7 @@ namespace salog {
     }
     #else
     template<typename... Args>
-    auto coutFmt([[maybe_unused]] int prio, [[maybe_unused]] const std::string_view formatUnused,
+    auto coutFmt([[maybe_unused]] LogId prio, [[maybe_unused]] const std::string_view formatUnused,
                  [[maybe_unused]] Args&&... args)
     {
         return 0;

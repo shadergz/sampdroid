@@ -35,7 +35,7 @@ bool ImGui_ImplRenderWare_Init()
     // Updates to the screen size will only appear when the next frame buffer is rendered
     ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
     
-    salog::printFormat(ANDROID_LOG_INFO, "GUI: Client display size: Width = %f, Height = %f", 
+    salog::printFormat(salog::LogId::Info, "GUI: Client display size: Width = %f, Height = %f", 
         io.DisplaySize.x, io.DisplaySize.y);
 
     return true;

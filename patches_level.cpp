@@ -37,20 +37,20 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 {
     static const auto symbolSize{AArch64Patcher::PATCHER_SYMBOL_NAME};
 
-    salog::printFormat(ANDROID_LOG_INFO, "Hooking function (%s) %#llx with %#llx method, "
+    salog::printFormat(salog::LogId::Info, "Hooking function (%s) %#llx with %#llx method, "
         "saving in %#llx", sbName, method, replace, saveIn);
 
     *saveIn = {};
 
     if (strlen(sbName) > symbolSize) {
-        salog::printFormat(ANDROID_LOG_ERROR, "Symbol name %s is larger than the symbol name space!", sbName);
+        salog::printFormat(salog::LogId::Error, "Symbol name %s is larger than the symbol name space!", sbName);
         return;
     }
     auto hookableCtx{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
     if (!hookableCtx)
         return;
     
-    salog::printFormat(ANDROID_LOG_INFO, "New trampoline allocated in %p\n", hookableCtx);
+    salog::printFormat(salog::LogId::Info, "New trampoline allocated in %p\n", hookableCtx);
     
     hookableCtx->m_id = m_randomDist(m_nemesis);
     hookableCtx->m_source = method;
@@ -98,7 +98,7 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 
     *saveIn = (uintptr_t)(trContext);
 
-    salog::printFormat(ANDROID_LOG_INFO, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
+    salog::printFormat(salog::LogId::Info, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
         method, replace, (uintptr_t)trContext & 0xffffffffff, hookableCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
@@ -120,7 +120,7 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     auto overflow{unfuckAddr & 0xffff ? 1 : 0};
     auto count{countPages(region_size) + overflow};
 
-    salog::printFormat(ANDROID_LOG_INFO, "Changing permission of %lu pages in %#llx base address", count, baseAddr);
+    salog::printFormat(salog::LogId::Info, "Changing permission of %lu pages in %#llx base address", count, baseAddr);
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 

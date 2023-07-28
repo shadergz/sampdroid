@@ -1,42 +1,125 @@
 #include <array>
 
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <unistd.h>
+
 #include <log_client.h>
 
 namespace saglobal {
-    const char* g_logTag = "saclient";
+    extern uintptr_t g_gameAddr;
 }
+
+static const char* logcatTag = "saclient";
+
+// This wrapper class is used to ensure that the file will be fclose()'d at the end of this library's lifetime
+class LogFile {
+    public:
+    ~LogFile() {
+        if (logFile)
+            fclose(logFile);
+    }
+    void operator=(std::FILE* filePtr) {
+        logFile = filePtr;
+    }
+
+    auto operator*() {
+        return logFile;
+    }
+
+    private:
+    std::FILE* logFile;
+
+};
+
+static LogFile logFile{};
 
 namespace salog {
     using namespace saglobal;
 
-#ifndef NDEBUG
-    int printFormat(int prio, const char* format, ...)
+    [[gnu::always_inline]] inline void checkLogFile() {
+        char logFilePath[0x4f];
+
+        std::snprintf(logFilePath, std::size(logFilePath),
+            "%slogclient.txt", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
+        
+        logFile = fopen(logFilePath, "a");
+        char openedAt[0x2f];
+
+        if (!*logFile) {
+            __android_log_print(ANDROID_LOG_ERROR, logcatTag, 
+                "Can't open the log file in (...MISSING...)%s", logFilePath);
+            return;
+        }
+
+        auto ts{time(nullptr)};
+            const auto timeData{localtime(&ts)};
+
+        std::strftime(openedAt,
+            std::size(openedAt), "%T", timeData);
+
+        SALOG_ASSERT(access(logFilePath, W_OK) == 0, "Sa log file in GTA SA external data dir couldn't be found");
+        
+        __android_log_print(ANDROID_LOG_INFO, logcatTag,
+            "Log file opened in %s", logFilePath);
+        
+        std::fprintf(*logFile, "Start time of writing [%s], file pointer: %p from %s\n", 
+            openedAt, *logFile, logFilePath);
+        fflush(*logFile);
+        
+    }
+
+    int printFormat(LogId prio, const char* format, ...)
     {
-        va_list var;
+#if NDEBUG
+        if (prio == LogId::Debug)
+            return 0;
+#endif
+        va_list var, cp;
         va_start(var, format);
+        va_copy(cp, var);
+
+        [[unlikely]] if (!*logFile && g_gameAddr)
+            checkLogFile();
     
-        const auto droidRet{__android_log_vprint(prio, g_logTag, format, var)};
+        const auto droidRet{__android_log_vprint(
+            static_cast<android_LogPriority>(prio), logcatTag, format, var)};
+        
+        if (*logFile) {
+            std::vfprintf(*logFile, format, cp);
+            putc('\n', *logFile);
+            fflush(*logFile);
+        }
+        
         va_end(var);
+        va_end(cp);
     
         return droidRet;
     }
     
-    int print(int prio, const char* msgStr)
+    int print(LogId prio, const char* msgStr)
     {
-        const auto androidResult{__android_log_write(prio, g_logTag, msgStr)};
+#if NDEBUG
+        if (prio == LogId::Debug)
+            return 0;
+#endif
+
+        [[unlikely]] if (!*logFile && g_gameAddr)
+            checkLogFile();
+
+        const auto androidResult{__android_log_write(
+            static_cast<android_LogPriority>(prio), logcatTag, msgStr)};
+        
+        if (*logFile) {
+
+            std::fputs(msgStr, *logFile);
+            putc('\n', *logFile);
+            fflush(*logFile);
+
+        }
         return androidResult;
     }
-    
-#else
-    int printFormat([[maybe_unused]] int prio, [[maybe_unused]] const char* format, ...)
-    {
-        return 0;
-    }
-    int print([[maybe_unused]] int prio, [[maybe_unused]] const char* msgStr)
-    {
-        return 0;
-    }
-#endif
 
     void assertAbort(const char* cond, const char* fileName,
         int line, const char* format, ...)
@@ -50,7 +133,7 @@ namespace salog {
         vsnprintf(assertBuffer.data(), assertBuffer.size(), format, va);
         va_end(va);
 
-        __android_log_assert(nullptr, g_logTag, "ASSERTION: By %s in %s:%d -> %s", cond, fileName,
+        __android_log_assert(nullptr, logcatTag, "ASSERTION: By %s in %s:%d -> %s", cond, fileName,
             line, assertBuffer.data());
         std::terminate();
     }

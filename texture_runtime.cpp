@@ -15,7 +15,7 @@ namespace saglobal {
 
 uintptr_t TextureDatabaseRuntime::GetTexture(const char* textureName)
 {
-    salog::printFormat(ANDROID_LOG_INFO, "Loading new texture with name %s in memory", textureName);
+    salog::printFormat(salog::LogId::Info, "Loading new texture with name %s in memory", textureName);
     auto loadedTex{((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(textureName)};
     if (!loadedTex)
         return 0;
@@ -62,7 +62,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
-            salog::printFormat(ANDROID_LOG_INFO, "Database not found: %s\n", dbName);
+            salog::printFormat(salog::LogId::Info, "Database not found: %s\n", dbName);
             return 0;
         }
 
@@ -88,10 +88,10 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
     
     if (loadedTexture)
-        salog::printFormat(ANDROID_LOG_INFO, "Texture %s from database (%s) loaded at %#llx\n",
+        salog::printFormat(salog::LogId::Info, "Texture %s from database (%s) loaded at %#llx\n",
             textureName, dbName, loadedTexture);
     else
-        salog::printFormat(ANDROID_LOG_INFO, "Texture %s not found in database %s\n", textureName, dbName);
+        salog::printFormat(salog::LogId::Error, "Texture %s not found in database %s\n", textureName, dbName);
 
     return loadedTexture;
 }

@@ -77,7 +77,7 @@ static void menuOnInit() {}
     saglobal::g_playMultiplayer = true;
     menuOnInit();
 
-    salog::printFormat(ANDROID_LOG_DEBUG, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
+    salog::printFormat(salog::LogId::Info, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
 }
 
 static void menu_placeButton(const char* buttonName, const char* fep, MainMenuScreen* menu)
@@ -86,12 +86,12 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
     SALOG_ASSERT(textureButton, "Can't build the menu, some texture hasn't found!");
 
     auto slotPlaceholder{menu->m_slotIndex};
-    salog::printFormat(ANDROID_LOG_DEBUG, "Menu slot index: %u\n", slotPlaceholder);
+    salog::printFormat(salog::LogId::Debug, "Menu slot index: %u\n", slotPlaceholder);
     const uint32_t newSlot{slotPlaceholder + 1};
 
     static constexpr uint SLOT_MAX_COUNT{8};
     if (!menu->m_slot) {
-        salog::printFormat(ANDROID_LOG_DEBUG, "Menu slot doesn't exist, allocating 8 slots now!");
+        salog::printFormat(salog::LogId::Debug, "Menu slot doesn't exist, allocating 8 slots now!");
         // TODO: Maybe the game clashes because of this, the original function allocate with malloc
         // instead of new operator
         menu->m_slot = new MenuSlot[SLOT_MAX_COUNT];
@@ -102,7 +102,7 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
     }
     SALOG_ASSERT(newSlot < menu->m_slotMax, "Can't use a slot for store a menu item with name: %s", buttonName);
     auto slotPtr{&(menu->m_slot[menu->m_slotIndex++])};
-    salog::printFormat(ANDROID_LOG_INFO, "Free slot selected in addr: %llx\n", slotPtr);
+    salog::printFormat(salog::LogId::Info, "Free slot selected in addr: %llx\n", slotPtr);
 
     slotPtr->m_buttonTexure = textureButton;
     // Our library will live for entire game scenes, this may not be a memory leak
@@ -135,11 +135,11 @@ namespace samimic {
 
     void MainMenuScreen_AddAllItems(uintptr_t this_x0)
     {
-        salog::print(ANDROID_LOG_WARN, "MenuHook: on (AddAllItems)!");
+        salog::print(salog::LogId::Debug, "MenuHook: on (AddAllItems)!");
         *(uintptr_t*)&MainMenuScreen_HasCPSave = g_gameAddr + 0x35a680;
 
         auto ourInGameMenu{reinterpret_cast<MainMenuScreen*>(this_x0)};
-        salog::printFormat(ANDROID_LOG_INFO, "MenuHook: menu structure location: %llx\n", ourInGameMenu);
+        salog::printFormat(salog::LogId::Info, "MenuHook: menu structure location: %llx\n", ourInGameMenu);
 
         *reinterpret_cast<uintptr_t*>(&OnResume_buttonPressed) = g_gameAddr + 0x35a0f8;
         *reinterpret_cast<uintptr_t*>(&OnStartGame_buttonPressed) = g_gameAddr + 0x35a31c;
@@ -151,11 +151,11 @@ namespace samimic {
 
         *reinterpret_cast<uintptr_t*>(&OnExit_buttonPressed) = g_gameAddr + 0x35a758;
 
-        salog::print(ANDROID_LOG_INFO, "MenuHook: placing on game menu buttons");
+        salog::print(salog::LogId::Info, "MenuHook: placing on game menu buttons");
 
         if (__builtin_expect(!ourInGameMenu->m_inGameplayScene, 0)) {
             // We're in the Main Menu, the user can choice between SAMP or MTA
-            salog::print(ANDROID_LOG_WARN, "MenuHook: placing Main Menu (Resume) button");
+            salog::print(salog::LogId::Debug, "MenuHook: placing Main Menu (Resume) button");
             // For place the "Resume button we need to check if there's a Save Game already"
             uint32_t hasSave{MainMenuScreen_HasCPSave()};
             if (hasSave & 1)

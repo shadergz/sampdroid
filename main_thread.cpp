@@ -3,7 +3,7 @@
 
 #include <atomic>
 
-#include <ui/userint.h>
+#include <ui/user_graphics.h>
 #include <log_client.h>
 
 namespace saglobal {
@@ -31,7 +31,7 @@ namespace saclient {
     void* enterMainLoop([[maybe_unused]] void* unused)
     {
         g_clientHasInitiliazed = true;        
-        salog::print(ANDROID_LOG_INFO, "Main thread has started!");
+        salog::print(salog::LogId::Info, "Main thread has started!");
 
         pthread_mutex_lock(&g_multExclusive);
         pthread_cond_wait(&g_multCond, &g_multExclusive);
@@ -40,7 +40,7 @@ namespace saclient {
         // Our JNI_OnLoad function has already completed its execution
 
         g_clientIsRunning = true;
-        salog::print(ANDROID_LOG_INFO, "Multiplayer game thread has continued");
+        salog::print(salog::LogId::Debug, "Multiplayer game thread has continued");
 
         pthread_cond_wait(&g_multCond, &g_multExclusive);
 

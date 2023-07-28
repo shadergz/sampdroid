@@ -8,7 +8,7 @@
 #include <patches_level.h>
 #include <texture_runtime.h>
 
-#include <ui/userint.h>
+#include <ui/user_graphics.h>
 #include <jvm_helper.h>
 #include <main_thread.h>
 
@@ -36,7 +36,7 @@ namespace saclient {
 extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
-    salog::print(ANDROID_LOG_INFO, "Unload all used resources");
+    salog::print(salog::LogId::Info, "Unload all used resources");
 
     if (g_playerUi)
         delete g_playerUi;
@@ -55,7 +55,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_JVMSaMobile
     [[maybe_unused]] JNIEnv* env, jobject gtaClass) 
 {
     saglobal::g_gtaSA = gtaClass;
-    salog::print(ANDROID_LOG_INFO, "JVMSaMobileReady() has been called from JVM");
+    salog::print(salog::LogId::Info, "JVMSaMobileReady() has been called from JVM");
 
     pthread_mutex_lock(&saclient::g_multExclusive);
     pthread_cond_broadcast(&saclient::g_multCond);
@@ -68,14 +68,14 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
 
-    salog::print(ANDROID_LOG_INFO, "SAMobile has loaded, build date: " __DATE__ " " __TIME__);
-    salog::coutFmt(ANDROID_LOG_INFO, "Loaded by thread id {} in core {}",
+    salog::print(salog::LogId::Info, "SAMobile has loaded, build date: " __DATE__ " " __TIME__);
+    salog::coutFmt(salog::LogId::Info, "Loaded by thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
 
     const jint useVersion{JNI_VERSION_1_6};
 
     if (vm->GetEnv(reinterpret_cast<void**>(&g_gameEnv), useVersion) != JNI_OK) {
-        salog::print(ANDROID_LOG_ERROR, "Can't get the JNI interface!");
+        salog::print(salog::LogId::Error, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
         return JNI_ERR;
     }
@@ -94,7 +94,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
         "SAMobile is being halted now :[");
-    salog::printFormat(ANDROID_LOG_INFO, "Native libraries base region address found in:\n"
+    salog::printFormat(salog::LogId::Info, "Native libraries base region address found in:\n"
         "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 
     // Applying patches and hooking some methods
