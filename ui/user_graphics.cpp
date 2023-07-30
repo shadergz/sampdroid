@@ -3,6 +3,8 @@
 #include <unistd.h>
 
 bool ImGui_ImplRenderWare_Init();
+
+void ImGui_ImplRenderWare_NewFrame();
 void ImGui_ImplRenderWare_RenderDrawData(ImDrawData* draw_data);
 
 void ImGui_ImplRenderWare_Shutdown();
@@ -90,8 +92,26 @@ UiClientUser::UiClientUser()
 
 int UiClientUser::renderDrawCommand()
 {
+    ImGui_ImplRenderWare_NewFrame();
+    ImGui::NewFrame();
+
+    renderClientDetails();
+
+    ImGui::EndFrame();
+
+    // Ensure that ImGUI will render a vertex buffer from its command pipeline list
+    ImGui::Render();
+
     auto draw{ImGui::GetDrawData()};
+    ImGui_ImplRenderWare_RenderDrawData(draw);
+
     return draw->CmdListsCount;
+}
+
+void UiClientUser::renderClientDetails()
+{
+    ImGui::GetOverlayDrawList()->AddText(
+        ImVec2(10, 10), ImColor(IM_COL32_BLACK), "SA Mobile");
 }
 
 UiClientUser::~UiClientUser()

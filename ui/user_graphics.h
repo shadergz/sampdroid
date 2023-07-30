@@ -5,6 +5,10 @@
 
 #include <imgui/imgui.h>
 
+namespace saglobal {
+    extern void (*g_Render2dStuff)(void);
+}
+
 class UiClientUser {
 public:
     UiClientUser();
@@ -12,6 +16,7 @@ public:
     ~UiClientUser();
 
     int renderDrawCommand();
+    void renderClientDetails();
 
     struct SaFont {
         const char* m_fontName;

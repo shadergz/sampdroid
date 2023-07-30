@@ -7,7 +7,6 @@ namespace sarender {
 };
 
 namespace saglobal {
-    extern uintptr_t g_gameAddr;
     long (*g_CGame_InitializeRenderWare)();
 }
 

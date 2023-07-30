@@ -133,6 +133,10 @@ namespace sapatch {
         g_patcherMicro = new AArch64Patcher();
         g_textureDatabase = new TextureDatabaseRuntime();
 
+        g_patcherMicro->placeHookAt("Render2dStuff", g_gameAddr + 0x5d8994,
+            (uintptr_t)samimic::Render2dStuff, 
+            (uintptr_t*)&saglobal::g_Render2dStuff);
+
         // MenuItem_add is no longer present
         g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010,
             (uintptr_t)samimic::MainMenuScreen_AddAllItems,
@@ -144,7 +148,7 @@ namespace sapatch {
 
         g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040,
             (uintptr_t)samimic::NVThreadSpawnProc,
-            (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
+            (uintptr_t*)&saglobal::g_NVThreadSpawnProc);        
     }
 
 }
