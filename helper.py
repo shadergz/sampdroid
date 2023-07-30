@@ -19,9 +19,9 @@ with open('env.json', 'r') as jf:
 # Change this to your current input files
 USER_PATH: Final[str] = os.path.expanduser('~').replace('\\', '/')
 
-APK_BASE: Final[str] = f'{USER_PATH}/{apk_origin}'
+APK_BASE: Final[str] = f'{apk_origin}'
 
-APKTOOL: Final[str] = f'{USER_PATH}/{apktool}'
+APKTOOL: Final[str] = f'{apktool}'
 
 SIGNER_KSPATH: Final[str] = os.getenv(envvar_keypath).replace('\\', '/')
 SIGNER_KSALIAS: Final[str] = os.getenv(envvar_keyalias)

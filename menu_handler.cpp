@@ -86,14 +86,14 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
     SALOG_ASSERT(textureButton, "Can't build the menu, some texture hasn't found!");
 
     auto slotPlaceholder{menu->m_slotIndex};
-    salog::printFormat(salog::LogId::Debug, "Menu slot index: %u\n", slotPlaceholder);
+    salog::printFormat(salog::LogId::Debug, "Menu slot index: %u", slotPlaceholder);
     const uint32_t newSlot{slotPlaceholder + 1};
 
     static constexpr uint SLOT_MAX_COUNT{8};
     if (!menu->m_slot) {
         salog::printFormat(salog::LogId::Debug, "Menu slot doesn't exist, allocating 8 slots now!");
         // TODO: Maybe the game clashes because of this, the original function allocate with malloc
-        // instead of new operator
+        // instead of "new" operator
         menu->m_slot = new MenuSlot[SLOT_MAX_COUNT];
         // Putting a trap data into it (this has used for debug purposes only!)!
         std::memset(menu->m_slot, 0xf, sizeof(MenuSlot) * SLOT_MAX_COUNT);
@@ -101,9 +101,10 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
         menu->m_slotMax = SLOT_MAX_COUNT;
     }
     SALOG_ASSERT(newSlot < menu->m_slotMax, "Can't use a slot for store a menu item with name: %s", buttonName);
-    auto slotPtr{&(menu->m_slot[menu->m_slotIndex++])};
-    salog::printFormat(salog::LogId::Info, "Free slot selected in addr: %llx\n", slotPtr);
 
+    auto slotPtr{&(menu->m_slot[menu->m_slotIndex++])};
+
+    salog::printFormat(salog::LogId::Debug, "Free slot selected in addr: %llx", slotPtr);
     slotPtr->m_buttonTexure = textureButton;
     // Our library will live for entire game scenes, this may not be a memory leak
     slotPtr->m_fepMask = fep;
@@ -139,7 +140,7 @@ namespace samimic {
         *(uintptr_t*)&MainMenuScreen_HasCPSave = g_gameAddr + 0x35a680;
 
         auto ourInGameMenu{reinterpret_cast<MainMenuScreen*>(this_x0)};
-        salog::printFormat(salog::LogId::Info, "MenuHook: menu structure location: %llx\n", ourInGameMenu);
+        salog::printFormat(salog::LogId::Debug, "MenuHook: menu structure location: %llx", ourInGameMenu);
 
         *reinterpret_cast<uintptr_t*>(&OnResume_buttonPressed) = g_gameAddr + 0x35a0f8;
         *reinterpret_cast<uintptr_t*>(&OnStartGame_buttonPressed) = g_gameAddr + 0x35a31c;

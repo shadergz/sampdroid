@@ -50,7 +50,7 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
     if (!hookableCtx)
         return;
     
-    salog::printFormat(salog::LogId::Info, "New trampoline allocated in %p\n", hookableCtx);
+    salog::printFormat(salog::LogId::Debug, "New trampoline allocated in %#p", hookableCtx);
     
     hookableCtx->m_id = m_randomDist(m_nemesis);
     hookableCtx->m_source = method;

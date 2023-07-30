@@ -1,4 +1,6 @@
 build*
-*factory*
+apkgen
 compile_commands.json
 .cache
+*.apk
+*.jar

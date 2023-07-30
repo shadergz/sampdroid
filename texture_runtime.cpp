@@ -36,7 +36,8 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     static const char* mtDB[]{
         "client",
         "playerside", 
-        "serverside"};
+        "serverside"
+    };
     
     bool needToOpen{false};
     for (auto mtPrivateDb : mtDB) {
@@ -62,8 +63,8 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
-            salog::printFormat(salog::LogId::Info, "Database not found: %s\n", dbName);
-            return 0;
+            salog::printFormat(salog::LogId::Error, "Database not found: %s\n", dbName);
+            std::terminate();
         }
 
         ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2865d8))(*dbPtr);
@@ -88,10 +89,10 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
     
     if (loadedTexture)
-        salog::printFormat(salog::LogId::Info, "Texture %s from database (%s) loaded at %#llx\n",
+        salog::printFormat(salog::LogId::Info, "Texture %s from database (%s) loaded at %#llx",
             textureName, dbName, loadedTexture);
     else
-        salog::printFormat(salog::LogId::Error, "Texture %s not found in database %s\n", textureName, dbName);
+        salog::printFormat(salog::LogId::Error, "Texture %s not found in database %s", textureName, dbName);
 
     return loadedTexture;
 }

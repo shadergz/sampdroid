@@ -42,7 +42,7 @@ namespace salog {
         char logFilePath[0x4f];
 
         std::snprintf(logFilePath, std::size(logFilePath),
-            "%slogclient.txt", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
+            "%slog_client.txt", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
         
         logFile = fopen(logFilePath, "a");
         char openedAt[0x2f];
@@ -54,11 +54,9 @@ namespace salog {
         }
 
         auto ts{time(nullptr)};
-            const auto timeData{localtime(&ts)};
+        const auto timeData{localtime(&ts)};
 
-        std::strftime(openedAt,
-            std::size(openedAt), "%T", timeData);
-
+        std::strftime(openedAt, std::size(openedAt), "%T", timeData);
         SALOG_ASSERT(access(logFilePath, W_OK) == 0, "Sa log file in GTA SA external data dir couldn't be found");
         
         __android_log_print(ANDROID_LOG_INFO, logcatTag,

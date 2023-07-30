@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <time.h>
+#include <jni.h>
 
 #include <atomic>
 
@@ -12,6 +13,8 @@ namespace saglobal {
     std::atomic<bool> g_clientHasInitiliazed{false};
     
     std::atomic<bool> g_clientIsRunning{false};
+
+    extern JNIEnv* g_gameEnv;
 }
 
 namespace saclient {
@@ -32,6 +35,12 @@ namespace saclient {
     {
         g_clientHasInitiliazed = true;        
         salog::print(salog::LogId::Info, "Main thread has started!");
+        
+        static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "SA client"};
+        
+        JavaVM* vm{};
+        g_gameEnv->GetJavaVM(&vm);
+        vm->AttachCurrentThread(&g_gameEnv, &threadInfo);
 
         pthread_mutex_lock(&g_multExclusive);
         pthread_cond_wait(&g_multCond, &g_multExclusive);
@@ -40,7 +49,7 @@ namespace saclient {
         // Our JNI_OnLoad function has already completed its execution
 
         g_clientIsRunning = true;
-        salog::print(salog::LogId::Debug, "Multiplayer game thread has continued");
+        salog::print(salog::LogId::Info, "Multiplayer game thread has continued");
 
         // Waiting for the player press the Start button
         pthread_cond_wait(&g_multCond, &g_multExclusive);

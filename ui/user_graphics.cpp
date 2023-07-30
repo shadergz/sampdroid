@@ -18,7 +18,7 @@ static const ImWchar ranges[] {
     0x0490, 0x04A0,
     0x2010, 0x2040,
     0x20A0, 0x20B0,
-    0x2110, 0x2130, 
+    0x2110, 0x2130,
     0
 };
 
@@ -67,7 +67,7 @@ UiClientUser::UiClientUser()
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDrive, font->m_fontName);
 
-        salog::printFormat(salog::LogId::Info, "Attempt to load font %s from %s", 
+        salog::printFormat(salog::LogId::Debug, "Attempt to load font %s from %s", 
             font->m_fontName, font->m_fontPathBuffer);
 
         bool isFound{false};

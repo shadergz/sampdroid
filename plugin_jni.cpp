@@ -74,6 +74,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     const jint useVersion{JNI_VERSION_1_6};
 
+    JavaVMAttachArgs attachThread{.version = useVersion, .name = "SA OnLoad"};
+    vm->AttachCurrentThread(&g_gameEnv, &attachThread);
+
     if (vm->GetEnv(reinterpret_cast<void**>(&g_gameEnv), useVersion) != JNI_OK) {
         salog::print(salog::LogId::Error, "Can't get the JNI interface!");
         vm->DetachCurrentThread();
@@ -86,8 +89,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
             std::terminate();
     }
 
-    JavaVMAttachArgs attachThread{.version = useVersion, .name = "saclient"};
-    vm->AttachCurrentThread(&g_gameEnv, &attachThread);
     // Fetches in memory GTASA base library address (where exatcly JVM has loaded the game engine)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
