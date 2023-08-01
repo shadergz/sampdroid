@@ -33,7 +33,8 @@ target_sources(saclient PRIVATE
     render/engine.cpp
     
     game/game_objects.cpp
-    game/render2d.cpp
+    game/hud_manager.cpp
+    game/state.cpp
 
     ui/user_graphics.cpp
     ui/imgui_rw.cpp)

@@ -37,9 +37,9 @@ namespace safs {
 
         asprintf(&maps, mapsFormat, getpid());
         AFileDescriptor_setFd(g_gameEnv, jsideFile, open(maps, O_RDONLY));
-        static constexpr int INVALID_FD{-1};
+        static constexpr int32_t INVALID_FD{-1};
         if (AFileDescriptor_getFd(g_gameEnv, jsideFile) == INVALID_FD) {
-            salog::printFormat(salog::LogId::Error, "Can't open the maps file, cause of %s", strerror(errno));
+            salog::printFormat(salog::Error, "Can't open the maps file, cause of %s", strerror(errno));
             free(maps);
             g_gameEnv->DeleteLocalRef(jsideFile);
 

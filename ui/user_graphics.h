@@ -5,10 +5,6 @@
 
 #include <imgui/imgui.h>
 
-namespace saglobal {
-    extern void (*g_Render2dStuff)(void);
-}
-
 class UiClientUser {
 public:
     UiClientUser();

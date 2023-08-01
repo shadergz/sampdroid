@@ -23,10 +23,10 @@ void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
         vertexBuffer.resize(drawData->TotalVtxCount);
     
     RwIm2DVertex* vtxDest{vertexBuffer.data()};
-    int vtxOffset{0};
+    uint32_t vtxOffset{0};
 
     // Fill up the entire vertex buffer and fix all screen coordinates
-    for (int cmdIdx = 0; cmdIdx < drawData->CmdListsCount; cmdIdx++) {
+    for (uint32_t cmdIdx = 0; cmdIdx < drawData->CmdListsCount; cmdIdx++) {
         const ImDrawList* cmdList{drawData->CmdLists[cmdIdx]};
 
         std::for_each(cmdList->VtxBuffer.begin(), cmdList->VtxBuffer.end(), 
@@ -103,7 +103,7 @@ bool ImGui_ImplRenderWare_Init()
     // Updates to the screen size will only appear when the next frame buffer is rendered
     ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
     
-    salog::printFormat(salog::LogId::Info, "GUI: Client display size: width = (%f), height = (%f)", 
+    salog::printFormat(salog::Info, "GUI: Client display size: width = (%f), height = (%f)", 
         io.DisplaySize.x, io.DisplaySize.y);
 
     return true;
@@ -137,7 +137,7 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
 
     RwUInt8* fontPixelsDest{fontData->cpPixels};
 
-    for (int pixelIdx{0}; pixelIdx < fontData->height; pixelIdx++) {
+    for (uint32_t pixelIdx{0}; pixelIdx < fontData->height; pixelIdx++) {
         memcpy(fontPixelsDest, pxS + fontData->stride * pixelIdx, fontData->stride);
         fontPixelsDest += fontData->stride;
     }

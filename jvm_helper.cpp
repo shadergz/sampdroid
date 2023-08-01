@@ -41,7 +41,7 @@ namespace sajvm {
 
     ImVec2 getScreenSize()
     {
-        salog::print(salog::LogId::Info, "Geeting screen size from JVM");
+        salog::print(salog::Info, "Geeting screen size from JVM");
 
         jclass activityClass{g_gameEnv->GetObjectClass(g_gtaSA)};
         jclass displayClass{g_gameEnv->FindClass("android/view/Display")};

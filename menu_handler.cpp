@@ -23,15 +23,20 @@ static uint32_t (*MainMenuScreen_HasCPSave)();
 #pragma pack(push, 1)
 struct MenuSlot {
     RwTexture* m_buttonTexure;
+    
     const char* m_fepMask;
+
     void (*m_onPressedCallback)();
 };
 
 struct MainMenuScreen {
 public:
     std::array<uint8_t, 0x15> m_undefined0;
+    
     bool m_inGameplayScene;
+    
     std::array<uint8_t, 0x42> m_undefined1;
+    
     /* A slot index identifier, needed to be increased while adding
      * new items into it! */
     // Count of available entries inside of m_slot
@@ -77,7 +82,7 @@ static void menuOnInit() {}
     saglobal::g_playMultiplayer = true;
     menuOnInit();
 
-    salog::printFormat(salog::LogId::Info, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
+    salog::printFormat(salog::Info, "Multiplayer button selected from menu at %s, enjoy!", timeBf);
 }
 
 static void menu_placeButton(const char* buttonName, const char* fep, MainMenuScreen* menu)
@@ -86,12 +91,12 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
     SALOG_ASSERT(textureButton, "Can't build the menu, some texture hasn't found!");
 
     auto slotPlaceholder{menu->m_slotIndex};
-    salog::printFormat(salog::LogId::Debug, "Menu slot index: %u", slotPlaceholder);
+    salog::printFormat(salog::Debug, "Menu slot index: %u", slotPlaceholder);
     const uint32_t newSlot{slotPlaceholder + 1};
 
     static constexpr uint SLOT_MAX_COUNT{8};
     if (!menu->m_slot) {
-        salog::printFormat(salog::LogId::Debug, "Menu slot doesn't exist, allocating 8 slots now!");
+        salog::printFormat(salog::Debug, "Menu slot doesn't exist, allocating 8 slots now!");
         // TODO: Maybe the game clashes because of this, the original function allocate with malloc
         // instead of "new" operator
         menu->m_slot = new MenuSlot[SLOT_MAX_COUNT];
@@ -104,7 +109,7 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
 
     auto slotPtr{&(menu->m_slot[menu->m_slotIndex++])};
 
-    salog::printFormat(salog::LogId::Debug, "Free slot selected in addr: %llx", slotPtr);
+    salog::printFormat(salog::Debug, "Free slot selected in addr: %llx", slotPtr);
     slotPtr->m_buttonTexure = textureButton;
     // Our library will live for entire game scenes, this may not be a memory leak
     slotPtr->m_fepMask = fep;
@@ -136,11 +141,11 @@ namespace samimic {
 
     void MainMenuScreen_AddAllItems(uintptr_t this_x0)
     {
-        salog::print(salog::LogId::Debug, "MenuHook: on (AddAllItems)!");
+        salog::print(salog::Debug, "MenuHook: on (AddAllItems)!");
         *(uintptr_t*)&MainMenuScreen_HasCPSave = g_gameAddr + 0x35a680;
 
         auto ourInGameMenu{reinterpret_cast<MainMenuScreen*>(this_x0)};
-        salog::printFormat(salog::LogId::Debug, "MenuHook: menu structure location: %llx", ourInGameMenu);
+        salog::printFormat(salog::Debug, "MenuHook: menu structure location: %llx", ourInGameMenu);
 
         *reinterpret_cast<uintptr_t*>(&OnResume_buttonPressed) = g_gameAddr + 0x35a0f8;
         *reinterpret_cast<uintptr_t*>(&OnStartGame_buttonPressed) = g_gameAddr + 0x35a31c;
@@ -152,11 +157,11 @@ namespace samimic {
 
         *reinterpret_cast<uintptr_t*>(&OnExit_buttonPressed) = g_gameAddr + 0x35a758;
 
-        salog::print(salog::LogId::Info, "MenuHook: placing on game menu buttons");
+        salog::print(salog::Info, "MenuHook: placing on game menu buttons");
 
         if (__builtin_expect(!ourInGameMenu->m_inGameplayScene, 0)) {
             // We're in the Main Menu, the user can choice between SAMP or MTA
-            salog::print(salog::LogId::Debug, "MenuHook: placing Main Menu (Resume) button");
+            salog::print(salog::Debug, "MenuHook: placing Main Menu (Resume) button");
             // For place the "Resume button we need to check if there's a Save Game already"
             uint32_t hasSave{MainMenuScreen_HasCPSave()};
             if (hasSave & 1)

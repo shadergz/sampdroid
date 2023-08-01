@@ -7,7 +7,7 @@ namespace sarender {
 };
 
 namespace saglobal {
-    long (*g_CGame_InitializeRenderWare)();
+    uint64_t (*g_CGame_InitializeRenderWare)();
 }
 
 namespace saclient {
@@ -25,14 +25,14 @@ namespace samimic {
     https://gtamods.com/wiki/Mobile_textures_(SA/VC)
     */
 
-    long CGame_InitializeRenderWare()
+    uint64_t CGame_InitializeRenderWare()
     {        
         auto rwResult{g_CGame_InitializeRenderWare()};
         
         // Loads RenderWare global variables and functions pointer
         sarender::initSaReferences();
 
-        using TextureDatabaseFormat = int;
+        using TextureDatabaseFormat = int32_t;
 
         // This functions below doesn't clashes the game if the texture database wasn't found
         ((int64_t (*)(const char*, bool, TextureDatabaseFormat))

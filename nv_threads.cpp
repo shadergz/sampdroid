@@ -17,7 +17,7 @@ namespace samimic {
     void NVThreadSpawnProc(uintptr_t x0)
     {
         std::unique_lock<std::mutex> nvWaitLocker(nvLock);
-        salog::printFormat(salog::LogId::Debug, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
+        salog::printFormat(salog::Debug, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
         thCount++;
 
         nvWaitLocker.unlock();

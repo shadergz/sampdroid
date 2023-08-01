@@ -44,7 +44,7 @@ UiClientUser::UiClientUser()
     // Dark mode isn't enable by default
     ImGui::StyleColorsDark();
 
-    salog::printFormat(salog::LogId::Info, "GUI: ImGUI version in use %d: %s", 
+    salog::printFormat(salog::Info, "GUI: ImGUI version in use %d: %s", 
         IMGUI_VERSION_NUM, IMGUI_VERSION);
 
     ImGui_ImplRenderWare_Init();
@@ -55,7 +55,7 @@ UiClientUser::UiClientUser()
     // Loading related fonts
     auto gameDataDrive{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
 
-    static SaFont* SaFontRefs[]{
+    static SaFont* const SaFontRefs[]{
         &arialFont, 
         &sampAux3Font,
         &userDefaultFont,
@@ -69,12 +69,12 @@ UiClientUser::UiClientUser()
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDrive, font->m_fontName);
 
-        salog::printFormat(salog::LogId::Debug, "Attempt to load font %s from %s", 
+        salog::printFormat(salog::Debug, "Attempt to load font %s from %s", 
             font->m_fontName, font->m_fontPathBuffer);
 
         bool isFound{false};
         if (font->m_isRequired && !(isFound = access(font->m_fontPathBuffer, R_OK | F_OK) == 0)) {
-            salog::printFormat(salog::LogId::Error, "Couldn't load font with name %s", font->m_fontName);
+            salog::printFormat(salog::Error, "Couldn't load font with name %s", font->m_fontName);
             std::terminate();
         }
 
@@ -85,7 +85,7 @@ UiClientUser::UiClientUser()
             m_inScreenfontSize, nullptr, ranges);
         
         m_loadedFonts.push_back(font);
-        salog::printFormat(salog::LogId::Info, "New SA font with name %s successful loaded", font->m_fontName);
+        salog::printFormat(salog::Info, "New SA font with name %s successful loaded", font->m_fontName);
 
     }
 }
@@ -116,7 +116,7 @@ void UiClientUser::renderClientDetails()
 
 UiClientUser::~UiClientUser()
 {
-    salog::print(salog::LogId::Info, "GUI: System is been shutdown now!");
+    salog::print(salog::Info, "GUI: System is been shutdown now!");
     
     // auto& io{ImGui::GetIO()};
     // io.Fonts->Clear();

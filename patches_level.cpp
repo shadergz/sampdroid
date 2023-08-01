@@ -14,18 +14,21 @@ namespace saglobal {
     extern uintptr_t g_gameAddr;
 }
 
-enum MicroBranchMode {};
-
 #pragma pack(push, 1)
+
 struct TrampolineContext {
-    uint m_id;
+    uint32_t m_id;
+
     uintptr_t m_source;
+    
     // Count of instructions replaced inside the origin and placed inside of our trampoline
     unsigned char m_instCount;
 
     std::array<char, AArch64Patcher::PATCHER_SYMBOL_NAME> m_symbolName;
+    
     std::array<uint8_t, sizeof(uint32_t) * AArch64Patcher::PATCHER_MAX_INST> m_content;
 };
+
 #pragma pack(pop)
 
 static constexpr uint8_t PATCHER_FRAME_GOBACK{offsetof(TrampolineContext, m_content)};
@@ -37,20 +40,20 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 {
     static const auto symbolSize{AArch64Patcher::PATCHER_SYMBOL_NAME};
 
-    salog::printFormat(salog::LogId::Info, "Hooking function (%s) %#llx with %#llx method, "
+    salog::printFormat(salog::Info, "Hooking function (%s) %#llx with %#llx method, "
         "saving in %#llx", sbName, method, replace, saveIn);
 
     *saveIn = {};
 
     if (strlen(sbName) > symbolSize) {
-        salog::printFormat(salog::LogId::Error, "Symbol name %s is larger than the symbol name space!", sbName);
+        salog::printFormat(salog::Error, "Symbol name %s is larger than the symbol name space!", sbName);
         return;
     }
     auto hookableCtx{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
     if (!hookableCtx)
         return;
     
-    salog::printFormat(salog::LogId::Debug, "New trampoline allocated in %#p", hookableCtx);
+    salog::printFormat(salog::Debug, "New trampoline allocated in %#p", hookableCtx);
     
     hookableCtx->m_id = m_randomDist(m_nemesis);
     hookableCtx->m_source = method;
@@ -98,7 +101,7 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 
     *saveIn = (uintptr_t)(trContext);
 
-    salog::printFormat(salog::LogId::Info, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
+    salog::printFormat(salog::Info, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
         method, replace, (uintptr_t)trContext & 0xffffffffff, hookableCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
@@ -120,7 +123,7 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     auto overflow{unfuckAddr & 0xffff ? 1 : 0};
     auto count{countPages(region_size) + overflow};
 
-    salog::printFormat(salog::LogId::Info, "Changing permission of %lu pages in %#llx base address", count, baseAddr);
+    salog::printFormat(salog::Info, "Changing permission of %lu pages in %#llx base address", count, baseAddr);
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 
@@ -132,23 +135,11 @@ namespace sapatch {
     {
         g_patcherMicro = new AArch64Patcher();
         g_textureDatabase = new TextureDatabaseRuntime();
-
-        g_patcherMicro->placeHookAt("Render2dStuff", g_gameAddr + 0x5d8994,
-            (uintptr_t)samimic::Render2dStuff, 
-            (uintptr_t*)&saglobal::g_Render2dStuff);
-
         // MenuItem_add is no longer present
-        g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010,
-            (uintptr_t)samimic::MainMenuScreen_AddAllItems,
-            (uintptr_t*)&saglobal::g_MainMenuScreen_AddAllItems);
-
-        g_patcherMicro->placeHookAt("InitRenderWare", g_gameAddr + 0x55b668,
-            (uintptr_t)samimic::CGame_InitializeRenderWare,
-            (uintptr_t*)&saglobal::g_CGame_InitializeRenderWare);
-
-        g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040,
-            (uintptr_t)samimic::NVThreadSpawnProc,
-            (uintptr_t*)&saglobal::g_NVThreadSpawnProc);        
+        g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010, (uintptr_t)samimic::MainMenuScreen_AddAllItems, (uintptr_t*)&saglobal::g_MainMenuScreen_AddAllItems);
+        g_patcherMicro->placeHookAt("InitRenderWare", g_gameAddr + 0x55b668, (uintptr_t)samimic::CGame_InitializeRenderWare, (uintptr_t*)&saglobal::g_CGame_InitializeRenderWare);
+        g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040, (uintptr_t)samimic::NVThreadSpawnProc, (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
+        g_patcherMicro->placeHookAt("Render2dStuff", g_gameAddr + 0x5d8994, (uintptr_t)samimic::Render2dStuff, (uintptr_t*)&saglobal::g_Render2dStuff);
     }
 
 }
