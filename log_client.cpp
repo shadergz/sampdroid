@@ -48,8 +48,11 @@ namespace salog {
         char openedAt[0x2f];
 
         if (!*logFile) {
+            // It isn't a critical error and occurs somewhat frequently at plugin startup
+#ifndef NDEBUG
             __android_log_print(ANDROID_LOG_ERROR, logcatTag, 
                 "Can't open the log file in (...MISSING...)%s", logFilePath);
+#endif
             return;
         }
 

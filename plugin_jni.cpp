@@ -66,7 +66,6 @@ extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_JVMSaMobile
     // This thread should fall to the end, before game itself starts
 }
 
-/*
 static struct sigaction originSigSegv;
 
 [[noreturn]] void segvSaHandler(int32_t signal, siginfo_t* info, void* ctxPtr)
@@ -79,17 +78,26 @@ static struct sigaction originSigSegv;
     salog::printFormat(salog::Error, "\tGTASA base library around: %#p", saglobal::g_gameAddr);
 
     uint64_t PC{segvContext->uc_mcontext.pc};
-    salog::printFormat(salog::Error, "\tGame space region without base library, at: %#p", (PC & 0xffffff) - (saglobal::g_gameAddr & 0xffffff));
+    
+    uint64_t pcOffset{(PC & 0xffffff) - (saglobal::g_gameAddr & 0xffffff)};
+    if (!(pcOffset & (static_cast<uint64_t>(0xffffffff) << 32))) {
+        salog::printFormat(salog::Error, "\tGame space region without base library, at: %#p", pcOffset);
+    }
 
     salog::printFormat(salog::Error, "\t1. Backtrace Program Counter at: Hex: %#p, Dec: %llu", PC, PC);
     salog::printFormat(salog::Error, "\t2. Backtrace Stack Pointer at %#p", segvContext->uc_mcontext.sp);
 
+    // Restoring and calling the original Android sigsegv handler
     sigaction(signal, &originSigSegv, nullptr);
-    raise(signal);
 
+    if (originSigSegv.sa_flags & SA_SIGINFO) {
+        originSigSegv.sa_sigaction(signal, info, ctxPtr);
+    } else if (originSigSegv.sa_handler != SIG_DFL && originSigSegv.sa_handler != SIG_IGN)
+        originSigSegv.sa_handler(signal);
+
+    raise(SIGSEGV);
     _Exit(1);
 }
-*/
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
@@ -120,8 +128,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
 
-    //static const struct sigaction ourHandler{.sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler};
-    //sigaction(SIGSEGV, &ourHandler, &originSigSegv);
+    static const struct sigaction ourHandler{.sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler};
+
+    sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
         "SAMobile is being halted now :[");
