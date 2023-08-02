@@ -15,7 +15,7 @@ add_library(saclient MODULE)
 
 # https://developer.android.com/ndk/guides/cpp-support#libc
 # RTTI is enable by default for ensure a better and safety objects handle
-target_compile_options(saclient PRIVATE -Wall -Werror -frtti 
+target_compile_options(saclient PRIVATE -Wall -Werror -frtti
     $<$<CONFIG:Release>:-Ofast;-fno-stack-protector;-DNDEBUG>)
 target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
 
@@ -33,8 +33,7 @@ target_sources(saclient PRIVATE
     render/engine.cpp
     
     game/game_objects.cpp
-    game/hud_manager.cpp
-    game/state.cpp
+    game/clock.cpp
 
     ui/user_graphics.cpp
     ui/imgui_rw.cpp)

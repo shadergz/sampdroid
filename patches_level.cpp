@@ -101,7 +101,7 @@ void AArch64Patcher::placeHookAt(const char* sbName, const uintptr_t method,
 
     *saveIn = (uintptr_t)(trContext);
 
-    salog::printFormat(salog::Info, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)",
+    salog::printFormat(salog::Info, "HOOK installed in ADDR %#llx by %#llx, (| %#llx | %u |)",
         method, replace, (uintptr_t)trContext & 0xffffffffff, hookableCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
@@ -137,9 +137,12 @@ namespace sapatch {
         g_textureDatabase = new TextureDatabaseRuntime();
         // MenuItem_add is no longer present
         g_patcherMicro->placeHookAt("AddAllItems", g_gameAddr + 0x358010, (uintptr_t)samimic::MainMenuScreen_AddAllItems, (uintptr_t*)&saglobal::g_MainMenuScreen_AddAllItems);
+        
         g_patcherMicro->placeHookAt("InitRenderWare", g_gameAddr + 0x55b668, (uintptr_t)samimic::CGame_InitializeRenderWare, (uintptr_t*)&saglobal::g_CGame_InitializeRenderWare);
+        
         g_patcherMicro->placeHookAt("NVThreadSpawnProc", g_gameAddr + 0x332040, (uintptr_t)samimic::NVThreadSpawnProc, (uintptr_t*)&saglobal::g_NVThreadSpawnProc);
-        g_patcherMicro->placeHookAt("Render2dStuff", g_gameAddr + 0x5d8994, (uintptr_t)samimic::Render2dStuff, (uintptr_t*)&saglobal::g_Render2dStuff);
+        
+        g_patcherMicro->placeHookAt("CClock::Update", g_gameAddr + 0x5c20a4, (uintptr_t)samimic::CClock_Update, (uintptr_t*)&saglobal::g_CClock_Update);
     }
 
 }

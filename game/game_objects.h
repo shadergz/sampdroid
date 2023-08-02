@@ -4,7 +4,7 @@
 
 namespace samimic {
     uint64_t CGame_InitializeRenderWare();
-    void Render2dStuff();
+    void CClock_Update(uint64_t rX0);
 }
 
 namespace saglobal {
@@ -12,6 +12,6 @@ namespace saglobal {
     extern UiClientUser* g_playerUi;
 
     extern uint64_t (*g_CGame_InitializeRenderWare)();
-    extern void (*g_Render2dStuff)(void);
+    extern void (*g_CClock_Update)(uint64_t rX0);
 
 }

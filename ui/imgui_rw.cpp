@@ -16,6 +16,8 @@ std::vector<RwIm2DVertex> vertexBuffer;
 
 void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 {
+    salog::print(salog::Info, "Impl IMGUI RenderWare for data draw purposes, has been called");
+
     const RwReal* nearScreenZ{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xe20868)};
     const RwReal* recipNearClip{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xe20864)};
 
@@ -110,9 +112,11 @@ bool ImGui_ImplRenderWare_Init()
 }
 
 static RwRaster* fontRaster{nullptr};
+static RwImage* fontPixels{};
 
 static void ImGui_ImplRenderWare_CreateDeviceObjects()
 {
+    salog::printFormat(salog::Info, "GUI: Creating new device objects");
     auto& io{ImGui::GetIO()};
     uint8_t* pxS;
     
@@ -122,11 +126,18 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
     io.Fonts->GetTexDataAsRGBA32(&pxS, &outWidth, &outHeight, &outBytesPerPixel);
     outBytesPerPixel *= 8;
 
-    salog::printFormat(salog::Info, "GUI: Font atlas width (%d), height (%d)",
-        outWidth, outHeight, outBytesPerPixel); 
+    salog::printFormat(salog::Info, "GUI: Font atlas pixels (%#lp), width (%d), height (%d)",
+        pxS, outWidth, outHeight);
     
     RwImage* fontData{RwImageCreate(outWidth, outHeight, outBytesPerPixel)};
-    RwImageAllocatePixels(fontData);
+    salog::printFormat(salog::Info, "Font data allocated at %#p", fontData);
+
+    if (!fontData) {
+        salog::print(salog::Error, "RW couldn't allocate the desired image, quitting...");
+        std::terminate();
+    }
+    
+    fontPixels = RwImageAllocatePixels(fontData);
     /*
     struct RwImage {
         RwInt32 flags, width, height, depth, stride;
@@ -137,20 +148,22 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
 
     RwUInt8* fontPixelsDest{fontData->cpPixels};
 
-    for (uint32_t pixelIdx{0}; pixelIdx < fontData->height; pixelIdx++) {
-        memcpy(fontPixelsDest, pxS + fontData->stride * pixelIdx, fontData->stride);
+    for (uint32_t strideIdx{0}; strideIdx < fontData->height; strideIdx++) {
+        memcpy(fontPixelsDest, pxS + fontData->stride * strideIdx, fontData->stride);
         fontPixelsDest += fontData->stride;
     }
 
     RwInt32 width, 
-        height, 
-        delph, 
+        height,
+        delph,
         flags;
     
     RwImageFindRasterFormat(fontData, rwRASTERTYPETEXTURE, &width, &height, &delph, &flags);
     RwRaster* preFontImage{RwRasterCreate(width, height, delph, flags)};
 
     fontRaster = RwRasterSetFromImage(preFontImage, fontData);
+    salog::printFormat(salog::Info, "Font raster in %#p by %#p", fontRaster, fontPixels);
+
     RwImageDestroy(fontData);
 
     io.Fonts->TexID = reinterpret_cast<ImTextureID*>(fontRaster);
@@ -162,6 +175,9 @@ void ImGui_ImplRenderWare_Shutdown()
     auto& io{ImGui::GetIO()};
     // Destroy font Raster data
     RwRasterDestroy(fontRaster);
+    // The font pixels are no longer needed
+    RwImageFreePixels(fontPixels);
+    fontPixels = nullptr;
 
     fontRaster = nullptr;
     io.Fonts->TexID = nullptr;

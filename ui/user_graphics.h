@@ -11,7 +11,7 @@ public:
     
     ~UiClientUser();
 
-    int renderDrawCommand();
+    int renderByEachGameSecond();
     void renderClientDetails();
 
     struct SaFont {

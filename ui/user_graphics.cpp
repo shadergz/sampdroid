@@ -55,16 +55,17 @@ UiClientUser::UiClientUser()
     // Loading related fonts
     auto gameDataDrive{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
 
-    static SaFont* const SaFontRefs[]{
+    [[maybe_unused]] static SaFont* const SaFontRefs[]{
         &arialFont, 
         &sampAux3Font,
         &userDefaultFont,
         nullptr
     };
 
-    for (auto font : SaFontRefs) {
-        if (!font) 
-            break;
+    auto font{&arialFont};
+    //for (auto font : SaFontRefs) {
+        //if (!font) 
+            //break;
         
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDrive, font->m_fontName);
@@ -78,8 +79,8 @@ UiClientUser::UiClientUser()
             std::terminate();
         }
 
-        if (!isFound)
-            continue;
+        //if (!isFound)
+        //    continue;
         
         font->m_fontObject = io.Fonts->AddFontFromFileTTF(font->m_fontPathBuffer, 
             m_inScreenfontSize, nullptr, ranges);
@@ -87,10 +88,10 @@ UiClientUser::UiClientUser()
         m_loadedFonts.push_back(font);
         salog::printFormat(salog::Info, "New SA font with name %s successful loaded", font->m_fontName);
 
-    }
+    //}
 }
 
-int UiClientUser::renderDrawCommand()
+int UiClientUser::renderByEachGameSecond()
 {
     ImGui_ImplRenderWare_NewFrame();
     ImGui::NewFrame();

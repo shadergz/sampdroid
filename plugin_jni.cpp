@@ -1,5 +1,7 @@
 #include <sched.h>
 #include <thread>
+#include <signal.h>
+#include <sys/ucontext.h>
 
 #include <cstdlib>
 
@@ -64,6 +66,31 @@ extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_JVMSaMobile
     // This thread should fall to the end, before game itself starts
 }
 
+/*
+static struct sigaction originSigSegv;
+
+[[noreturn]] void segvSaHandler(int32_t signal, siginfo_t* info, void* ctxPtr)
+{
+    auto segvContext{reinterpret_cast<ucontext_t*>(ctxPtr)};
+    const uint64_t faultAddress{segvContext->uc_mcontext.fault_address};
+
+    salog::printFormat(salog::Error, "--------\n\tSEG FAULT caught in address or page: %#p (invalid dereference)\n--------\nComputer state:", faultAddress);
+
+    salog::printFormat(salog::Error, "\tGTASA base library around: %#p", saglobal::g_gameAddr);
+
+    uint64_t PC{segvContext->uc_mcontext.pc};
+    salog::printFormat(salog::Error, "\tGame space region without base library, at: %#p", (PC & 0xffffff) - (saglobal::g_gameAddr & 0xffffff));
+
+    salog::printFormat(salog::Error, "\t1. Backtrace Program Counter at: Hex: %#p, Dec: %llu", PC, PC);
+    salog::printFormat(salog::Error, "\t2. Backtrace Stack Pointer at %#p", segvContext->uc_mcontext.sp);
+
+    sigaction(signal, &originSigSegv, nullptr);
+    raise(signal);
+
+    _Exit(1);
+}
+*/
+
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
@@ -92,6 +119,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     // Fetches in memory GTASA base library address (where exatcly JVM has loaded the game engine)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
+
+    //static const struct sigaction ourHandler{.sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler};
+    //sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
         "SAMobile is being halted now :[");
