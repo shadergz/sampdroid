@@ -103,7 +103,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
 
-    salog::print(salog::Info, "SAMobile has loaded, build date: " __DATE__ " " __TIME__);
+    salog::print(salog::Info, "SA Mobile has loaded, build date: " __DATE__ " " __TIME__);
+    
     salog::coutFmt(salog::Info, "Loaded by thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
 
@@ -128,12 +129,15 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
 
-    static const struct sigaction ourHandler{.sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler};
+    static const struct sigaction ourHandler{
+        .sa_flags = SA_SIGINFO, 
+        .sa_sigaction = segvSaHandler
+    };
 
     sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
-        "SAMobile is being halted now :[");
+        "SA Mobile is being halted now :[");
     salog::printFormat(salog::Info, "Native libraries base region address found in:\n"
         "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 

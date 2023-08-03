@@ -13,11 +13,8 @@ namespace samimic {
     {
         static uint64_t callTimes{};
         salog::printFormat(salog::Debug, 
-            "Game world clock has been incrementing since the beginning by a factor of %ld", callTimes++);
+            "Game world clock has been incremented since the spawn by %ld", callTimes++);
 
         saglobal::g_CClock_Update(rX0);
-
-        if (saglobal::g_playerUi)
-            saglobal::g_playerUi->renderByEachGameSecond();
     }
 }

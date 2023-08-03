@@ -34,6 +34,7 @@ target_sources(saclient PRIVATE
     
     game/game_objects.cpp
     game/clock.cpp
+    game/render.cpp
 
     ui/user_graphics.cpp
     ui/imgui_rw.cpp)

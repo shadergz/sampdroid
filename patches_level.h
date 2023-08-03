@@ -1,33 +1,39 @@
 #pragma once
 
-#include <cstdint>
 #include <array>
+#include <linux/mman.h>
 #include <random>
 
+#include <sys/user.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <log_client.h>
 
 class AArch64Patcher {
 public:
-    static constexpr uint8_t PATCHER_HOOK_COUNT{64};
-    static constexpr uint8_t PATCHER_MAX_INST{8};
 
-    static constexpr uint8_t PATCHER_SYMBOL_NAME{19};
+    static constexpr uint16_t PATCHER_PAGE_SIZE{4096 * 3};
+    static constexpr uint8_t PATCHER_MAX_INST{28};
+
     static constexpr uint8_t PATCHER_HOOK_SIZE{
         sizeof(uint) + sizeof(uintptr_t) +
-        sizeof(unsigned char) + sizeof(char[PATCHER_SYMBOL_NAME]) +
-        sizeof(uint32_t) * PATCHER_MAX_INST
+        sizeof(unsigned char) + sizeof(uint32_t) * PATCHER_MAX_INST +
+        3 * sizeof(char)
     };
+    static constexpr uint8_t PATCHER_HOOK_COUNT{PATCHER_PAGE_SIZE / PATCHER_HOOK_SIZE};
+
     AArch64Patcher() {}
 
-    void placeHookAt(const char* sbName, const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn);
+    void placeHookAt(const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn);
+    
+    void emplaceMethod(const uintptr_t method, const uintptr_t super, uint8_t instCount, bool runAfter);
+    
     static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
     auto getNewTrampoline() noexcept 
     {
         SALOG_ASSERT(m_trBank.m_tIndex < PATCHER_HOOK_COUNT - 1,
             "Our trampoline bank data buffer has exhausted!");
-        return reinterpret_cast<uint32_t*>(&m_trBank.m_tRWXData[PATCHER_HOOK_SIZE * m_trBank.m_tIndex++]);
+        return reinterpret_cast<uint32_t*>(m_trBank.m_tRWXData + PATCHER_HOOK_SIZE * m_trBank.m_tIndex++);
     }
 
 private:
@@ -41,14 +47,25 @@ private:
         static constexpr uint8_t ARCH_INST_SIZE{8};
 
         MicroRaw_Trampoline() {
-            static_assert(sizeof m_tRWXData == PAGE_SIZE, "Trampoline data size is wrong! fix now!");
-            static_assert(sizeof m_tRWXData / PATCHER_HOOK_SIZE == PATCHER_HOOK_COUNT,
-                "PAGE_SIZE isn't the desired value!");
-            unfuckPageRWX((uintptr_t)(m_tRWXData.data()), m_tRWXData.size());
+            // Allocating memory at the process level is needed because we could share this piece of memory with other threads in the same process
+            m_tRWXData = reinterpret_cast<uint8_t*>(mmap(nullptr, PATCHER_PAGE_SIZE, PROT_EXEC|PROT_READ|PROT_WRITE, 
+                MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
+            SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is point to a invalid address space");
+            salog::printFormat(salog::Info, "Patch data alocated at: %#p\n", m_tRWXData);
+
+            //unfuckPageRWX((uintptr_t)(m_tRWXData), PAGE_SIZE);
         }
 
-        alignas(PAGE_SIZE) std::array<uint8_t, PAGE_SIZE> m_tRWXData;
+        ~MicroRaw_Trampoline() {
+            if (m_tRWXData) {
+                std::memset(m_tRWXData, 0xff, PATCHER_PAGE_SIZE);
+                munmap(m_tRWXData, PATCHER_PAGE_SIZE);
+            }
+            
+        }
+
+        uint8_t* m_tRWXData{};
         uint8_t m_tIndex{};
     };
 
