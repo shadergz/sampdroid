@@ -9,7 +9,7 @@ namespace saglobal {
 
 namespace samimic {
     // Count of created threads
-    static uint16_t thCount{};
+    static uint8_t thCount{};
     static std::mutex nvLock{};
 
     using namespace saglobal;
@@ -17,7 +17,7 @@ namespace samimic {
     void NVThreadSpawnProc(uintptr_t x0)
     {
         std::unique_lock<std::mutex> nvWaitLocker(nvLock);
-        salog::printFormat(salog::Debug, "NVThreadHook: on (NVThreadSpawnProc: %u)", thCount);
+        salog::printFormat(salog::Debug, "Threads: on (NVThreadSpawnProc: %u)", thCount);
         thCount++;
 
         nvWaitLocker.unlock();

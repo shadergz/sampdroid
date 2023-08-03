@@ -21,11 +21,10 @@ namespace saglobal {
 
 struct TrampolineContext {
     uint32_t m_id;
-
     uintptr_t m_source;
     
     // Count of instructions replaced inside the origin and placed inside of our trampoline
-    unsigned char m_instCount;
+    uint8_t m_instCount;
     
     std::array<uint32_t, AArch64Patcher::PATCHER_MAX_INST> m_content;
 };
@@ -36,10 +35,10 @@ static_assert(sizeof(TrampolineContext) == AArch64Patcher::PATCHER_HOOK_SIZE,
     "Trampoline struct data size is invalid and must be fixed!");
 
 //#if NDEBUG
-//#define __dsp_origin_dump(origin, limit)
+//#define DUMP_PRINT_INST(origin, limit)
 //#else
-#define __dsp_origin_dump(origin, limit)\
-    salog::printFormat(salog::Info, "Dump of %llu from method %#p", limit, origin);\
+#define DUMP_PRINT_INST(origin, limit)\
+    salog::printFormat(salog::Info, "Hook: dump of %llu from method %#p", limit, origin);\
     for (uint64_t _inst_count{}; _inst_count < limit; _inst_count++)\
         salog::printFormat(salog::Info, "\t%llu. %#p = %#llx",\
             _inst_count, reinterpret_cast<uint32_t*>(origin) + _inst_count, *(reinterpret_cast<uint32_t*>(origin) + _inst_count))
@@ -50,86 +49,82 @@ void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super
 {
     auto patcherCtx{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
     
-    __test_hook(patcherCtx);
-    __save_hook(patcherCtx, method, m_nemesis, instCount);
+    TEST_HOOK_CTX(patcherCtx);
+    UPDATE_HOOK_CTX(patcherCtx, method, m_nemesis, instCount);
     
     auto patcherData{reinterpret_cast<uint32_t*>(patcherCtx->m_content.data())};
     auto const origin{reinterpret_cast<uint32_t*>(method)};
 
-#define __func_prologue(data)\
+#define PLACE_FUNC_PROLOGUE(data)\
     *data++ = 0xfd7bbfa9;\
     *data++ = 0xfd030091
 
-#define __func_epilogue_with_ret(data)\
+#define PLACE_EPILOGUE_AND_RET(data)\
     *data++ = 0xbf030091;\
     *data++ = 0xfd7bc1a8;\
     *data++ = 0xc0035fd6
 
     if (runAfter) {
-        // Save calle
-        __func_prologue(patcherData);
+        // Save callee
+        PLACE_FUNC_PROLOGUE(patcherData);
 
         for (uint32_t instIndex{}; instCount != instIndex; instIndex++)
             *patcherData++ = origin[instIndex];
 
-        __imm_fix_place(patcherData++);
-        
-        __make_branch(patcherData++);
-
-        ___fix_branch_location(patcherData, super);
+        IMM_FIX_PLACE(patcherData++);
+        MAKE_BRANCH(patcherData++);
+        FIX_BRANCH_LOCAL(patcherData, super);
         patcherData += 2;
-
-        // restore calle and place ret
-        __func_epilogue_with_ret(patcherData);
+        // Restore calle and place ret
+        PLACE_EPILOGUE_AND_RET(patcherData);
 
     } else {
-        // Save calle
-        __func_prologue(patcherData);
+        // Save callee
+        PLACE_FUNC_PROLOGUE(patcherData);
 
         // Putting our super function at the very beginning
-        __imm_fix_place(patcherData++);
-        __make_branch(patcherData++);
-        ___fix_branch_location(patcherData, super);
+        IMM_FIX_PLACE(patcherData++);
+        MAKE_BRANCH(patcherData++);
+        FIX_BRANCH_LOCAL(patcherData, super);
         
         // Skip 2 bytes, used above
         patcherData += 2;
-
         for (uint32_t instIndex{}; instCount != instIndex; instIndex++)
             *patcherData++ = origin[instIndex];
 
         // Restore callee
         // place ret
-        __func_epilogue_with_ret(patcherData);
+        PLACE_EPILOGUE_AND_RET(patcherData);
     }
 
     unfuckPageRWX(reinterpret_cast<uintptr_t>(origin), PAGE_SIZE);
 
-    __imm_fix_place((origin + 0));
-    __make_branch((origin + 1));
+    IMM_FIX_PLACE((origin + 0));
+    MAKE_BRANCH((origin + 1));
     // Placing our trampoline inside the class method/routine
     patcherData = reinterpret_cast<uint32_t*>(patcherCtx->m_content.data());
 
-    ___fix_branch_location(origin + 2, patcherData);
+    FIX_BRANCH_LOCAL(origin + 2, patcherData);
 
-    __cache_hook_update(patcherCtx);
-    __cache_origin_drop(origin, instCount);
+    CACHE_UPDATE_HOOK(patcherCtx);
+    CACHE_UPDATE_ORIGIN(origin, instCount);
 
-    __dsp_origin_dump(origin, patcherCtx->m_instCount + 1);
-    __dsp_origin_dump(patcherData, AArch64Patcher::PATCHER_MAX_INST);
+    DUMP_PRINT_INST(origin, patcherCtx->m_instCount + 1);
+    DUMP_PRINT_INST(patcherData, AArch64Patcher::PATCHER_MAX_INST);
 
 }
 
 void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace, uintptr_t* saveIn)
 {
-    salog::printFormat(salog::Info, "Hooking member %#llx with %#llx method saving in %#llx", method, replace, saveIn);
-    __clean_context(*saveIn);
+    salog::printFormat(salog::Info, "Hook: hooking member %#llx with %#llx method saving in %#llx", method, replace, saveIn);
+    CLEAN_CONTEXT(*saveIn);
     
     auto hookCtx{reinterpret_cast<TrampolineContext*>(getNewTrampoline())};
-    __test_hook(hookCtx);
+    TEST_HOOK_CTX(hookCtx);
 
-    salog::printFormat(salog::Debug, "New trampoline allocated in %#p", hookCtx);
+    salog::printFormat(salog::Debug, "Hook: new trampoline allocated in %#p address", hookCtx);
 
-    __save_hook(hookCtx, method, m_nemesis, 0);
+    UPDATE_HOOK_CTX(hookCtx, method, m_nemesis, 0);
     // Doing the frame backup (we're divorciating now)
     auto originFunc{reinterpret_cast<uint32_t*>(method)};
     auto trContext{reinterpret_cast<uint8_t*>(hookCtx->m_content.data())};
@@ -145,12 +140,11 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
     // making the page readable/writable and executable
     unfuckPageRWX(reinterpret_cast<uintptr_t>(originFunc), PAGE_SIZE);
     // ldr x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x8
-    __imm_fix_place((originFunc + 0));
-    
+    IMM_FIX_PLACE((originFunc + 0));
     // br x17
-    __make_branch((originFunc + 1));
+    MAKE_BRANCH((originFunc + 1));
 
-    ___fix_branch_location((originFunc + 2), replace);
+    FIX_BRANCH_LOCAL((originFunc + 2), replace);
     // At this point, the trampoline has the 4 instructions from the origin instruction
     // and the original instruction has a jump to your hook method
     
@@ -159,14 +153,14 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
     
     // Forcing the CPU to fetch the actual version for both operations 
     // Dumping the residual wrong instructions from the cache
-    __cache_hook_update(hookCtx);
-    __cache_origin_drop(originFunc, hookCtx->m_instCount);
+    CACHE_UPDATE_HOOK(hookCtx);
+    CACHE_UPDATE_ORIGIN(originFunc, hookCtx->m_instCount);
 
-    __dsp_origin_dump(originFunc, hookCtx->m_instCount);
+    DUMP_PRINT_INST(originFunc, hookCtx->m_instCount);
 
-    __save_output(*saveIn, trContext);
+    SAVE_CTX(*saveIn, trContext);
 
-    salog::printFormat(salog::Info, "Hook installed in addr %#llx by %#llx, (| %#llx | %u |)", method, replace, (uintptr_t)trContext & 0xffffffffff, hookCtx->m_instCount);
+    salog::printFormat(salog::Info, "Hook: installed in addr %#llx by %#llx, (| %#llx | %u |)", method, replace, (uintptr_t)trContext & 0xffffffffff, hookCtx->m_instCount);
 }
 void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
 {
@@ -187,7 +181,7 @@ void AArch64Patcher::unfuckPageRWX(uintptr_t unfuckAddr, uint64_t region_size)
     auto overflow{unfuckAddr & 0xffff ? 1 : 0};
     auto count{countPages(region_size) + overflow};
 
-    salog::printFormat(salog::Info, "Changing permission of %lu pages in %#llx base address", count, baseAddr);
+    salog::printFormat(salog::Info, "Hook: changing permission of %lu pages in %#llx base address", count, baseAddr);
     mprotect((void*)(baseAddr), count * pageSize, protect);
 }
 
