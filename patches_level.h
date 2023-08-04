@@ -4,7 +4,6 @@
 #include <linux/mman.h>
 #include <random>
 
-#include <sys/user.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <log_client.h>
@@ -32,7 +31,7 @@ public:
     auto getNewTrampoline() noexcept 
     {
         SALOG_ASSERT(m_trBank.m_tIndex < PATCHER_HOOK_COUNT - 1,
-            "Our trampoline bank data buffer has exhausted!");
+            "Our trampoline bank's data buffer has been exhausted!");
         return reinterpret_cast<uint32_t*>(m_trBank.m_tRWXData + PATCHER_HOOK_SIZE * m_trBank.m_tIndex++);
     }
 
@@ -51,10 +50,9 @@ private:
             m_tRWXData = reinterpret_cast<uint8_t*>(mmap(nullptr, PATCHER_PAGE_SIZE, PROT_EXEC|PROT_READ|PROT_WRITE, 
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
-            SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is point to a invalid address space");
-            salog::printFormat(salog::Info, "Patch data alocated at: %#p\n", m_tRWXData);
+            SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is pointing to an invalid address space");
+            salog::printFormat(salog::Info, "Hook: patch data alocated at: %#p", m_tRWXData);
 
-            //unfuckPageRWX((uintptr_t)(m_tRWXData), PAGE_SIZE);
         }
 
         ~MicroRaw_Trampoline() {

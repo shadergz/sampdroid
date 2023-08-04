@@ -34,7 +34,7 @@ namespace saclient {
     void* enterMainLoop([[maybe_unused]] void* unused)
     {
         g_clientHasInitiliazed = true;        
-        salog::print(salog::Info, "Main thread has started!");
+        salog::print(salog::Info, "Main: Main thread has started!");
         
         static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "SA client"};
         
@@ -49,7 +49,7 @@ namespace saclient {
         // Our JNI_OnLoad function has already completed its execution
 
         g_clientIsRunning = true;
-        salog::print(salog::Info, "Multiplayer game thread has continued");
+        salog::print(salog::Info, "Main: Multiplayer game thread has continued");
 
         // Waiting for the player press the Start button
         pthread_cond_wait(&g_multCond, &g_multExclusive);

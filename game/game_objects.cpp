@@ -1,5 +1,4 @@
 #include <pthread.h>
-
 #include <game/game_objects.h>
 
 namespace sarender {
@@ -26,7 +25,7 @@ namespace samimic {
     */
 
     uint64_t CGame_InitializeRenderWare()
-    {        
+    {
         auto rwResult{g_CGame_InitializeRenderWare()};
         
         // Loads RenderWare global variables and functions pointer

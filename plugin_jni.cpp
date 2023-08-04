@@ -73,7 +73,7 @@ static struct sigaction originSigSegv;
     auto segvContext{reinterpret_cast<ucontext_t*>(ctxPtr)};
     const uint64_t faultAddress{segvContext->uc_mcontext.fault_address};
 
-    salog::printFormat(salog::Error, "--------\n\tSEG FAULT caught in address or page: %#p (invalid dereference)\n--------\nComputer state:", faultAddress);
+    salog::printFormat(salog::Error, "--------\n\tSIGSEGV fault in address or page: %#p (access or dereference)\n--------\nComputer state:", faultAddress);
 
     salog::printFormat(salog::Error, "\tGTASA base library around: %#p", saglobal::g_gameAddr);
 

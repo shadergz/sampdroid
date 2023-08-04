@@ -134,8 +134,9 @@ namespace salog {
         vsnprintf(assertBuffer.data(), assertBuffer.size(), format, va);
         va_end(va);
 
-        __android_log_assert(nullptr, logcatTag, "ASSERTION: By %s in %s:%d -> %s", cond, fileName,
+        __android_log_assert(nullptr, logcatTag, "ASSERTION: by %s in %s:%d -> %s", cond, fileName,
             line, assertBuffer.data());
+        
         std::terminate();
     }
     

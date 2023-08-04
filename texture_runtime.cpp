@@ -21,7 +21,7 @@ uintptr_t TextureDatabaseRuntime::GetTexture(const char* textureName)
         return 0;
 
     SALOG_ASSERT(!std::strncmp(loadedTex->name, textureName, rwTEXTUREBASENAMELENGTH),
-        "DB: wrong RwTexture type detected, mem str: %s", loadedTex->name);
+        "Wrong RwTexture type detected, memory str ref: %s", loadedTex->name);
 
     // Forcing the engine to keep our texture reference alive!
     loadedTex->refCount++;
@@ -54,7 +54,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         auto dbPtr{&dbHandler[0]};
         if (!needToOpen)
             break;
-        // Locating an invalid db pointer to place into it!
+        // Locating an invalid database pointer to place into it!
         while (!*dbPtr && dbPtr < &dbHandler[std::size(dbHandler)])
             dbPtr++;
         if (dbPtr >= &dbPtr[std::size(dbHandler)])
@@ -63,7 +63,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName)};
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
-            salog::printFormat(salog::Error, "DB: database not found: %s\n", dbName);
+            salog::printFormat(salog::Error, "DB: database not found: %s", dbName);
             std::terminate();
         }
 
@@ -71,7 +71,9 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
 
     const auto loadedTexture{GetTexture(textureName)};
+    
     static const char cleanTrigger[]{"clean"};
+
     if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {
         // Unregistring the databases, isn't no needed to keep it's openned
         if (*(dbHandler + 0x0))
@@ -79,7 +81,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         if (*(dbHandler + 0x1))
             ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x1));
         if (*(dbHandler + 0x2))
-          ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
+            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
         
         uint8x16_t cl{};
         veorq_u8(cl, cl);

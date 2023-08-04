@@ -40,7 +40,7 @@ namespace salog {
     #else
     template<typename... Args>
     auto coutFmt([[maybe_unused]] LogId prio, [[maybe_unused]] const std::string_view formatUnused,
-                 [[maybe_unused]] Args&&... args)
+        [[maybe_unused]] Args&&... args)
     {
         return 0;
     }

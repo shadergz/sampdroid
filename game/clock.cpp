@@ -11,9 +11,9 @@ namespace samimic {
     // Updates the game clock every second based on the current FPS, which could be either after 60 frames or 30 frames, depending on the situation
     void CClock_Update(uint64_t rX0)
     {
-        static uint64_t callTimes{};
+        static uint64_t secsIncr{};
         salog::printFormat(salog::Debug, 
-            "Game world clock has been incremented since the spawn by %ld", callTimes++);
+            "Game world clock has been incremented since the spawn by %ld", secsIncr++);
 
         saglobal::g_CClock_Update(rX0);
     }
