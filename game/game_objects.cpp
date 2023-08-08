@@ -6,7 +6,7 @@ namespace sarender {
 };
 
 namespace saglobal {
-    uint64_t (*g_CGame_InitializeRenderWare)();
+    uint64_t (*g_CGame_InitialiseRenderWare)();
 }
 
 namespace saclient {
@@ -24,9 +24,9 @@ namespace samimic {
     https://gtamods.com/wiki/Mobile_textures_(SA/VC)
     */
 
-    uint64_t CGame_InitializeRenderWare()
+    uint64_t CGame_InitialiseRenderWare()
     {
-        auto rwResult{g_CGame_InitializeRenderWare()};
+        auto rwResult{g_CGame_InitialiseRenderWare()};
         
         // Loads RenderWare global variables and functions pointer
         sarender::initSaReferences();

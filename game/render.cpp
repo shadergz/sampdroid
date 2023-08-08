@@ -1,19 +1,24 @@
+#include <malloc.h>
 
 #include <game/game_objects.h>
 #include <log_client.h>
 
-namespace saglobal {
-}
-
 namespace samimic {
 
-    void CEntity_UpdateRpHAnim(uintptr_t thiz)
+    void CEntity_UpdateRpHAnim(void* __restrict thiz)
     {
-        // __asm("brk #0\n");
+        salog::printFormat(salog::Info, 
+            "UpdateRpHAnim() has called, CEntity struct ptr: %#lx [allocated size: %lfKib]", 
+            thiz, static_cast<float>(malloc_usable_size(thiz)) / 1024);
 
-        salog::printFormat(salog::Info, "UpdateRpHAnim() has called, CEntity struct ptr: %#p", thiz);
+    }
+
+    void CHUD_Draw()
+    {
+        // __asm("brk #0");
+        salog::print(salog::Info, "CHUD_Draw called");
 
         // if (saglobal::g_playerUi)
-        //     saglobal::g_playerUi->renderByEachGameSecond();
+        //    saglobal::g_playerUi->renderByEachGameSecond();
     }
 }

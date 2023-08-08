@@ -27,7 +27,7 @@ public:
     
     void emplaceMethod(const uintptr_t method, const uintptr_t super, uint8_t instCount, bool runAfter);
     
-    static void unfuckPageRWX(uintptr_t unfuckAddr, uint64_t regionSize);
+    static void turnTextSegmentMutable(uintptr_t unfuckAddr, uint64_t regionSize);
     auto getNewTrampoline() noexcept 
     {
         SALOG_ASSERT(m_trBank.m_tIndex < PATCHER_HOOK_COUNT - 1,
@@ -53,6 +53,10 @@ private:
             SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is pointing to an invalid address space");
             salog::printFormat(salog::Info, "Hook: patch data alocated at: %#p", m_tRWXData);
 
+#ifndef NDEBUG
+            for (uintptr_t iIdex{}; iIdex != PATCHER_PAGE_SIZE; iIdex += 4)
+                *reinterpret_cast<uint32_t*>(m_tRWXData + iIdex) = __builtin_bswap32(0x000020d4);
+#endif
         }
 
         ~MicroRaw_Trampoline() {
