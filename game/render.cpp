@@ -7,11 +7,13 @@ namespace saglobal {
 
 namespace samimic {
 
-    void CEntity_UpdateRwFrame(uintptr_t thiz)
+    void CEntity_UpdateRpHAnim(uintptr_t thiz)
     {
-        salog::printFormat(salog::Info, "UpdateRwFrame() has called, CEntity struct ptr: %#p", thiz);
+        // __asm("brk #0\n");
 
-        //if (saglobal::g_playerUi)
-        //    saglobal::g_playerUi->renderByEachGameSecond();
+        salog::printFormat(salog::Info, "UpdateRpHAnim() has called, CEntity struct ptr: %#p", thiz);
+
+        // if (saglobal::g_playerUi)
+        //     saglobal::g_playerUi->renderByEachGameSecond();
     }
 }

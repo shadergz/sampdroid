@@ -2,6 +2,7 @@
 #include <cstring>
 #include <array>
 
+#include <exception>
 #include <patches_level.h>
 #include <patches_helper.h>
 
@@ -34,15 +35,15 @@ struct TrampolineContext {
 static_assert(sizeof(TrampolineContext) == AArch64Patcher::PATCHER_HOOK_SIZE,
     "Trampoline struct data size is invalid and should be fixed!");
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
 #define DUMP_PRINT_INST(origin, limit)\
     salog::printFormat(salog::Info, "Hook: dump of %llu from method %#p", limit, origin);\
     for (uint64_t _inst_count{}; _inst_count < limit; _inst_count++)\
         salog::printFormat(salog::Info, "\t%llu. %#p = %#llx",\
             _inst_count, reinterpret_cast<uint32_t*>(origin) + _inst_count, *(reinterpret_cast<uint32_t*>(origin) + _inst_count))
-#elif NDEBUG
-#define DUMP_PRINT_INST(origin, limit)
-#endif
+//#elif NDEBUG
+//#define DUMP_PRINT_INST(origin, limit)
+//#endif
 
 void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super, 
     uint8_t instCount, bool runAfter)
@@ -55,45 +56,58 @@ void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super
     auto patcherData{reinterpret_cast<uint32_t*>(patcherCtx->m_content.data())};
     auto const origin{reinterpret_cast<uint32_t*>(method)};
 
-    if (runAfter) {
-        for (uint32_t instIndex{}; instCount != instIndex; instIndex++) {
-            *(patcherData + instIndex) = origin[instIndex];
-        }
-        // Save callee
-        PLACE_FUNC_PROLOGUE(patcherData + instCount);
+    for (uint32_t instIndex{}; instCount != instIndex; instIndex++) {
+        const auto indexPtr{instIndex + (runAfter ? 0 : 12)};
+        if (*(origin + indexPtr) == __builtin_bswap32(0xd65f03c0))
+            // Maybe we're running in a different context, where a ret or a branch may interfere and cause unexpected behavior
+            std::runtime_error("Opcodes that modify the PC cannot be copied");
 
-        IMM_FIX_PLACE(patcherData + 2 + instCount);
-        MAKE_BRANCH(patcherData + 3 + instCount);
-        FIX_BRANCH_LOCAL(patcherData + 4 + instCount, super);
-        // Restore callee
-        PLACE_FUNC_EPILOGUE(patcherData + 6 + instCount);
-
-        PLACE_RET(patcherData + 7 + instCount);
-
-    } else {
-        // Save callee
-        PLACE_FUNC_PROLOGUE(patcherData);
-        // Putting our super function at the very beginning
-        IMM_FIX_PLACE(patcherData + 2);
-        MAKE_BRANCH(patcherData + 3);
-        FIX_BRANCH_LOCAL(patcherData + 4, super);
-        // Restore callee
-        PLACE_FUNC_EPILOGUE(patcherData + 6);
-
-        // Skip 2 bytes, used above
-        for (uint32_t instIndex{}; instCount != instIndex; instIndex++) {
-            *(patcherData + 7 + instIndex) = origin[instIndex];
-        }
-
-        PLACE_RET(patcherData + 7 + instCount);
+        *(patcherData + indexPtr) = *(origin + instIndex);
     }
 
     unfuckPageRWX(reinterpret_cast<uintptr_t>(origin), PAGE_SIZE);
 
-    IMM_FIX_PLACE(origin + 0);
-    MAKE_BRANCH(origin + 1);
+    IMM2_FIX_BRANCH(origin + 0);
     // Placing our trampoline inside the class method/routine
-    FIX_BRANCH_LOCAL(origin + 2, patcherData);
+    FIX2_BRANCH_LOCAL(origin + 2, patcherData);
+    MAKE1_BRANCH_WITH_R17(origin + 4);
+
+    if (runAfter) {
+        // FUNCTION CODE HERE
+
+        // Save callee
+        PLACE2_FUNC_PROLOGUE(patcherData + instCount);
+        IMM4_FIX_LINKER_R30(patcherData + 2 + instCount, patcherData + 9);
+
+        IMM2_FIX_BRANCH(patcherData + 6 + instCount);
+        MAKE1_BRANCH_WITH_R17(patcherData + 8 + instCount);
+        FIX2_BRANCH_LOCAL(patcherData + 9 + instCount, super);
+        // Restore callee
+        PLACE1_FUNC_EPILOGUE(patcherData + 11 + instCount);
+
+        IMM2_FIX_BRANCH(patcherData + 12 + instCount);
+        FIX2_BRANCH_LOCAL(patcherData + 14 + instCount, origin + instCount);
+        MAKE1_BRANCH_WITH_R17(patcherData + 16 + instCount);
+
+    } else {
+        // Save callee
+        PLACE2_FUNC_PROLOGUE(patcherData);
+        // Putting our super function at the very beginning
+        IMM4_FIX_LINKER_R30(patcherData + 2, patcherData + 11);
+
+        IMM2_FIX_BRANCH(patcherData + 6);
+        FIX2_BRANCH_LOCAL(patcherData + 8, super);
+        MAKE1_BRANCH_WITH_R17(patcherData + 10);
+        // Restore callee
+        PLACE1_FUNC_EPILOGUE(patcherData + 11);
+
+        // FUNCTION CODE HERE
+
+        IMM2_FIX_BRANCH(patcherData + 12 + instCount);
+
+        FIX2_BRANCH_LOCAL(patcherData + 14 + instCount, origin + instCount);
+        MAKE1_BRANCH_WITH_R17(patcherData + 16 + instCount);
+    }
 
     CACHE_UPDATE_HOOK(patcherCtx);
     CACHE_UPDATE_ORIGIN(origin, instCount);
@@ -117,39 +131,48 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
     auto originFunc{reinterpret_cast<uint32_t*>(method)};
     auto trContext{reinterpret_cast<uint32_t*>(hookCtx->m_content.data())};
 
-    trContext[0] = originFunc[0];
-    trContext[1] = originFunc[1];
-    trContext[2] = originFunc[2];
-    trContext[3] = originFunc[3];
+    int nextToCopy{};
 
-    hookCtx->m_iCount = &originFunc[4] - &originFunc[0];
+    trContext[nextToCopy++] = originFunc[0];
+    trContext[nextToCopy++] = originFunc[1];
+    trContext[nextToCopy++] = originFunc[2];
+    trContext[nextToCopy++] = originFunc[3];
+
+    if (originFunc[4] != __builtin_bswap32(0xd65f03c0)) {
+        trContext[nextToCopy++] = originFunc[4];
+    } else {
+        throw std::runtime_error("originFunc[nextToCopy] is an instruction that is used to return from a subroutine");
+    }
+
+    hookCtx->m_iCount = &originFunc[nextToCopy] - &originFunc[0];
 
     // Installing our payload instruction, now we can overwrite the original method frame
     // making the page readable/writable and executable
     
     unfuckPageRWX(reinterpret_cast<uintptr_t>(originFunc), PAGE_SIZE);
     
-    // ldr x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x8
-    // br x17
+    // LDR x17, #0x8 -> loading a 64 bit immediate value from offset PC + 0x4
+    // BR x17
 
-    IMM_FIX_PLACE(originFunc);
-    MAKE_BRANCH(originFunc + 1);
+    IMM2_FIX_BRANCH(originFunc);
+    FIX2_BRANCH_LOCAL(originFunc + 2, replace);
+    MAKE1_BRANCH_WITH_R17(originFunc + 4);
 
-    FIX_BRANCH_LOCAL(originFunc + 2, replace);
     // At this point, the trampoline has the 4 instructions from the origin instruction
     // and the original instruction has a jump to your hook method
 
-    IMM_FIX_PLACE(trContext + 4);
-    MAKE_BRANCH(trContext + 5);
+    IMM2_FIX_BRANCH(trContext + nextToCopy);
+    FIX2_BRANCH_LOCAL(trContext + 2 + nextToCopy, originFunc + nextToCopy);
 
-    FIX_BRANCH_LOCAL(trContext + 6, originFunc + 4);
+    MAKE1_BRANCH_WITH_R17(trContext + 4 + nextToCopy);
     
     // Forcing the CPU to fetch the actual version for both operations 
     // Dumping the residual wrong instructions from the cache
     CACHE_UPDATE_HOOK(hookCtx);
     CACHE_UPDATE_ORIGIN(originFunc, hookCtx->m_iCount);
 
-    DUMP_PRINT_INST(trContext, hookCtx->m_content.size());
+    // DUMP_PRINT_INST(originFunc, hookCtx->m_iCount);
+    // DUMP_PRINT_INST(trContext, PATCHER_MAX_INST);
 
     SAVE_CTX(*saveIn, trContext);
 
@@ -190,12 +213,12 @@ namespace sapatch {
         // MenuItem_add is no longer present
         g_patcherMicro->placeHookAt(g_gameAddr + 0x358010, (uintptr_t)MainMenuScreen_AddAllItems, (uintptr_t*)&g_MainMenuScreen_AddAllItems);
         
-        g_patcherMicro->placeHookAt(g_gameAddr + 0x55b668, (uintptr_t)CGame_InitializeRenderWare, (uintptr_t*)&g_CGame_InitializeRenderWare);
+        g_patcherMicro->placeHookAt(g_gameAddr + 0x65b668, (uintptr_t)CGame_InitializeRenderWare, (uintptr_t*)&g_CGame_InitializeRenderWare);
         
         g_patcherMicro->placeHookAt(g_gameAddr + 0x332040, (uintptr_t)NVThreadSpawnProc, (uintptr_t*)&g_NVThreadSpawnProc);
         
         g_patcherMicro->placeHookAt(g_gameAddr + 0x5c20a4, (uintptr_t)CClock_Update, (uintptr_t*)&g_CClock_Update);
-        g_patcherMicro->emplaceMethod(g_gameAddr + 0x5cbaec, (uintptr_t)CEntity_UpdateRwFrame, 0x4, false);
+        // g_patcherMicro->emplaceMethod(g_gameAddr + 0x5cbb00, (uintptr_t)CEntity_UpdateRpHAnim, 0x4, false);
     }
 
 }

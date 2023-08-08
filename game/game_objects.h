@@ -5,7 +5,7 @@
 namespace samimic {
     uint64_t CGame_InitializeRenderWare();
     void CClock_Update(uint64_t rX0);
-    void CEntity_UpdateRwFrame(uintptr_t thiz);
+    void CEntity_UpdateRpHAnim(uintptr_t thiz);
     
 }
 

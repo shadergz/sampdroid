@@ -3,24 +3,40 @@
 
 #pragma once
 
-#define FIX_BRANCH_LOCAL(at, by)\
+// BID - D32: 0x14000003
+#define INC1_NEXT_PC(addr)\
+    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x03000014)
+
+#define FIX2_BRANCH_LOCAL(at, by)\
     *reinterpret_cast<uint64_t**>((at)) = reinterpret_cast<uint64_t*>((uint64_t)((by)) & (uint64_t)-1)\
 
-#define IMM_FIX_PLACE(addr)\
-    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x51000058)
+#define IMM2_FIX_BRANCH(addr)\
+    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x51000058);\
+    INC1_NEXT_PC(addr + 1)
 
-#define MAKE_BRANCH(addr)\
+// BIG - D32: 0x5800005d, &BY
+#define IMM4_FIX_LINKER_R30(addr, by)\
+    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x5e000058);\
+    INC1_NEXT_PC(addr + 1);\
+    FIX2_BRANCH_LOCAL(addr + 2, by)
+
+#define MAKE1_BRANCH_WITH_R17(addr)\
     *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x20021fd6)
 
-#define PLACE_FUNC_PROLOGUE(addr)\
-    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0xa9bf7bfd);\
-    *reinterpret_cast<uint32_t*>((addr + 1)) = __builtin_bswap32(0x910003fd)\
+// BIG - D32: 0xfd7bbfa9, 0xfd030091. W64: 0xfd030091fd7bbfa9
+// LITTLE - D32: 0xa9bf7bfd, 0x910003fd
 
-#define PLACE_FUNC_EPILOGUE(addr)\
-    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0xa8c17bfd)\
+#define PLACE2_FUNC_PROLOGUE(addr)\
+    *reinterpret_cast<uint64_t*>((addr)) = __builtin_bswap64(0xfd7bbfa9fd030091)
 
-#define PLACE_RET(addr)\
-    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0xd65f03c0);
+// BIG - D32: 0xa9417bfd
+
+#define PLACE1_FUNC_EPILOGUE(addr)\
+    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0xa8c17bfd)
+
+// BIG: - W32: 0xd4200000
+#define PLACE1_BREAKPOINT(addr)\
+    *reinterpret_cast<uint32_t*>((addr)) = __builtin_bswap32(0x000020d4)
 
 #define TEST_HOOK_CTX(hook)\
     if (!hook)\
