@@ -41,7 +41,9 @@ target_sources(saclient PRIVATE
 
 add_library(vendor_imgui STATIC
     ${SRC_DIR}/vendor/imgui/imgui_draw.cpp
-    ${SRC_DIR}/vendor/imgui/imgui.cpp)
+    ${SRC_DIR}/vendor/imgui/imgui.cpp
+    # $<$<CONFIG:DEBUG>:${SRC_DIR}/vendor/imgui/imgui_demo.cpp>
+)
 
 target_include_directories(vendor_imgui INTERFACE
     # Does #include <imgui/imgui.h> be available for us

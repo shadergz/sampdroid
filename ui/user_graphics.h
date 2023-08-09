@@ -12,17 +12,28 @@ public:
     ~UiClientUser();
 
     int renderOnGameScene();
-    void renderClientDetails();
+    void renderVersion();
 
     struct SaFont {
+        SaFont(const char* fontName, bool isRequired = true) : 
+            m_fontName(fontName),
+            m_isLoaded(false),
+            m_hasFound(false),
+            m_isRequired(isRequired),
+            m_fontObject(nullptr) {}
+        
         const char* m_fontName;
         char m_fontPathBuffer[0x5f];
 
         bool m_isLoaded;
         bool m_hasFound;
-        bool m_isRequired{true};
+        bool m_isRequired;
 
         ImFont* m_fontObject;
+
+        auto operator*() {
+            return m_fontObject;
+        }
 
     };
 

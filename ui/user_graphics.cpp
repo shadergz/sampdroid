@@ -1,6 +1,8 @@
+#include <array>
+#include <unistd.h>
+
 #include <ui/user_graphics.h>
 #include <log_client.h>
-#include <unistd.h>
 
 bool ImGui_ImplRenderWare_Init();
 
@@ -24,16 +26,9 @@ static const ImWchar ranges[] {
     0
 };
 
-static UiClientUser::SaFont arialFont {
-    .m_fontName = "arial.ttf",
-};
-static UiClientUser::SaFont sampAux3Font {
-    .m_fontName = "sampaux3.ttf",
-};
-static UiClientUser::SaFont userDefaultFont {
-    .m_fontName = "userfont.ttf",
-    .m_isRequired = false
-};
+static UiClientUser::SaFont arialFont("arial.ttf");
+static UiClientUser::SaFont sampAux3Font("sampaux3.ttf");
+static UiClientUser::SaFont userDefaultFont("userfont.ttf", false);
 
 UiClientUser::UiClientUser()
 {
@@ -52,23 +47,18 @@ UiClientUser::UiClientUser()
     m_screenScale.y = io.DisplaySize.y * (1 / io.DisplaySize.y);
     
     auto& style{ImGui::GetStyle()};
+    style.ScrollbarSize = m_screenScale.y * 55.f;
     style.WindowBorderSize = 0.0f;
 
     // Loading related fonts
     auto gameDataDrive{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
 
-    [[maybe_unused]] static SaFont* const SaFontRefs[]{
-        &arialFont, 
-        &sampAux3Font,
-        &userDefaultFont,
-        nullptr
+    std::array<SaFont*, 1> saFontPtrs {
+        // &sampAux3Font, &userDefaultFont, 
+        &arialFont
     };
 
-    auto font{&arialFont};
-    //for (auto font : SaFontRefs) {
-        //if (!font) 
-            //break;
-        
+    for (auto font : saFontPtrs) {   
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDrive, font->m_fontName);
 
@@ -81,41 +71,51 @@ UiClientUser::UiClientUser()
             std::terminate();
         }
 
-        //if (!isFound)
-        //    continue;
+        if (!isFound)
+            continue;
         
         font->m_fontObject = io.Fonts->AddFontFromFileTTF(font->m_fontPathBuffer, 
             m_inScreenfontSize, nullptr, ranges);
         
         m_loadedFonts.push_back(font);
-        salog::printFormat(salog::Info, "GUI: new SA font with name %s successful loaded", font->m_fontName);
+        salog::printFormat(salog::Info, "GUI: new SA font with name %s has successful loaded", font->m_fontName);
 
-    //}
+    }
+
 }
 
 int UiClientUser::renderOnGameScene()
 {
     ImGui_ImplRenderWare_NewFrame();
+
     ImGui::NewFrame();
 
-    renderClientDetails();
+    ImGui::Begin("Demo window");
+    ImGui::Button("Hello!");
+    ImGui::End();
 
+    renderVersion();
+
+#ifndef NDEBUG
+    // ImGui::ShowDemoWindow();
+#endif
     ImGui::EndFrame();
 
     // Ensure that ImGUI will render a vertex buffer from its command pipeline list
     ImGui::Render();
 
+    // Render everything to the screen using our dynamic RW vertex buffer
     auto draw{ImGui::GetDrawData()};
     ImGui_ImplRenderWare_RenderDrawData(draw);
 
     return draw->CmdListsCount;
 }
 
-void UiClientUser::renderClientDetails()
+void UiClientUser::renderVersion()
 {
     ImGui::GetOverlayDrawList()->AddText(
-        ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000), ImColor(
-            IM_COL32_BLACK), "SA Mobile v0.103");
+        ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000),
+        ImColor(IM_COL32_BLACK), "SA Mobile v0.103");
 }
 
 UiClientUser::~UiClientUser()
