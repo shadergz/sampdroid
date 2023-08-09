@@ -1,4 +1,5 @@
 #include <pthread.h>
+
 #include <game/game_objects.h>
 
 namespace sarender {
@@ -16,13 +17,12 @@ namespace saclient {
 
 namespace samimic {
     using namespace saglobal;
-    /*
-    Inside CGame::InitialiseRenderWare() the game will actually loads all textures database of the game
-    that includes: ["mobile", "txd", "gta3", "gta_int", "cutscene", "menu"]
-    The menu database has all textures from the game menu screen and inside the gameplay
-    We know what the string parameter is, but we can't figure out at this moment, what the false, and 5 are...
-    https://gtamods.com/wiki/Mobile_textures_(SA/VC)
-    */
+    
+    // Inside CGame::InitialiseRenderWare() the game will actually loads all textures database of the game
+    // that includes: ["mobile", "txd", "gta3", "gta_int", "cutscene", "menu"]
+    // The menu database has all textures from the game menu screen and inside the gameplay
+    // We know what the string parameter is, but we can't figure out at this moment, what the false, and 5 are...
+    // https://gtamods.com/wiki/Mobile_textures_(SA/VC)
 
     uint64_t CGame_InitialiseRenderWare()
     {

@@ -8,8 +8,7 @@ namespace samimic {
 
     void CEntity_UpdateRpHAnim(void* __restrict thiz);
     
-    void CHUD_Draw();
-    
+    void CTouchInterface_DrawAll(bool drawAll);    
 }
 
 namespace saglobal {
@@ -18,5 +17,7 @@ namespace saglobal {
 
     extern uint64_t (*g_CGame_InitialiseRenderWare)();
     extern void (*g_CClock_Update)(uint64_t rX0);
+
+    extern void (*g_CTouchInterface_DrawAll)(bool drawAll);
 
 }

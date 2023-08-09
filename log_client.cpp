@@ -86,13 +86,14 @@ namespace salog {
     
         const auto droidRet{__android_log_vprint(
             static_cast<android_LogPriority>(prio), logcatTag, format, var)};
-        
+
+#ifdef NDEBUG
         if (*logFile) {
             std::vfprintf(*logFile, format, cp);
             putc('\n', *logFile);
             fflush(*logFile);
         }
-        
+#endif
         va_end(var);
         va_end(cp);
     
@@ -112,13 +113,15 @@ namespace salog {
         const auto androidResult{__android_log_write(
             static_cast<android_LogPriority>(prio), logcatTag, msgStr)};
         
+#ifdef NDEBUG
         if (*logFile) {
 
             std::fputs(msgStr, *logFile);
             putc('\n', *logFile);
             fflush(*logFile);
-
         }
+#endif
+
         return androidResult;
     }
 

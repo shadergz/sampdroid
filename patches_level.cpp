@@ -4,7 +4,7 @@
 
 #include <exception>
 #include <patches_level.h>
-#include <patches_helper.h>
+#include <patches_macros.h>
 
 #include <texture_runtime.h>
 
@@ -203,7 +203,8 @@ namespace sapatch {
         g_patcherMicro->placeHookAt(g_gameAddr + 0x4c20a4, (uintptr_t)CClock_Update, (uintptr_t*)&g_CClock_Update);
         
         g_patcherMicro->emplaceMethod(g_gameAddr + 0x4cbb00, (uintptr_t)CEntity_UpdateRpHAnim, 0x5, true);
-        g_patcherMicro->emplaceMethod(g_gameAddr + 0x51f6f0, (uintptr_t)CHUD_Draw, 0x5, false);
+        
+        g_patcherMicro->placeHookAt(g_gameAddr + 0x36fb00, (uintptr_t)CTouchInterface_DrawAll, (uintptr_t*)&g_CTouchInterface_DrawAll);
     
     }
 

@@ -1,7 +1,7 @@
+#pragma once
+
 #include <log_client.h>
 #include <patches_level.h>
-
-#pragma once
 
 // BIG - D32: 0x14000003
 #define INC1_NEXT_PC(addr)\
@@ -62,6 +62,4 @@
 
 #define CACHE_UPDATE_ORIGIN(origin, sz)\
     __builtin___clear_cache((char*)origin, (char*)&origin[sz])
-
-
 
