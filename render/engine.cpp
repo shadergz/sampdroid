@@ -79,11 +79,11 @@ namespace sarender {
             g_rsGlobal->appName, g_rsGlobal->maxFPS);
         
         /* render/rwcore.h */
-        *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr + 0x228f20);
-        *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr + 0x22def0);
-        *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr + 0x21c240);
+        *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr + 0x26cf50);
+        *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr + 0x26cf48);
+        *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr + 0x26d220);
 
-        *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_gameAddr + 0x21a980);
+        *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_gameAddr + 0x272e34);
         *(uintptr_t**)(&RwRasterDestroy)              = (uintptr_t*)(g_gameAddr + 0x272b24);
         *(uintptr_t**)(&RwRasterGetOffset)            = (uintptr_t*)(g_gameAddr + 0x272940);
         *(uintptr_t**)(&RwRasterGetNumLevels)         = (uintptr_t*)(g_gameAddr + 0x272cf4);

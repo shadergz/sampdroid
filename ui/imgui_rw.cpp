@@ -16,7 +16,7 @@ std::vector<RwIm2DVertex> vertexBuffer;
 
 void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 {
-    salog::print(salog::Info, "GUI: ImGui_Impl RenderWare for data draw purposes, has been called");
+    salog::print(salog::Debug, "GUI: ImGui_Impl RenderWare for data draw purposes, has been called");
 
     const RwReal* nearScreenZ{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868)};
     const RwReal* recipNearClip{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864)};

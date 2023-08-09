@@ -48,6 +48,8 @@ UiClientUser::UiClientUser()
         IMGUI_VERSION_NUM, IMGUI_VERSION);
 
     ImGui_ImplRenderWare_Init();
+    m_screenScale.x = io.DisplaySize.x * (1 / io.DisplaySize.x);
+    m_screenScale.y = io.DisplaySize.y * (1 / io.DisplaySize.y);
     
     auto& style{ImGui::GetStyle()};
     style.WindowBorderSize = 0.0f;
@@ -86,12 +88,12 @@ UiClientUser::UiClientUser()
             m_inScreenfontSize, nullptr, ranges);
         
         m_loadedFonts.push_back(font);
-        salog::printFormat(salog::Info, "New SA font with name %s successful loaded", font->m_fontName);
+        salog::printFormat(salog::Info, "GUI: new SA font with name %s successful loaded", font->m_fontName);
 
     //}
 }
 
-int UiClientUser::renderByEachGameSecond()
+int UiClientUser::renderOnGameScene()
 {
     ImGui_ImplRenderWare_NewFrame();
     ImGui::NewFrame();
@@ -112,15 +114,16 @@ int UiClientUser::renderByEachGameSecond()
 void UiClientUser::renderClientDetails()
 {
     ImGui::GetOverlayDrawList()->AddText(
-        ImVec2(10, 10), ImColor(IM_COL32_BLACK), "SA Mobile");
+        ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000), ImColor(
+            IM_COL32_BLACK), "SA Mobile v0.103");
 }
 
 UiClientUser::~UiClientUser()
 {
-    salog::print(salog::Info, "GUI: System is been shutdown now!");
+    salog::print(salog::Info, "GUI: system is been shutdown now!");
     
-    // auto& io{ImGui::GetIO()};
-    // io.Fonts->Clear();
+    auto& io{ImGui::GetIO()};
+    io.Fonts->Clear();
 
     ImGui_ImplRenderWare_Shutdown();
     ImGui::DestroyContext();

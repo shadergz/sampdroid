@@ -30,7 +30,7 @@ namespace samimic {
             drawAll ? "true" : "false");
 
         if (saglobal::g_playerUi)
-            saglobal::g_playerUi->renderByEachGameSecond();
+            saglobal::g_playerUi->renderOnGameScene();
 
     }
 }

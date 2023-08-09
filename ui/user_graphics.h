@@ -11,7 +11,7 @@ public:
     
     ~UiClientUser();
 
-    int renderByEachGameSecond();
+    int renderOnGameScene();
     void renderClientDetails();
 
     struct SaFont {
@@ -28,6 +28,7 @@ public:
 
 private:
     std::vector<SaFont*> m_loadedFonts;
-    float m_inScreenfontSize = 10.f;
+    float m_inScreenfontSize = 40.f;
+    ImVec2 m_screenScale;
 
 };
