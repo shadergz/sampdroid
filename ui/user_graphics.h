@@ -12,7 +12,7 @@ public:
     ~UiClientUser();
 
     int renderOnGameScene();
-    void renderVersion();
+    void renderSceneDetails();
 
     struct SaFont {
         SaFont(const char* fontName, bool isRequired = true) : 

@@ -89,13 +89,18 @@ int UiClientUser::renderOnGameScene()
     ImGui_ImplRenderWare_NewFrame();
 
     ImGui::NewFrame();
+        ImGui::PushFont(arialFont.m_fontObject);
 
-    ImGui::Begin("Demo window");
-    ImGui::Button("Hello!");
-    ImGui::End();
+        ImGui::Begin("ImGUI Test Window", 
+            nullptr, 
+            ImGuiWindowFlags_AlwaysAutoResize);
+            ImGui::Button("TAP HERE");
+        ImGui::End();
 
-    renderVersion();
+        ImGui::PopFont();
     ImGui::EndFrame();
+
+    renderSceneDetails();
 
     // Ensure that ImGUI will render a vertex buffer from its command pipeline list
     ImGui::Render();
@@ -107,11 +112,18 @@ int UiClientUser::renderOnGameScene()
     return draw->CmdListsCount;
 }
 
-void UiClientUser::renderVersion()
+void UiClientUser::renderSceneDetails()
 {
+    static constexpr uint modVersionMJF{103};
+    static char txtBuffer[0x30];
+    float gameFPSCounter{*reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
+
+    std::snprintf(txtBuffer, sizeof txtBuffer, "SA-Mobile-%3u | FPS: %2.f",
+        modVersionMJF, gameFPSCounter);
+
     ImGui::GetOverlayDrawList()->AddText(
         ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000),
-        ImColor(IM_COL32_BLACK), "SA-Mobile-103");
+        IM_COL32(255, 127, 80, 255), txtBuffer);
 }
 
 UiClientUser::~UiClientUser()
