@@ -51,7 +51,7 @@ UiClientUser::UiClientUser()
     style.WindowBorderSize = 0.0f;
 
     // Loading related fonts
-    auto gameDataDrive{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
+    auto gameDataDir{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
 
     std::array<SaFont*, 1> saFontPtrs {
         // &sampAux3Font, &userDefaultFont, 
@@ -60,9 +60,9 @@ UiClientUser::UiClientUser()
 
     for (auto font : saFontPtrs) {   
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
-            "%sfonts/%s", gameDataDrive, font->m_fontName);
+            "%sfonts/%s", gameDataDir, font->m_fontName);
 
-        salog::printFormat(salog::Debug, "Attempt to load font %s from %s", 
+        salog::printFormat(salog::Debug, "GUI: attempt to load font %s from %s", 
             font->m_fontName, font->m_fontPathBuffer);
 
         bool isFound{false};
@@ -95,10 +95,6 @@ int UiClientUser::renderOnGameScene()
     ImGui::End();
 
     renderVersion();
-
-#ifndef NDEBUG
-    // ImGui::ShowDemoWindow();
-#endif
     ImGui::EndFrame();
 
     // Ensure that ImGUI will render a vertex buffer from its command pipeline list
@@ -115,7 +111,7 @@ void UiClientUser::renderVersion()
 {
     ImGui::GetOverlayDrawList()->AddText(
         ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000),
-        ImColor(IM_COL32_BLACK), "SA Mobile v0.103");
+        ImColor(IM_COL32_BLACK), "SA-Mobile-103");
 }
 
 UiClientUser::~UiClientUser()

@@ -32,7 +32,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
 {
     // TextureDatabaseRuntime::GetDatabase(char const*), The game handler all resource inside multiples
     // databases, we need to get the texture from the correct database name, we can also
-    // implements our owns databases
+    // implements our own databases
     static const char* mtDB[]{
         "client",
         "playerside", 
@@ -54,7 +54,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         auto dbPtr{&dbHandler[0]};
         if (!needToOpen)
             break;
-        // Locating an invalid database pointer to place into it!
+        // Locating an invalid database pointer to place in!
         while (!*dbPtr && dbPtr < &dbHandler[std::size(dbHandler)])
             dbPtr++;
         if (dbPtr >= &dbPtr[std::size(dbHandler)])
@@ -75,7 +75,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     static const char cleanTrigger[]{"clean"};
 
     if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {
-        // Unregistring the databases, isn't no needed to keep it's openned
+        // Closing the databases, there is no need to keep them open
         if (*(dbHandler + 0x0))
             ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x0));
         if (*(dbHandler + 0x1))
@@ -83,7 +83,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         if (*(dbHandler + 0x2))
             ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
         
-        uint8x16_t cl{};
+        static uint8x16_t cl{};
         veorq_u8(cl, cl);
         vst1q_u8(reinterpret_cast<uint8_t*>(dbHandler), cl);
 

@@ -103,7 +103,7 @@ bool ImGui_ImplRenderWare_Init()
         io.DisplaySize = sajvm::getScreenSize();
     }
     // Updates to the screen size will only appear when the next frame buffer is rendered
-    ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
+    // ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
     
     salog::printFormat(salog::Info, "GUI: client display size: width = (%f), height = (%f)", 
         io.DisplaySize.x, io.DisplaySize.y);
@@ -153,11 +153,7 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
         fontPixelsDest += fontData->stride;
     }
 
-    RwInt32 width, 
-        height,
-        delph,
-        flags;
-    
+    RwInt32 width, height, delph, flags;
     RwImageFindRasterFormat(fontData, rwRASTERTYPETEXTURE, &width, &height, &delph, &flags);
     RwRaster* preFontImage{RwRasterCreate(width, height, delph, flags)};
 
@@ -167,7 +163,6 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
     RwImageDestroy(fontData);
 
     io.Fonts->TexID = reinterpret_cast<ImTextureID*>(fontRaster);
-
 }
 
 void ImGui_ImplRenderWare_Shutdown()

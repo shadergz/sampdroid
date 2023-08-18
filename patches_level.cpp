@@ -67,12 +67,12 @@ void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super
 
         // Save callee
     IMM4_FIX_LINKER_R30(patcherData + instCount, patcherData + 8 + instCount);
-
+//  |
         IMM1_FIX_LOAD_BRANCH(patcherData + 4 + instCount);
         MAKE1_BRANCH_WITH_R17(patcherData + 5 + instCount);
         FIX2_BRANCH_LOCAL(patcherData + 6 + instCount, super);
         // Restore callee
-
+//  |
     IMM1_FIX_LOAD_BRANCH(patcherData + 8 + instCount);
         
         MAKE1_BRANCH_WITH_R17(patcherData + 9 + instCount);
@@ -81,15 +81,16 @@ void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super
     } else {
         // Save callee
 
-        // Putting our super function at the very beginning
+        // Placing our super function at the very beginning
     IMM4_FIX_LINKER_R30(patcherData, patcherData + 8 + instCount);
-
+//  |
         IMM1_FIX_LOAD_BRANCH(patcherData + 4);
         MAKE1_BRANCH_WITH_R17(patcherData + 5);
         FIX2_BRANCH_LOCAL(patcherData + 6, super);
         // Restore callee
 
         // FUNCTION CODE HERE
+//  |
     IMM1_FIX_LOAD_BRANCH(patcherData + 8 + instCount);
 
         MAKE1_BRANCH_WITH_R17(patcherData + 9 + instCount);
@@ -132,7 +133,7 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
         // and the original instruction has a jump to your hook method
 
         if (originFunc[nextToCopy] == __builtin_bswap32(0xd65f03c0)) {
-            throw std::runtime_error("originFunc[nextToCopy] is an instruction that is used to return from a subroutine");
+            throw std::runtime_error("Can't be an instruction that is used to return from a subroutine");
         }
 
         IMM1_FIX_LOAD_BRANCH(trContext + nextToCopy);

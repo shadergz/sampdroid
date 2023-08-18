@@ -81,22 +81,24 @@ static struct sigaction originSigSegv;
     
     uint64_t pcOffset{(PC & 0xffffff) - (saglobal::g_gameAddr & 0xffffff)};
     if (!(pcOffset & (static_cast<uint64_t>(0xffffffff) << 32))) {
-        salog::printFormat(salog::Error, "\tGame space region without base library, at: %#p", pcOffset);
+        salog::printFormat(salog::Error, 
+            "\tGame space region without base library, at: %#p", pcOffset);
     }
 
-    salog::printFormat(salog::Error, "\t1. Backtrace Program Counter at: Hex: %#p, Dec: %llu", PC, PC);
-    salog::printFormat(salog::Error, "\t2. Backtrace Stack Pointer at %#p", segvContext->uc_mcontext.sp);
+    salog::printFormat(salog::Error, "\t1. Backtrace # Program Counter at: Hex: %#p, Dec: %llu", PC, PC);
+    salog::printFormat(salog::Error, "\t2. Backtrace # Stack Pointer at %#p", segvContext->uc_mcontext.sp);
 
     // Restoring and calling the original Android sigsegv handler
     sigaction(signal, &originSigSegv, nullptr);
 
-    if (originSigSegv.sa_flags & SA_SIGINFO) {
+    if (originSigSegv.sa_flags & SA_SIGINFO)
         originSigSegv.sa_sigaction(signal, info, ctxPtr);
-    } else if (originSigSegv.sa_handler != SIG_DFL && originSigSegv.sa_handler != SIG_IGN)
+    else if (originSigSegv.sa_handler != SIG_DFL && originSigSegv.sa_handler != SIG_IGN)
         originSigSegv.sa_handler(signal);
 
     raise(SIGSEGV);
-    _Exit(1);
+
+    __builtin_unreachable();
 }
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
@@ -125,13 +127,12 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
             std::terminate();
     }
 
-    // Fetches in memory GTASA base library address (where exatcly JVM has loaded the game engine)
+    // Fetching the base library address of GTASA in memory (precisely where the JVM has loaded the game engine)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
 
     static const struct sigaction ourHandler{
-        .sa_flags = SA_SIGINFO, 
-        .sa_sigaction = segvSaHandler
+        .sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler
     };
 
     sigaction(SIGSEGV, &ourHandler, &originSigSegv);

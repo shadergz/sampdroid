@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(SAMOBILE_OUTRELDIR "Local installation directory path")
-option(SAMOBILE_SHARED_NAME "Output core library's name")
+option(SAMOBILE_OUTRELDIR "Path to the local installation directory")
+option(SAMOBILE_SHARED_NAME "Name of the output core library")
 option(SAMOBILE_VERSION "Implementation version")
 
 project(SAMobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
@@ -43,7 +43,7 @@ add_library(vendor_imgui STATIC
     ${SRC_DIR}/vendor/imgui/imgui_draw.cpp
     ${SRC_DIR}/vendor/imgui/imgui.cpp
     # $<$<CONFIG:DEBUG>:${SRC_DIR}/vendor/imgui/imgui_demo.cpp>
-)
+    )
 
 target_include_directories(vendor_imgui INTERFACE
     # Does #include <imgui/imgui.h> be available for us

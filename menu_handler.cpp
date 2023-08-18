@@ -130,13 +130,12 @@ static void menu_placeButton(const char* buttonName, const char* fep, MainMenuSc
 
 namespace samimic {
     using namespace saglobal;
-    /* It's seems that the original function is trying to detect if we are at
-    * the main game screen or in gameplay game screen scene (Like when we open the map
-    * while in gameplay)
-    * 1. [x0 + 0x15] has a value (boolean) that determine this, it's clearly a boolean value
-    * mov x19, this
-    * ldrb w8, [x19, #0x15]
-    */
+    // It's seems that the original function is trying to detect if we are at
+    // the main game screen or in gameplay game screen scene (Like when we open the map
+    // while in gameplay)
+    // 1. [x0 + 0x15] has a value (boolean) that determine this, it's clearly a boolean value
+    // mov x119, this
+    // ldrb w8, [x19, #0x15]
 
     void MainMenuScreen_AddAllItems(uintptr_t this_x0)
     {

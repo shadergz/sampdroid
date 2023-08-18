@@ -46,8 +46,9 @@ private:
         static constexpr uint8_t ARCH_INST_SIZE{8};
 
         MicroRaw_Trampoline() {
-            // Allocating memory at the process level is needed because we could share this piece of memory with other threads in the same process
-            m_tRWXData = reinterpret_cast<uint8_t*>(mmap(nullptr, PATCHER_PAGE_SIZE, PROT_EXEC|PROT_READ|PROT_WRITE, 
+            // Allocating memory at the process level is necessary because we can share this memory segment with other threads within the same process
+            m_tRWXData = reinterpret_cast<uint8_t*>(mmap(nullptr, PATCHER_PAGE_SIZE, 
+                PROT_EXEC | PROT_READ | PROT_WRITE, 
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
             SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is pointing to an invalid address space");
