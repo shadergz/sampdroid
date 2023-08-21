@@ -20,12 +20,9 @@ void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 
     const RwReal* nearScreenZ{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868)};
     const RwReal* recipNearClip{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864)};
-
-    if (vertexBuffer.size() < drawData->TotalVtxCount)
-        vertexBuffer.resize(drawData->TotalVtxCount);
     
     RwIm2DVertex* vtxDest{vertexBuffer.data()};
-    uint32_t vtxOffset{0};
+    uint32_t vtxOffset{};
 
     // Fill up the entire vertex buffer and fix all screen coordinates
     for (uint32_t cmdIdx = 0; cmdIdx < drawData->CmdListsCount; cmdIdx++) {
@@ -91,9 +88,15 @@ void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
     }
 }
 
+static constexpr uint vertexInitialSize{5000};
+
 bool ImGui_ImplRenderWare_Init()
 {
     auto& io{ImGui::GetIO()};
+
+    if (vertexBuffer.empty())
+        vertexBuffer.resize(vertexInitialSize);
+
     const ImVec2 displaySz(static_cast<float>(saglobal::g_rsGlobal->maximumWidth), 
         static_cast<float>(saglobal::g_rsGlobal->maximumHeight));
     
