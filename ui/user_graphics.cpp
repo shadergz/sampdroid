@@ -135,5 +135,4 @@ UiClientUser::~UiClientUser()
 
     ImGui_ImplRenderWare_Shutdown();
     ImGui::DestroyContext();
-
 }

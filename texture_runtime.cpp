@@ -44,7 +44,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         if (!std::strncmp(mtPrivateDb, dbName, strlen(dbName)))
             needToOpen = true;
     }
-    
+
     struct NativeTDRHandler {
         uintptr_t* m_dbHandler;
     };
@@ -71,7 +71,6 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
 
     const auto loadedTexture{GetTexture(textureName)};
-    
     static const char cleanTrigger[]{"clean"};
 
     if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {

@@ -12,28 +12,24 @@ namespace saglobal {
     bool g_playMultiplayer{false};
     void (*g_MainMenuScreen_AddAllItems)(uintptr_t x0);
     extern uintptr_t g_gameAddr;
-
-
     extern std::atomic<bool> g_clientIsRunning;
 }
 
 // Why CP? are you kidding with me?!
 static uint32_t (*MainMenuScreen_HasCPSave)();
+
 #pragma pack(push, 1)
+
 struct MenuSlot {
     RwTexture* m_buttonTexure;
-    
     const char* m_fepMask;
-
     void (*m_onPressedCallback)();
 };
 
 struct MainMenuScreen {
 public:
     std::array<uint8_t, 0x15> m_undefined0;
-    
     bool m_inGameplayScene;
-    
     std::array<uint8_t, 0x42> m_undefined1;
     
     /* A slot index identifier, needed to be increased while adding
@@ -41,9 +37,9 @@ public:
     // Count of available entries inside of m_slot array
     uint32_t m_slotMax;
     uint32_t m_slotIndex;
-
     MenuSlot* m_slot;
 };
+
 #pragma pack(pop)
 
 static_assert(offsetof(MainMenuScreen, m_inGameplayScene) == 0x15);
@@ -66,6 +62,7 @@ static void (*OnSettings_buttonPressed)();
 static void (*OnBriefs_buttonPressed)();
 static void (*OnStats_buttonPressed)();
 static void (*OnExit_buttonPressed)();
+
 static void menuOnInit() {}
 
 [[maybe_unused]] static void OnMultiplayer_buttonPressed()
@@ -77,7 +74,6 @@ static void menuOnInit() {}
     struct tm* tm{localtime(&t)};
     std::array<char, 0x1f> timeBf;
     strftime(timeBf.data(), timeBf.size(), "%c", tm);
-
     saglobal::g_playMultiplayer = true;
     menuOnInit();
 
@@ -168,7 +164,6 @@ namespace samimic {
             menu_placeButton(bNameOnPlay, "FEP_STG", ourInGameMenu);
             menu_placeButton(bNameOnSettings, "FEP_OPT", ourInGameMenu);
         } else {
-
             menu_placeButton(bNameOnResume, "FEP_RES", ourInGameMenu);
             menu_placeButton(bNameOnSettings, "FEP_OPT", ourInGameMenu);
             menu_placeButton(bNameOnStats, "FEH_STA", ourInGameMenu);

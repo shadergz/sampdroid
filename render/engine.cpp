@@ -60,7 +60,6 @@ RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
 namespace saglobal {
     RsGlobalType* g_rsGlobal;
-
     extern uintptr_t g_gameAddr;
 }
 

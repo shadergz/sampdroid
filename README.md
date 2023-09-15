@@ -20,9 +20,14 @@ An experimental MTA and SAMP implementation for GTA SA v210 on AArch64
 
 ## Todo
 ```
-- [x] To load our 3 (three) texture databases at startup
-- [x] To create two database directories that utilize the game's texture database system, providing users with the ability to load or replace game objects and textures
-- [x] To hook class methods using the jump-to-trampoline technique
-- [x] To fix CEntity_UpdateRpHAnim hooking and restores from LP, making both LP and PC versions work
-- [x] Display the FPS at the bottom of the screen
+
+- [] Handle vehicle and NPC pools
+- [] Get/Set player coordinates (*)
+- [] Create single and multiplayer player objects
+- [] Handle life and AFK
+- [] Create SAMP splash screen
+- [] Better handle entries systems
+- [] Update internal libraries and fix the code base inconsistency (*)
+- [] Implement .txd/.dff dynamic loader (uncompress .txt for each GPU platform if needed)
+- [x] Add libRakNet to the vendor directory
 ```

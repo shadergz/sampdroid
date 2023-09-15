@@ -112,7 +112,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     const jint useVersion{JNI_VERSION_1_6};
 
-    JavaVMAttachArgs attachThread{.version = useVersion, .name = "SA OnLoad"};
+    JavaVMAttachArgs attachThread{.version = useVersion, .name = "saonload"};
     vm->AttachCurrentThread(&g_gameEnv, &attachThread);
 
     if (vm->GetEnv(reinterpret_cast<void**>(&g_gameEnv), useVersion) != JNI_OK) {
@@ -131,10 +131,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     g_gameAddr = safs::getLibrary("libGTASA.so");
     g_audioBackend = safs::getLibrary("libOpenAL64.so");
 
-    static const struct sigaction ourHandler{
-        .sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler
-    };
-
+    static const struct sigaction ourHandler{.sa_flags = SA_SIGINFO, .sa_sigaction = segvSaHandler};
     sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
@@ -144,10 +141,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     // Applying patches and hooking some methods
     sapatch::applyOnGame();
-    
     pthread_mutex_init(&saclient::g_multExclusive, nullptr);
     pthread_cond_init(&saclient::g_multCond, nullptr);
-
     pthread_t clientThread;
     pthread_create(&clientThread, nullptr, saclient::enterMainLoop, nullptr);
 

@@ -23,21 +23,18 @@ public:
     void operator=(std::FILE* filePtr) {
         m_logFile = filePtr;
     }
-
     auto operator*() {
         return m_logFile;
     }
 
 private:
     std::FILE* m_logFile;
-
 };
 
 namespace salog {
     static LogFile logFile{};
 
     using namespace saglobal;
-
     [[gnu::always_inline]] inline void checkLogFile() {
         char logFilePath[0x4f];
 
@@ -96,7 +93,6 @@ namespace salog {
 #endif
         va_end(var);
         va_end(cp);
-    
         return droidRet;
     }
     
@@ -106,7 +102,6 @@ namespace salog {
         if (prio == LogId::Debug)
             return 0;
 #endif
-
         [[unlikely]] if (!*logFile && g_gameAddr)
             checkLogFile();
 
@@ -115,7 +110,6 @@ namespace salog {
         
 #ifdef NDEBUG
         if (*logFile) {
-
             std::fputs(msgStr, *logFile);
             putc('\n', *logFile);
             fflush(*logFile);
@@ -138,8 +132,7 @@ namespace salog {
         va_end(va);
 
         __android_log_assert(nullptr, logcatTag, "ASSERTION: by %s in %s:%d -> %s", cond, fileName,
-            line, assertBuffer.data());
-        
+            line, assertBuffer.data()); 
         std::terminate();
     }
     

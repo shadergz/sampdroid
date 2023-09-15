@@ -11,9 +11,7 @@ namespace saglobal {
     // Main UI player object, resides all other objects needed to do text/image graphics render in screen
     UiClientUser* g_playerUi;
     std::atomic<bool> g_clientHasInitiliazed{false};
-    
     std::atomic<bool> g_clientIsRunning{false};
-
     extern JNIEnv* g_gameEnv;
 }
 
@@ -36,8 +34,7 @@ namespace saclient {
         g_clientHasInitiliazed = true;        
         salog::print(salog::Info, "Main: main thread has started!");
         
-        static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "SA client"};
-        
+        static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "saclient"};
         JavaVM* vm{};
         g_gameEnv->GetJavaVM(&vm);
         vm->AttachCurrentThread(&g_gameEnv, &threadInfo);
@@ -55,7 +52,6 @@ namespace saclient {
         pthread_cond_wait(&g_multCond, &g_multExclusive);
 
         g_playerUi = new UiClientUser();
-
         for (;;) {
             // Main Multiplayer indepedent thread loop      
             const struct timespec requestWait{.tv_sec = 10};
@@ -63,7 +59,6 @@ namespace saclient {
         }
 
         exitingFromGame();
-
         pthread_exit(nullptr);
         return nullptr;
     }

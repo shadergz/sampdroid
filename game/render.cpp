@@ -31,6 +31,5 @@ namespace samimic {
 
         if (saglobal::g_playerUi)
             saglobal::g_playerUi->renderOnGameScene();
-
     }
 }
