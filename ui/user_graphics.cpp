@@ -113,7 +113,7 @@ int UiClientUser::renderOnGameScene()
 
 void UiClientUser::renderSceneDetails()
 {
-    static constexpr uint modVersionMJF{103};
+    static constexpr uint modVersionMJF{104};
     static char txtBuffer[0x30];
     float gameFPSCounter{*reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
 
