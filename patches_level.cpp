@@ -61,41 +61,19 @@ void AArch64Patcher::emplaceMethod(const uintptr_t method, const uintptr_t super
     // Placing our trampoline inside the class method/routine
     FIX2_BRANCH_LOCAL(origin + 2, patcherData);
     RELOAD1_LINKER_R30(origin + 4);
-    
+
+    auto patcherIndex{patcherData};
     if (runAfter) {
-        // FUNCTION CODE HERE
-
-        // Save callee
-    IMM4_FIX_LINKER_R30(patcherData + instCount, patcherData + 8 + instCount);
-//  |
-        IMM1_FIX_LOAD_BRANCH(patcherData + 4 + instCount);
-        MAKE1_BRANCH_WITH_R17(patcherData + 5 + instCount);
-        FIX2_BRANCH_LOCAL(patcherData + 6 + instCount, super);
-        // Restore callee
-//  |
-    IMM1_FIX_LOAD_BRANCH(patcherData + 8 + instCount);
-        
-        MAKE1_BRANCH_WITH_R17(patcherData + 9 + instCount);
-        FIX2_BRANCH_LOCAL(patcherData + 10 + instCount, origin + instCount - 1);
-
-    } else {
-        // Save callee
-
-        // Placing our super function at the very beginning
-    IMM4_FIX_LINKER_R30(patcherData, patcherData + 8 + instCount);
-//  |
-        IMM1_FIX_LOAD_BRANCH(patcherData + 4);
-        MAKE1_BRANCH_WITH_R17(patcherData + 5);
-        FIX2_BRANCH_LOCAL(patcherData + 6, super);
-        // Restore callee
-
-        // FUNCTION CODE HERE
-//  |
-    IMM1_FIX_LOAD_BRANCH(patcherData + 8 + instCount);
-
-        MAKE1_BRANCH_WITH_R17(patcherData + 9 + instCount);
-        FIX2_BRANCH_LOCAL(patcherData + 10 + instCount, origin + instCount - 1);
+        patcherIndex += instCount;
     }
+    IMM4_FIX_LINKER_R30(patcherData + instCount, patcherData + 8 + instCount);
+    IMM1_FIX_LOAD_BRANCH(patcherIndex + 4);
+    MAKE1_BRANCH_WITH_R17(patcherIndex + 5);
+    FIX2_BRANCH_LOCAL(patcherIndex + 6, super);
+
+    IMM1_FIX_LOAD_BRANCH(patcherData + 8 + instCount);
+    MAKE1_BRANCH_WITH_R17(patcherData + 9 + instCount);
+    FIX2_BRANCH_LOCAL(patcherData + 10 + instCount, origin + instCount - 1);
 
     CACHE_UPDATE_HOOK(patcherCtx);
     CACHE_UPDATE_ORIGIN(origin, instCount);
@@ -185,7 +163,7 @@ void AArch64Patcher::turnTextSegmentMutable(uintptr_t textPage, uint64_t regionS
     auto count{countPages(regionSize) + overflow};
 
     salog::printFormat(salog::Info, "Hook: changing permission of %lu pages in %#llx base address", count, baseAddr);
-    mprotect((void*)(baseAddr), count * pageSize, protect);
+    mprotect(reinterpret_cast<void*>(baseAddr), count * pageSize, protect);
 }
 
 // While the game isn't loaded yet we need to fixes and hook some functions

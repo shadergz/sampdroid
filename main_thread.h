@@ -1,5 +1,5 @@
 #pragma once
 
-namespace saclient {
+namespace appclient {
     [[noreturn]] void* enterMainLoop(void* unused);
 }

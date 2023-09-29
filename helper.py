@@ -60,12 +60,12 @@ ZIPALIGN: Final[str] = f'{BUILD_TOOLS}/zipalign'
 BUILD_TYPES: Final[tuple] = ('Release', 'Debug')
 BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 
-SAMOBILE_VERSION: Final[str] = '0.103'
-APK_OUT: Final[str] = f'{install_in}/gtasabase'
+SAONLINE_VERSION: Final[str] = '0.104'
+APK_OUT: Final[str] = f'{install_in}/gtasa-dir'
 
-LIB_BASENAME: Final[str] = 'saclient'
+LIB_BASENAME: Final[str] = 'SAOC'
 
-OUTPUT_SAMOBILE_FILE: Final[str] = f'{install_in}/{LIB_BASENAME}-v{SAMOBILE_VERSION}.apk'
+OUTPUT_SAONLINE_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{SAONLINE_VERSION}.apk'
 MALICIOUS_SMALI: Final[str] = 'GTASA.smali'
 
 parser = argparse.ArgumentParser()
@@ -93,9 +93,9 @@ def build_dir():
         '-DCMAKE_SYSTEM_NAME=': 'Android',
         '-DCMAKE_TOOLCHAIN_FILE=': ANDROID_TOOLCHAIN,
 
-        '-DSAMOBILE_OUTRELDIR=': install_in,
-        '-DSAMOBILE_SHARED_NAME=': LIB_BASENAME,
-        '-DSAMOBILE_VERSION=': SAMOBILE_VERSION,
+        '-DSAONLINE_OUTRELDIR=': install_in,
+        '-DSAONLINE_SHARED_NAME=': LIB_BASENAME,
+        '-DSAONLINE_VERSION=': SAONLINE_VERSION,
 
         '-DCMAKE_BUILD_TYPE=': BUILD_TYPES[0] if not enb_debug else BUILD_TYPES[1],
         '-DCMAKE_MAKE_PROGRAM=': NINJA_BIN,
@@ -135,8 +135,8 @@ def generate_apk():
         lib_file = lib_file.replace('\\', '/')
         shutil.copy(lib_file, f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/' + lib_file.split('/')[-1])
 
-    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_SAMOBILE_FILE}.un', APK_OUT])
-    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_SAMOBILE_FILE}.un', f'{OUTPUT_SAMOBILE_FILE}.aligned'], )
+    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_SAONLINE_FILE}.un', APK_OUT])
+    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_SAONLINE_FILE}.un', f'{OUTPUT_SAONLINE_FILE}.aligned'], )
     subprocess.run([
         APKSIGNER, 'sign', '-v',
         f'--min-sdk-version={ANDROID_MIN}',
@@ -144,22 +144,22 @@ def generate_apk():
         f'--ks={SIGNER_KSPATH}',
         f'--ks-key-alias={SIGNER_KSALIAS}',
         f'--ks-pass=pass:{SIGNER_KSPASSWORD}',
-        f'--in={OUTPUT_SAMOBILE_FILE}.aligned',
-        f'--out={OUTPUT_SAMOBILE_FILE}'
+        f'--in={OUTPUT_SAONLINE_FILE}.aligned',
+        f'--out={OUTPUT_SAONLINE_FILE}'
     ])
 
-    os.remove(f'{OUTPUT_SAMOBILE_FILE}.un')
-    os.remove(f'{OUTPUT_SAMOBILE_FILE}.aligned')
-    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_SAMOBILE_FILE}'])
+    os.remove(f'{OUTPUT_SAONLINE_FILE}.un')
+    os.remove(f'{OUTPUT_SAONLINE_FILE}.aligned')
+    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_SAONLINE_FILE}'])
 def list_devices():
     subprocess.run([ADB, 'devices'], shell=False)
 def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
 def install_apk():
-    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_SAMOBILE_FILE])
+    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_SAONLINE_FILE])
 def logcat():
     try:
-        subprocess.run([ADB, 'logcat', 'saclient,stargames.gtasa,DEBUG, *:S'])
+        subprocess.run([ADB, 'logcat', 'SAOC,stargames.gtasa,DEBUG, *:S'])
     except KeyboardInterrupt:
         pass
 def clean():
@@ -191,7 +191,7 @@ if args.connect:
     connect_device(args.connect)
     
 if args.install:
-    if not pathlib.Path(OUTPUT_SAMOBILE_FILE).is_file():
+    if not pathlib.Path(OUTPUT_SAONLINE_FILE).is_file():
         generate_apk()
     install_apk()
 

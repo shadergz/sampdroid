@@ -114,7 +114,7 @@
     invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
 
     .line 457
-    const-string v0, "saclient"
+    const-string v0, "SAOC"
 
     invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
 
@@ -2041,7 +2041,7 @@
 
     .line 317
     sget-object v0, Lcom/rockstargames/gtasa/GTASA;->gtasaSelf:Lcom/rockstargames/gtasa/GTASA;
-    invoke-virtual {v0}, Lcom/rockstargames/gtasa/GTASA;->JVMSaMobileReady()V
+    invoke-virtual {v0}, Lcom/rockstargames/gtasa/GTASA;->jvmClientIsReady()V
 
     .line 318
     iget-boolean v0, p0, Lcom/rockstargames/gtasa/GTASA;->isInSocialClub:Z
@@ -2158,5 +2158,5 @@
 .method public native setCurrentScreenSize(II)V
 .end method
 
-.method public native JVMSaMobileReady()V
+.method public native jvmClientIsReady()V
 .end method

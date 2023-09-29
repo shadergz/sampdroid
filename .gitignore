@@ -1,5 +1,5 @@
 build*
-apkgen
+genapk*
 compile_commands.json
 .cache
 *.apk

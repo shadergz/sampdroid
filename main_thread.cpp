@@ -15,7 +15,7 @@ namespace saglobal {
     extern JNIEnv* g_gameEnv;
 }
 
-namespace saclient {
+namespace appclient {
     using namespace saglobal;
 
     pthread_cond_t g_multCond;
@@ -34,7 +34,7 @@ namespace saclient {
         g_clientHasInitiliazed = true;        
         salog::print(salog::Info, "Main: main thread has started!");
         
-        static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "saclient"};
+        static JavaVMAttachArgs threadInfo{.version = JNI_VERSION_1_6, .name = "At Main Loop"};
         JavaVM* vm{};
         g_gameEnv->GetJavaVM(&vm);
         vm->AttachCurrentThread(&g_gameEnv, &threadInfo);

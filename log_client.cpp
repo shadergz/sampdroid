@@ -11,7 +11,7 @@ namespace saglobal {
     extern uintptr_t g_gameAddr;
 }
 
-static const char* logcatTag = "saclient";
+static const char* logcatTag = "SAOC";
 
 // This wrapper class is used to ensure that the file will be fclose()'d at the end of this library's lifetime
 class LogFile {
@@ -39,7 +39,7 @@ namespace salog {
         char logFilePath[0x4f];
 
         std::snprintf(logFilePath, std::size(logFilePath),
-            "%slog_client.txt", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
+            "%ssao-client.log", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
         
         logFile = fopen(logFilePath, "a");
         char openedAt[0x2f];
@@ -68,7 +68,7 @@ namespace salog {
         
     }
 
-    int printFormat(LogId prio, const char* format, ...)
+    int printFormat(const LogId prio, const char* format, ...)
     {
 #if NDEBUG
         if (prio == LogId::Debug)
@@ -96,7 +96,7 @@ namespace salog {
         return droidRet;
     }
     
-    int print(LogId prio, const char* msgStr)
+    int print(const LogId prio, const char* msgStr)
     {
 #if NDEBUG
         if (prio == LogId::Debug)

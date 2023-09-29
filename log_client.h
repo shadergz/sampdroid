@@ -17,12 +17,12 @@ namespace salog {
         Error = ANDROID_LOG_ERROR,
     };
 
-    int printFormat(LogId prio, const char* format, ...);
-    int print(LogId prio, const char* msgStr);
+    int printFormat(const LogId prio, const char* format, ...);
+    int print(const LogId prio, const char* msgStr);
 
     #ifndef NDEBUG
     template<typename... Args>
-    auto coutFmt(LogId prio, fmt::format_string<Args...> fmt, Args&&... args)
+    auto coutFmt(const LogId prio, fmt::format_string<Args...> fmt, Args&&... args)
     {
         uint64_t fioAllocated{};
         char* fioPtr{};

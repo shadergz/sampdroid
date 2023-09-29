@@ -30,7 +30,7 @@ namespace saglobal {
     extern std::atomic<bool> g_clientHasInitiliazed;
 }
 
-namespace saclient {
+namespace appclient {
     extern pthread_cond_t g_multCond;
     extern pthread_mutex_t g_multExclusive;
 }
@@ -48,20 +48,18 @@ extern "C" void JNI_OnUnload([[maybe_unused]] JavaVM* vm, [[maybe_unused]] void*
     if (g_textureDatabase)
         delete g_textureDatabase;
 
-    if (g_clientHasInitiliazed) {
-
-    }
+    if (g_clientHasInitiliazed) {}
 }
 
-extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_JVMSaMobileReady(
+extern "C" JNIEXPORT void JNICALL Java_com_rockstargames_gtasa_GTASA_jvmClientIsReady(
     [[maybe_unused]] JNIEnv* env, jobject gtaClass) 
 {
     saglobal::g_gtaSA = gtaClass;
-    salog::print(salog::Info, "JVMSaMobileReady() has been called from JVM");
+    salog::print(salog::Info, "jvmClientIsReady() has been called from JVM");
 
-    pthread_mutex_lock(&saclient::g_multExclusive);
-    pthread_cond_broadcast(&saclient::g_multCond);
-    pthread_mutex_unlock(&saclient::g_multExclusive);
+    pthread_mutex_lock(&appclient::g_multExclusive);
+    pthread_cond_broadcast(&appclient::g_multCond);
+    pthread_mutex_unlock(&appclient::g_multExclusive);
 
     // This thread should fall to the end, before game itself starts
 }
@@ -85,8 +83,8 @@ static struct sigaction originSigSegv;
             "\tGame space region without base library, at: %#p", pcOffset);
     }
 
-    salog::printFormat(salog::Error, "\t1. Backtrace # Program Counter at: Hex: %#p, Dec: %llu", PC, PC);
-    salog::printFormat(salog::Error, "\t2. Backtrace # Stack Pointer at %#p", segvContext->uc_mcontext.sp);
+    salog::printFormat(salog::Error, "\t1. Backtrace # pc at: Hex: %#p, Dec: %llu", PC, PC);
+    salog::printFormat(salog::Error, "\t2. Backtrace # sp at %#p", segvContext->uc_mcontext.sp);
 
     // Restoring and calling the original Android sigsegv handler
     sigaction(signal, &originSigSegv, nullptr);
@@ -105,14 +103,14 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
 
-    salog::print(salog::Info, "SA Mobile has loaded, build date: " __DATE__ " " __TIME__);
+    salog::print(salog::Info, "SAOnline has loaded, build date: " __DATE__ " " __TIME__);
     
     salog::coutFmt(salog::Info, "Loaded by thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
 
     const jint useVersion{JNI_VERSION_1_6};
 
-    JavaVMAttachArgs attachThread{.version = useVersion, .name = "saonload"};
+    JavaVMAttachArgs attachThread{.version = useVersion, .name = "At JNI_OnLoad"};
     vm->AttachCurrentThread(&g_gameEnv, &attachThread);
 
     if (vm->GetEnv(reinterpret_cast<void**>(&g_gameEnv), useVersion) != JNI_OK) {
@@ -135,16 +133,16 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
-        "SA Mobile is being halted now :[");
+        "SAOC is being halted now :[");
     salog::printFormat(salog::Info, "Native libraries base region address found in:\n"
         "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 
     // Applying patches and hooking some methods
     sapatch::applyOnGame();
-    pthread_mutex_init(&saclient::g_multExclusive, nullptr);
-    pthread_cond_init(&saclient::g_multCond, nullptr);
+    pthread_mutex_init(&appclient::g_multExclusive, nullptr);
+    pthread_cond_init(&appclient::g_multCond, nullptr);
     pthread_t clientThread;
-    pthread_create(&clientThread, nullptr, saclient::enterMainLoop, nullptr);
+    pthread_create(&clientThread, nullptr, appclient::enterMainLoop, nullptr);
 
     return useVersion;
 }

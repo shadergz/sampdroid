@@ -67,7 +67,7 @@ UiClientUser::UiClientUser()
 
         bool isFound{false};
         if (font->m_isRequired && !(isFound = access(font->m_fontPathBuffer, R_OK | F_OK) == 0)) {
-            salog::printFormat(salog::Error, "Couldn't load font with name %s", font->m_fontName);
+            salog::printFormat(salog::Error, "GUI: couldn't load font with name %s", font->m_fontName);
             std::terminate();
         }
 
@@ -81,7 +81,6 @@ UiClientUser::UiClientUser()
         salog::printFormat(salog::Info, "GUI: new SA font with name %s has successful loaded", font->m_fontName);
 
     }
-
 }
 
 int UiClientUser::renderOnGameScene()
@@ -118,7 +117,7 @@ void UiClientUser::renderSceneDetails()
     static char txtBuffer[0x30];
     float gameFPSCounter{*reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
 
-    std::snprintf(txtBuffer, sizeof txtBuffer, "SA-Mobile-%3u | FPS: %2.f",
+    std::snprintf(txtBuffer, sizeof txtBuffer, "SAOC v%3u | FPS: %2.f",
         modVersionMJF, gameFPSCounter);
 
     ImGui::GetOverlayDrawList()->AddText(

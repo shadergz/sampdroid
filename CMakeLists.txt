@@ -1,25 +1,22 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(SAMOBILE_OUTRELDIR "Path to the local installation directory")
-option(SAMOBILE_SHARED_NAME "Name of the output core library")
-option(SAMOBILE_VERSION "Implementation version")
+option(SAONLINE_OUTRELDIR "Path to the local installation directory")
+option(SAONLINE_SHARED_NAME "Name of the output core library")
+option(SAONLINE_VERSION "Implementation version")
 
-project(SAMobile VERSION ${SAMOBILE_VERSION} LANGUAGES CXX)
+project(SAOnline VERSION ${SAONLINE_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_EXTENSIONS On)
 
-set(SRC_DIR ${SAMobile_SOURCE_DIR})
-add_library(saclient MODULE)
+set(SRC_DIR ${SAOnline_SOURCE_DIR})
+add_library(Client MODULE)
 
-# https://developer.android.com/ndk/guides/cpp-support#libc
-# RTTI is enable by default for ensure a better and safety objects handle
-target_compile_options(saclient PRIVATE -Wall -Werror -frtti
+target_compile_options(Client PRIVATE -Wall -Werror -fno-rtti
     $<$<CONFIG:Release>:-Ofast;-fno-stack-protector;-DNDEBUG>)
-target_link_options(saclient PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
+target_link_options(Client PRIVATE $<$<CONFIG:Release>:-s;-Wl,--gc-sections>)
 
-target_sources(saclient PRIVATE
+target_sources(Client PRIVATE
     linux_hierarchy.cpp
     log_client.cpp
     patches_level.cpp
@@ -55,11 +52,11 @@ execute_process(COMMAND git log -1 --format=%h
     OUTPUT_VARIABLE GIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-set(SAMOBILE_PROJECTVERSION ${saclient_PROJECT_VERSION}.${GIT_HASH})
+set(SAONLINE_PROJECTVERSION ${SAOnline_PROJECT_VERSION}.${GIT_HASH})
 add_subdirectory(vendor/fmt EXCLUDE_FROM_ALL)
 
-target_link_libraries(saclient vendor_imgui log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
-set_target_properties(saclient PROPERTIES OUTPUT_NAME ${SAMOBILE_SHARED_NAME})
-target_include_directories(saclient PRIVATE ${SRC_DIR})
+target_link_libraries(Client vendor_imgui log nativehelper $<$<CONFIG:Debug>:fmt::fmt>)
+set_target_properties(Client PROPERTIES OUTPUT_NAME ${SAONLINE_SHARED_NAME})
+target_include_directories(Client PRIVATE ${SRC_DIR})
 
-install(TARGETS saclient LIBRARY DESTINATION ${SAMobile_SOURCE_DIR}/${SAMOBILE_OUTRELDIR})
+install(TARGETS Client LIBRARY DESTINATION ${SAOnline_SOURCE_DIR}/${SAONLINE_OUTRELDIR})
