@@ -25,4 +25,4 @@ Plugin for GTA:SA v210 to enable players to join SAMP/MTA matches
 ```
 
 #### Screenshots (work-in-progress), thorough testing, and additional fixes are still needed
-![Image](screens/Screenshot_20230928-154643_GTA_SA.png)
+![Image](screens/Screenshot_20230928-160404_GTA_SA.png)
