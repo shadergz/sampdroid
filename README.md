@@ -1,5 +1,5 @@
 # GTA:SA CO-OP
-A plugin for the android version of gtasa to enable players to join samp/mta matches
+A plugin for the Android version of GTASA to enable players to join SAMP/MTA matches
 
 #### Project aims
 - Complete replacement for build69 (SAMP for ARMv7 from GTASA v1.8 what has deprecated)
