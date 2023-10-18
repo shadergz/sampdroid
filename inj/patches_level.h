@@ -3,10 +3,10 @@
 #include <array>
 #include <linux/mman.h>
 #include <random>
-
 #include <unistd.h>
 #include <sys/mman.h>
-#include <log_client.h>
+
+#include <client/log_client.h>
 
 class AArch64Patcher {
 public:

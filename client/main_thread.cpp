@@ -4,8 +4,8 @@
 
 #include <atomic>
 
+#include "log_client.h"
 #include <ui/user_graphics.h>
-#include <log_client.h>
 
 namespace saglobal {
     // Main UI player object, resides all other objects needed to do text/image graphics render in screen

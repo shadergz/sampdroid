@@ -1,5 +1,6 @@
-#include <log_client.h>
-#include <jvm_helper.h>
+#include <client/log_client.h>
+
+#include "jvm_helper.h"
 
 namespace saglobal {
     extern JNIEnv* g_gameEnv;

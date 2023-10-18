@@ -1,8 +1,8 @@
 
-#include <render/rwcore.h>
-#include <render/skeleton.h>
+#include <client/log_client.h>
 
-#include <log_client.h>
+#include "rwcore.h"
+#include "skeleton.h"
 
 /* render/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);

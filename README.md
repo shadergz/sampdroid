@@ -1,5 +1,5 @@
-# saonline-mobile
-Plugin for GTA:SA v210 to enable players to join SAMP/MTA matches 
+# GTA:SA CO-OP
+A plugin for the android version of gtasa to enable players to join samp/mta matches
 
 #### Project aims
 - Complete replacement for build69 (SAMP for ARMv7 from GTASA v1.8 what has deprecated)
@@ -19,10 +19,5 @@ Plugin for GTA:SA v210 to enable players to join SAMP/MTA matches
 - [ ] Handle life and AFK
 - [ ] Create SAMP splash screen
 - [ ] Better handle entries systems
-- [x] Update internal libraries and fix the code base inconsistency (*)
 - [ ] Implement .txd/.dff dynamic loader (uncompress .txt for each GPU platform if needed)
-- [x] Add RakNet to the vendor directory
 ```
-
-#### Screenshots (work-in-progress), thorough testing, and additional fixes are still needed
-![Image](screens/Screenshot_20230928-160404_GTA_SA.png)

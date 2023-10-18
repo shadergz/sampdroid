@@ -5,14 +5,15 @@
 
 #include <cstdlib>
 
-#include <log_client.h>
-#include <linux_hierarchy.h>
-#include <patches_level.h>
-#include <texture_runtime.h>
+#include <client/log_client.h>
+#include <client/main_thread.h>
 
+#include <inj/patches_level.h>
+#include <txt/texture_runtime.h>
 #include <ui/user_graphics.h>
-#include <jvm_helper.h>
-#include <main_thread.h>
+
+#include "jvm_helper.h"
+#include "linux_hierarchy.h"
 
 namespace saglobal {
     // This env is specific by the calling thread and shouldn't be shared
@@ -103,7 +104,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     using namespace saglobal;
 
-    salog::print(salog::Info, "SAOnline has loaded, build date: " __DATE__ " " __TIME__);
+    salog::print(salog::Info, "GTA:SA CO-OP has loaded, build date: " __DATE__ " " __TIME__);
     
     salog::coutFmt(salog::Info, "Loaded by thread id {} in core {}",
         std::this_thread::get_id(), sched_getcpu());
@@ -133,7 +134,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
     sigaction(SIGSEGV, &ourHandler, &originSigSegv);
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
-        "SAOC is being halted now :[");
+        "coop is being halted now :[");
     salog::printFormat(salog::Info, "Native libraries base region address found in:\n"
         "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 

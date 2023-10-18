@@ -1,12 +1,12 @@
 
 #include <iterator>
 #include <cstring>
-
 #include <arm_neon.h>
 
 #include <render/rwcore.h>
-#include <log_client.h>
-#include <texture_runtime.h>
+#include <client/log_client.h>
+
+#include "texture_runtime.h"
 
 namespace saglobal {
     extern uintptr_t g_gameAddr;

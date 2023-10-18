@@ -1,8 +1,9 @@
 #include <array>
 #include <unistd.h>
 
-#include <ui/user_graphics.h>
-#include <log_client.h>
+#include <client/log_client.h>
+
+#include "user_graphics.h"
 
 bool ImGui_ImplRenderWare_Init();
 
@@ -117,7 +118,7 @@ void UiClientUser::renderSceneDetails()
     static char txtBuffer[0x30];
     float gameFPSCounter{*reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
 
-    std::snprintf(txtBuffer, sizeof txtBuffer, "SAOC v%3u | FPS: %2.f",
+    std::snprintf(txtBuffer, sizeof txtBuffer, "Plugin build v(%3u) | frames: %2.f",
         modVersionMJF, gameFPSCounter);
 
     ImGui::GetOverlayDrawList()->AddText(

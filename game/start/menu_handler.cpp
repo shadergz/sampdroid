@@ -4,9 +4,10 @@
 #include <pthread.h>
 
 #include <render/rwcore.h>
-#include <menu_handler.h>
-#include <texture_runtime.h>
-#include <log_client.h>
+#include <txt/texture_runtime.h>
+#include <client/log_client.h>
+
+#include "menu_handler.h"
 
 namespace saglobal {
     bool g_playMultiplayer{false};

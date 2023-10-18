@@ -5,13 +5,13 @@
 #include <ctime>
 #include <unistd.h>
 
-#include <log_client.h>
+#include "log_client.h"
 
 namespace saglobal {
     extern uintptr_t g_gameAddr;
 }
 
-static const char* logcatTag = "SAOC";
+static const char* logcatTag = "coop";
 
 // This wrapper class is used to ensure that the file will be fclose()'d at the end of this library's lifetime
 class LogFile {

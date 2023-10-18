@@ -1,7 +1,7 @@
 #include <mutex>
 
-#include <nv_threads.h>
-#include <log_client.h>
+#include <client/log_client.h>
+#include "nv_threads.h"
 
 namespace saglobal {
     void (*g_NVThreadSpawnProc)(uintptr_t x0);

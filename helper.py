@@ -60,13 +60,13 @@ ZIPALIGN: Final[str] = f'{BUILD_TOOLS}/zipalign'
 BUILD_TYPES: Final[tuple] = ('Release', 'Debug')
 BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 
-SAONLINE_VERSION: Final[str] = '0.104'
+COOP_VERSION: Final[str] = '0.104'
 APK_OUT: Final[str] = f'{install_in}/gtasa-dir'
 
-LIB_BASENAME: Final[str] = 'SAOC'
+LIB_BASENAME: Final[str] = 'coop'
 
-OUTPUT_SAONLINE_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{SAONLINE_VERSION}.apk'
-MALICIOUS_SMALI: Final[str] = 'GTASA.smali'
+OUTPUT_COOP_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{COOP_VERSION}.apk'
+MALICIOUS_SMALI: Final[str] = 'smali/GTASA.smali'
 
 parser = argparse.ArgumentParser()
 
@@ -93,9 +93,9 @@ def build_dir():
         '-DCMAKE_SYSTEM_NAME=': 'Android',
         '-DCMAKE_TOOLCHAIN_FILE=': ANDROID_TOOLCHAIN,
 
-        '-DSAONLINE_OUTRELDIR=': install_in,
-        '-DSAONLINE_SHARED_NAME=': LIB_BASENAME,
-        '-DSAONLINE_VERSION=': SAONLINE_VERSION,
+        '-DCOOP_OUTRELDIR=': install_in,
+        '-DCOOP_SHARED_NAME=': LIB_BASENAME,
+        '-DCOOP_VERSION=': COOP_VERSION,
 
         '-DCMAKE_BUILD_TYPE=': BUILD_TYPES[0] if not enb_debug else BUILD_TYPES[1],
         '-DCMAKE_MAKE_PROGRAM=': NINJA_BIN,
@@ -106,12 +106,12 @@ def build_dir():
     FULL_CMAKE: Final[list] = ['{}{}'.format(*c) for c in sorted(CMAKE_BUILD_OPTIONS.items())]
 
     print('CMake options list: ', FULL_CMAKE)
-    subprocess.run([CMAKE_BIN] + FULL_CMAKE + ['..'], shell=False)
+    subprocess.run([CMAKE_BIN] + FULL_CMAKE + ['../..'], shell=False)
     os.chdir(CWD)
 def generate_apk():
     if not os.path.exists(APK_OUT):
         subprocess.run(['java', '-jar', APKTOOL, 'd', '--output', APK_OUT, APK_BASE], shell=False)
-        shutil.copy(MALICIOUS_SMALI, f'{APK_OUT}/smali/com/rockstargames/gtasa/{MALICIOUS_SMALI}')
+        shutil.copy(MALICIOUS_SMALI, f'{APK_OUT}/smali/com/rockstargames/gtasa/GTASA.smali')
 
         # Removing all directories that we don't care inside of (lib) dir
         useless_libdirs = os.listdir(f'{APK_OUT}/lib')
@@ -135,8 +135,8 @@ def generate_apk():
         lib_file = lib_file.replace('\\', '/')
         shutil.copy(lib_file, f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/' + lib_file.split('/')[-1])
 
-    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_SAONLINE_FILE}.un', APK_OUT])
-    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_SAONLINE_FILE}.un', f'{OUTPUT_SAONLINE_FILE}.aligned'], )
+    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_COOP_FILE}.un', APK_OUT])
+    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_COOP_FILE}.un', f'{OUTPUT_COOP_FILE}.aligned'], )
     subprocess.run([
         APKSIGNER, 'sign', '-v',
         f'--min-sdk-version={ANDROID_MIN}',
@@ -144,22 +144,22 @@ def generate_apk():
         f'--ks={SIGNER_KSPATH}',
         f'--ks-key-alias={SIGNER_KSALIAS}',
         f'--ks-pass=pass:{SIGNER_KSPASSWORD}',
-        f'--in={OUTPUT_SAONLINE_FILE}.aligned',
-        f'--out={OUTPUT_SAONLINE_FILE}'
+        f'--in={OUTPUT_COOP_FILE}.aligned',
+        f'--out={OUTPUT_COOP_FILE}'
     ])
 
-    os.remove(f'{OUTPUT_SAONLINE_FILE}.un')
-    os.remove(f'{OUTPUT_SAONLINE_FILE}.aligned')
-    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_SAONLINE_FILE}'])
+    os.remove(f'{OUTPUT_COOP_FILE}.un')
+    os.remove(f'{OUTPUT_COOP_FILE}.aligned')
+    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_COOP_FILE}'])
 def list_devices():
     subprocess.run([ADB, 'devices'], shell=False)
 def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
 def install_apk():
-    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_SAONLINE_FILE])
+    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_COOP_FILE])
 def logcat():
     try:
-        subprocess.run([ADB, 'logcat', 'SAOC,stargames.gtasa,DEBUG, *:S'])
+        subprocess.run([ADB, 'logcat', 'coop,stargames.gtasa, *:S'])
     except KeyboardInterrupt:
         pass
 def clean():
@@ -191,7 +191,7 @@ if args.connect:
     connect_device(args.connect)
     
 if args.install:
-    if not pathlib.Path(OUTPUT_SAONLINE_FILE).is_file():
+    if not pathlib.Path(OUTPUT_COOP_FILE).is_file():
         generate_apk()
     install_apk()
 

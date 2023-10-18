@@ -9,8 +9,9 @@
 #include <malloc.h>
 #include <jni.h>
 
-#include <linux_hierarchy.h>
-#include <log_client.h>
+#include <client/log_client.h>
+
+#include "linux_hierarchy.h"
 
 namespace saglobal {
     extern JNIEnv* g_gameEnv;

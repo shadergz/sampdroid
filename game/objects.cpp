@@ -1,6 +1,6 @@
 #include <pthread.h>
 
-#include <game/game_objects.h>
+#include "objects.h"
 
 namespace sarender {
     extern void initSaReferences();

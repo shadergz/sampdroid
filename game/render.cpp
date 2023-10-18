@@ -1,8 +1,9 @@
 #include <malloc.h>
 
-#include <patches_notes.h>
-#include <game/game_objects.h>
-#include <log_client.h>
+#include <inj/patches_notes.h>
+#include <client/log_client.h>
+
+#include "objects.h"
 
 namespace saglobal {
     void (*g_CTouchInterface_DrawAll)(bool drawAll);

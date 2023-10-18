@@ -1,6 +1,6 @@
 #pragma once
 
-#include <render/rwlpcore.h>
+#include "rwlpcore.h"
 
 /**
  * \ingroup rwraster

@@ -3,15 +3,14 @@
 #include <array>
 
 #include <exception>
-#include <patches_level.h>
-#include <patches_macros.h>
 
-#include <texture_runtime.h>
+#include <game/start/menu_handler.h>
+#include <game/objects.h>
+#include <fixes/nv_threads.h>
+#include <txt/texture_runtime.h>
 
-#include <menu_handler.h>
-#include <game/game_objects.h>
-
-#include <nv_threads.h>
+#include "patches_level.h"
+#include "patches_macros.h"
 
 namespace saglobal {
     AArch64Patcher* g_patcherMicro;

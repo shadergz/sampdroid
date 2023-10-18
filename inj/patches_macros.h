@@ -1,7 +1,7 @@
 #pragma once
 
-#include <log_client.h>
-#include <patches_level.h>
+#include <client/log_client.h>
+#include "patches_level.h"
 
 // BIG - D32: 0x14000003
 #define INC1_NEXT_PC(addr)\

@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <vector>
 
-#include <log_client.h>
-#include <jvm_helper.h>
+#include <client/log_client.h>
+#include <android/jvm_helper.h>
 
 #include <render/rwlpcore.h>
 #include <render/skeleton.h>
