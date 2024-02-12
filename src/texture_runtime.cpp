@@ -4,19 +4,17 @@
 #include <arm_neon.h>
 
 #include <render/rwcore.h>
-#include <client/log_client.h>
+#include <android/log_client.h>
 
 #include "texture_runtime.h"
 
-namespace saglobal {
-    extern uintptr_t g_gameAddr;
-    class TextureDatabaseRuntime* g_textureDatabase;
-}
+extern uintptr_t g_gameAddr;
+class TextureDatabaseRuntime* g_textureDatabase;
 
 uintptr_t TextureDatabaseRuntime::GetTexture(const char* textureName)
 {
-    salog::printFormat(salog::Info, "DB: loading new texture with name %s in memory", textureName);
-    auto loadedTex{((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(textureName)};
+    useriDsp("DB: loading new texture with name %s in memory", textureName);
+    auto loadedTex = ((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(textureName);
     if (!loadedTex)
         return 0;
 
@@ -51,7 +49,7 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     static NativeTDRHandler* dbHandler[std::size(mtDB)]{};
 
     for (;;) {
-        auto dbPtr{&dbHandler[0]};
+        auto dbPtr = &dbHandler[0];
         if (!needToOpen)
             break;
         // Locating an invalid database pointer to place in!
@@ -60,17 +58,17 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         if (dbPtr >= &dbPtr[std::size(dbHandler)])
           break;
 
-        auto dbClass{((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName)};
+        auto dbClass = ((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName);
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
-            salog::printFormat(salog::Error, "DB: database not found: %s", dbName);
+            usereDsp("DB: database not found: %s", dbName);
             std::terminate();
         }
 
         ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2865d8))(*dbPtr);
     }
 
-    const auto loadedTexture{GetTexture(textureName)};
+    const auto loadedTexture = GetTexture(textureName);
     static const char cleanTrigger[]{"clean"};
 
     if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {
@@ -90,10 +88,10 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     }
     
     if (loadedTexture)
-        salog::printFormat(salog::Info, "DB: texture %s from database (%s) loaded at %#llx",
+        useriDsp("DB: texture %s from database (%s) loaded at %#llx",
             textureName, dbName, loadedTexture);
     else
-        salog::printFormat(salog::Error, "DB: texture %s not found in database %s", textureName, dbName);
+        useriDsp("DB: texture %s not found in database %s", textureName, dbName);
 
     return loadedTexture;
 }

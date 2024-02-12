@@ -1,25 +1,22 @@
 #include <algorithm>
 #include <vector>
 
-#include <client/log_client.h>
-#include <android/jvm_helper.h>
+#include <core/log_client.h>
+#include <core/jvm_helper.h>
 
 #include <render/rwlpcore.h>
 #include <render/skeleton.h>
 
-namespace saglobal {
-    extern RsGlobalType* g_rsGlobal;
-    extern uintptr_t g_gameAddr;
-}
+extern RsGlobalType* g_rsGlobal;
+extern uintptr_t g_gameAddr;
 
 std::vector<RwIm2DVertex> vertexBuffer;
 
 void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 {
-    salog::print(salog::Debug, "GUI: ImGui_Impl RenderWare for data draw purposes, has been called");
-
-    const RwReal* nearScreenZ{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868)};
-    const RwReal* recipNearClip{reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864)};
+    userdDsp("GUI: ImGui_Impl RenderWare for data draw purposes, has been called");
+    const RwReal* nearScreenZ = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868);
+    const RwReal* recipNearClip = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864);
     
     RwIm2DVertex* vtxDest{vertexBuffer.data()};
     uint32_t vtxOffset{};
@@ -89,7 +86,6 @@ void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 }
 
 static constexpr uint vertexInitialSize{5000};
-
 bool ImGui_ImplRenderWare_Init()
 {
     auto& io{ImGui::GetIO()};
@@ -108,9 +104,7 @@ bool ImGui_ImplRenderWare_Init()
     // Updates to the screen size will only appear when the next frame buffer is rendered
     // ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
     
-    salog::printFormat(salog::Info, "GUI: client display size: width = (%f), height = (%f)", 
-        io.DisplaySize.x, io.DisplaySize.y);
-
+    useriDsp("GUI: client display size: width = (%f), height = (%f)", io.DisplaySize.x, io.DisplaySize.y);
     return true;
 }
 
@@ -119,7 +113,7 @@ static RwImage* fontPixels{};
 
 static void ImGui_ImplRenderWare_CreateDeviceObjects()
 {
-    salog::printFormat(salog::Info, "GUI: creating new device objects");
+    useriDsp("GUI: creating new device objects");
     auto& io{ImGui::GetIO()};
     uint8_t* pxS;
     
@@ -129,14 +123,13 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
     io.Fonts->GetTexDataAsRGBA32(&pxS, &outWidth, &outHeight, &outBytesPerPixel);
     outBytesPerPixel *= 8;
 
-    salog::printFormat(salog::Info, "GUI: font atlas pixels (%#lp), width (%d), height (%d)",
-        pxS, outWidth, outHeight);
+    useriDsp("GUI: font atlas pixels (%#lp), width (%d), height (%d)", pxS, outWidth, outHeight);
     
-    RwImage* fontData{RwImageCreate(outWidth, outHeight, outBytesPerPixel)};
-    salog::printFormat(salog::Info, "GUI: font data allocated at %#p", fontData);
+    RwImage* fontData = RwImageCreate(outWidth, outHeight, outBytesPerPixel)};
+    useriDsp("GUI: font data allocated at %#p", fontData);
 
     if (!fontData) {
-        salog::print(salog::Error, "GUI: RW couldn't allocate the desired image, quitting...");
+        usereDsp("GUI: RW couldn't allocate the desired image, quitting...");
         std::terminate();
     }
     
@@ -161,7 +154,7 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
     RwRaster* preFontImage{RwRasterCreate(width, height, delph, flags)};
 
     fontRaster = RwRasterSetFromImage(preFontImage, fontData);
-    salog::printFormat(salog::Info, "GUI: font raster in %#llx by %#llx", fontRaster, fontPixels);
+    useriDsp("GUI: font raster in %#llx by %#llx", fontRaster, fontPixels);
 
     RwImageDestroy(fontData);
 

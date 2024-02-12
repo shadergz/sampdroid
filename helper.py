@@ -41,16 +41,16 @@ NINJA_BIN: Final[str] = f'{ANDROID_CMAKE}/bin/ninja'
 
 ANDROID_MODEL = 'c++_shared'
 
-ANDROID_TOOLCHAIN: Final[str] = f'{NDK_PATH}/build/cmake/android.toolchain.cmake'
+ANDROID_TOOLCHAIN: Final[str] = f'{NDK_PATH}/build/cmake/core.toolchain.cmake'
 
 ANDROID_PREBUILT = 'windows-x86_64' if platform.system() == 'Windows' else 'linux-x86_64'
 ANDROID_SHARED: Final[
-    str] = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-android/lib{ANDROID_MODEL}.so'
+    str] = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-core/lib{ANDROID_MODEL}.so'
 
 ANDROID_MIN: Final[int] = 31
 ANDROID_MAX: Final[int] = 33
 
-ANDROID_TARGET: Final[str] = f'android-{ANDROID_MAX}'
+ANDROID_TARGET: Final[str] = f'core-{ANDROID_MAX}'
 ANDROID_MICRO_ABI: Final[str] = 'arm64-v8a'
 
 APKSIGNER: Final[str] = f'{BUILD_TOOLS}/' + ('apksigner.bat' if platform.system() == 'Windows' else 'apksigner')
@@ -60,12 +60,12 @@ ZIPALIGN: Final[str] = f'{BUILD_TOOLS}/zipalign'
 BUILD_TYPES: Final[tuple] = ('Release', 'Debug')
 BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 
-COOP_VERSION: Final[str] = '0.104'
+MOD_VERSION: Final[str] = '0.104'
 APK_OUT: Final[str] = f'{install_in}/gtasa-dir'
 
-LIB_BASENAME: Final[str] = 'coop'
+LIB_BASENAME: Final[str] = 'samp20'
 
-OUTPUT_COOP_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{COOP_VERSION}.apk'
+OUTPUT_MOD_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{MOD_VERSION}.apk'
 MALICIOUS_SMALI: Final[str] = 'smali/GTASA.smali'
 
 parser = argparse.ArgumentParser()
@@ -93,9 +93,9 @@ def build_dir():
         '-DCMAKE_SYSTEM_NAME=': 'Android',
         '-DCMAKE_TOOLCHAIN_FILE=': ANDROID_TOOLCHAIN,
 
-        '-DCOOP_OUTRELDIR=': install_in,
-        '-DCOOP_SHARED_NAME=': LIB_BASENAME,
-        '-DCOOP_VERSION=': COOP_VERSION,
+        '-DSAMP20_OUTRELDIR=': install_in,
+        '-DSAMP20_SHARED_NAME=': LIB_BASENAME,
+        '-DSAMP20_VERSION=': MOD_VERSION,
 
         '-DCMAKE_BUILD_TYPE=': BUILD_TYPES[0] if not enb_debug else BUILD_TYPES[1],
         '-DCMAKE_MAKE_PROGRAM=': NINJA_BIN,
@@ -135,8 +135,8 @@ def generate_apk():
         lib_file = lib_file.replace('\\', '/')
         shutil.copy(lib_file, f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/' + lib_file.split('/')[-1])
 
-    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_COOP_FILE}.un', APK_OUT])
-    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_COOP_FILE}.un', f'{OUTPUT_COOP_FILE}.aligned'], )
+    subprocess.run(['java', '-jar', APKTOOL, 'b', '--output', f'{OUTPUT_MOD_FILE}.un', APK_OUT])
+    subprocess.run([ZIPALIGN, '-p', '-v', '-f', '4', f'{OUTPUT_MOD_FILE}.un', f'{OUTPUT_MOD_FILE}.aligned'], )
     subprocess.run([
         APKSIGNER, 'sign', '-v',
         f'--min-sdk-version={ANDROID_MIN}',
@@ -144,19 +144,19 @@ def generate_apk():
         f'--ks={SIGNER_KSPATH}',
         f'--ks-key-alias={SIGNER_KSALIAS}',
         f'--ks-pass=pass:{SIGNER_KSPASSWORD}',
-        f'--in={OUTPUT_COOP_FILE}.aligned',
-        f'--out={OUTPUT_COOP_FILE}'
+        f'--in={OUTPUT_MOD_FILE}.aligned',
+        f'--out={OUTPUT_MOD_FILE}'
     ])
 
-    os.remove(f'{OUTPUT_COOP_FILE}.un')
-    os.remove(f'{OUTPUT_COOP_FILE}.aligned')
-    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_COOP_FILE}'])
+    os.remove(f'{OUTPUT_MOD_FILE}.un')
+    os.remove(f'{OUTPUT_MOD_FILE}.aligned')
+    subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_MOD_FILE}'])
 def list_devices():
     subprocess.run([ADB, 'devices'], shell=False)
 def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
 def install_apk():
-    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_COOP_FILE])
+    subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_MOD_FILE])
 def logcat():
     try:
         subprocess.run([ADB, 'logcat', 'coop,stargames.gtasa, *:S'])
@@ -191,7 +191,7 @@ if args.connect:
     connect_device(args.connect)
     
 if args.install:
-    if not pathlib.Path(OUTPUT_COOP_FILE).is_file():
+    if not pathlib.Path(OUTPUT_MOD_FILE).is_file():
         generate_apk()
     install_apk()
 

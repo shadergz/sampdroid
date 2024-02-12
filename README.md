@@ -1,17 +1,17 @@
-# GTA:SA CO-OP
-A plugin for the Android version of GTASA to enable players to join SAMP/MTA matches
+# SAMP for Android GTA SA and new generation
+A plugin for the Android version of GTA SA to allow players to join SAMP (PC) matches
 
-#### Project aims
-- Complete replacement for build69 (SAMP for ARMv7 from GTASA v1.8 what has deprecated)
+### Project aims
+- Complete replacement for build69-plus (SAMP for ARMv7 from GTA SA v1.8 which has been deprecated)
 
-#### How to compile?
-- Before start make sure that you have configured the `env.json` file in the project folder
+### How to compile?
+- Before starting, make sure that you have configured the 'env.json' file in the project folder
 
-#### Limitations of hook system
-- Can't to replace or emplace instructions that are a 'ret' or any type of branch
-- Can't to replace or save any instruction that changes or modifies the x8 or x30 registers (only the function prologue is allowed)
+### Limitations of hook system
+- Can't replace or emplace instructions that are a 'ret' or any type of branch
+- Can't replace or save any instruction that changes or modifies the x8 or x30 registers (only the function prologue is allowed)
 
-#### Todo
+### Todo
 ```
 - [ ] Handle vehicles and NPCs pools
 - [ ] Get/Set player coordinates (*)

@@ -1,9 +1,8 @@
 #include <array>
 #include <unistd.h>
 
-#include <client/log_client.h>
-
-#include "user_graphics.h"
+#include <core/log_client.h>
+#include <ui/user_graphics.h>
 
 bool ImGui_ImplRenderWare_Init();
 
@@ -40,7 +39,7 @@ UiClientUser::UiClientUser()
     // Dark mode isn't enable by default
     ImGui::StyleColorsDark();
 
-    salog::printFormat(salog::Info, "GUI: ImGUI version in use %d: %s", 
+    useriDsp("GUI: ImGUI version in use %d: %s",
         IMGUI_VERSION_NUM, IMGUI_VERSION);
 
     ImGui_ImplRenderWare_Init();
@@ -52,23 +51,21 @@ UiClientUser::UiClientUser()
     style.WindowBorderSize = 0.0f;
 
     // Loading related fonts
-    auto gameDataDir{reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8)};
+    auto gameDataDir = reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8);
 
     std::array<SaFont*, 1> saFontPtrs {
         // &sampAux3Font, &userDefaultFont, 
         &arialFont
     };
-
     for (auto font : saFontPtrs) {   
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
             "%sfonts/%s", gameDataDir, font->m_fontName);
 
-        salog::printFormat(salog::Debug, "GUI: attempt to load font %s from %s", 
-            font->m_fontName, font->m_fontPathBuffer);
+        userdDsp("GUI: attempt to load font %s from %s", font->m_fontName, font->m_fontPathBuffer);
 
         bool isFound{false};
         if (font->m_isRequired && !(isFound = access(font->m_fontPathBuffer, R_OK | F_OK) == 0)) {
-            salog::printFormat(salog::Error, "GUI: couldn't load font with name %s", font->m_fontName);
+            usereDsp("GUI: couldn't load font with name %s", font->m_fontName);
             std::terminate();
         }
 
@@ -79,7 +76,7 @@ UiClientUser::UiClientUser()
             m_inScreenfontSize, nullptr, ranges);
         
         m_loadedFonts.push_back(font);
-        salog::printFormat(salog::Info, "GUI: new SA font with name %s has successful loaded", font->m_fontName);
+        useriDsp("GUI: new SA font with name %s has successful loaded", font->m_fontName);
 
     }
 }
@@ -116,10 +113,10 @@ void UiClientUser::renderSceneDetails()
 {
     static constexpr uint modVersionMJF{104};
     static char txtBuffer[0x30];
-    float gameFPSCounter{*reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
+    float gameFpsCounter = *reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
 
-    std::snprintf(txtBuffer, sizeof txtBuffer, "Plugin build v(%3u) | frames: %2.f",
-        modVersionMJF, gameFPSCounter);
+    std::snprintf(txtBuffer, sizeof txtBuffer, "Build v(%3u) | frames: %2.f",
+        modVersionMJF, gameFpsCounter);
 
     ImGui::GetOverlayDrawList()->AddText(
         ImVec2(m_screenScale.x * 20, m_screenScale.y * 1000),
@@ -128,7 +125,7 @@ void UiClientUser::renderSceneDetails()
 
 UiClientUser::~UiClientUser()
 {
-    salog::print(salog::Info, "GUI: system is been shutdown now!");
+    useriDsp("GUI: system is been shutdown now!");
     
     auto& io{ImGui::GetIO()};
     io.Fonts->Clear();

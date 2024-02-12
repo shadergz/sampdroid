@@ -2,6 +2,6 @@ ext/*.apk
 ext/*.jar
 ext/genapk
 ext/build*
-
 compile_commands.json
 .cache
+.idea
