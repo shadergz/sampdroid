@@ -55,8 +55,8 @@ ImVec2 getScreenSize()
     jfieldID widthPixelsField = g_gameEnv->GetFieldID(metricsClass, "widthPixels", "I");
     jfieldID heightPixelsFiel = {g_gameEnv->GetFieldID(metricsClass, "heightPixels", "I");
 
-    jint width = g_gameEnv->GetIntField(metrics, widthPixelsField)};
-    jint height = g_gameEnv->GetIntField(metrics, heightPixelsField)};
+    jint width = g_gameEnv->GetIntField(metrics, widthPixelsField);
+    jint height = g_gameEnv->GetIntField(metrics, heightPixelsField);
 
     // Clean up the local references
     g_gameEnv->DeleteLocalRef(activityClass);

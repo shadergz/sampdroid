@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
-#include <client/log_client.h>
+#include <core/log_client.h>
 
 class AArch64Patcher {
 public:

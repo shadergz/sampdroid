@@ -34,7 +34,6 @@ public:
         auto operator*() {
             return m_fontObject;
         }
-
     };
 
 private:

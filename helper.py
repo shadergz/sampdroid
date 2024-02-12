@@ -1,8 +1,13 @@
 #! /bin/python3
 
-import os, argparse, pathlib, subprocess, shutil, glob, platform
+import os
+import argparse
+import pathlib
+import subprocess
+import shutil
+import glob
+import platform
 import json as voorhees
-from typing import Final
 
 # You can change these fields too!
 with open('env.json', 'r') as jf:
@@ -17,56 +22,55 @@ with open('env.json', 'r') as jf:
     envvar_keypass = env['android_keypass_env']
 
 # Change this to your current input files
-USER_PATH: Final[str] = os.path.expanduser('~').replace('\\', '/')
+USER_PATH = os.path.expanduser('~').replace('\\', '/')
 
-APK_BASE: Final[str] = f'{apk_origin}'
+APK_BASE = f'{apk_origin}'
 
-APKTOOL: Final[str] = f'{apktool}'
+APKTOOL = f'{apktool}'
 
-SIGNER_KSPATH: Final[str] = os.getenv(envvar_keypath).replace('\\', '/')
-SIGNER_KSALIAS: Final[str] = os.getenv(envvar_keyalias)
-SIGNER_KSPASSWORD: Final[str] = os.getenv(envvar_keypass)
+SIGNER_KSPATH = os.getenv(envvar_keypath).replace('\\', '/')
+SIGNER_KSALIAS = os.getenv(envvar_keyalias)
+SIGNER_KSPASSWORD = os.getenv(envvar_keypass)
 
 # --- Try build now!
 
-# Don't touch in nothing below, at least if you know exactly what are you doing!
-ANDROID_SDK: Final[str] = f'{USER_PATH}/AppData/Local/Android/Sdk' if platform.system() == 'Windows' else f'{USER_PATH}/Android/Sdk'
+# Don't touch anything below, unless you know exactly what you are doing!
+ANDROID_SDK = f'{USER_PATH}/AppData/Local/Android/Sdk' if platform.system() == 'Windows' else f'{USER_PATH}/Android/Sdk'
 
-NDK_PATH: Final[str] = f'{ANDROID_SDK}/ndk/' + os.listdir(f'{ANDROID_SDK}/ndk')[0]
-BUILD_TOOLS: Final[str] = f'{ANDROID_SDK}/build-tools/' + os.listdir(f'{ANDROID_SDK}/build-tools')[0]
-ANDROID_CMAKE: Final[str] = f'{ANDROID_SDK}/cmake/' + os.listdir(f'{ANDROID_SDK}/cmake')[0]
-PLATFORM_TOOLS: Final[str] = f'{ANDROID_SDK}/platform-tools'
-CMAKE_BIN: Final[str] = f'{ANDROID_CMAKE}/bin/cmake'
-NINJA_BIN: Final[str] = f'{ANDROID_CMAKE}/bin/ninja'
+NDK_PATH = f'{ANDROID_SDK}/ndk/' + os.listdir(f'{ANDROID_SDK}/ndk')[0]
+BUILD_TOOLS = f'{ANDROID_SDK}/build-tools/' + os.listdir(f'{ANDROID_SDK}/build-tools')[0]
+ANDROID_CMAKE = f'{ANDROID_SDK}/cmake/' + os.listdir(f'{ANDROID_SDK}/cmake')[0]
+PLATFORM_TOOLS = f'{ANDROID_SDK}/platform-tools'
+CMAKE_BIN = f'{ANDROID_CMAKE}/bin/cmake'
+NINJA_BIN = f'{ANDROID_CMAKE}/bin/ninja'
 
 ANDROID_MODEL = 'c++_shared'
 
-ANDROID_TOOLCHAIN: Final[str] = f'{NDK_PATH}/build/cmake/core.toolchain.cmake'
+ANDROID_TOOLCHAIN = f'{NDK_PATH}/build/cmake/core.toolchain.cmake'
 
 ANDROID_PREBUILT = 'windows-x86_64' if platform.system() == 'Windows' else 'linux-x86_64'
-ANDROID_SHARED: Final[
-    str] = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-core/lib{ANDROID_MODEL}.so'
+ANDROID_SHARED = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-core/lib{ANDROID_MODEL}.so'
 
-ANDROID_MIN: Final[int] = 31
-ANDROID_MAX: Final[int] = 33
+ANDROID_MIN = 31
+ANDROID_MAX = 33
 
-ANDROID_TARGET: Final[str] = f'core-{ANDROID_MAX}'
-ANDROID_MICRO_ABI: Final[str] = 'arm64-v8a'
+ANDROID_TARGET = f'core-{ANDROID_MAX}'
+ANDROID_MICRO_ABI = 'arm64-v8a'
 
-APKSIGNER: Final[str] = f'{BUILD_TOOLS}/' + ('apksigner.bat' if platform.system() == 'Windows' else 'apksigner')
-ADB: Final[str] = f'{PLATFORM_TOOLS}/adb'
-ZIPALIGN: Final[str] = f'{BUILD_TOOLS}/zipalign'
+APKSIGNER = f'{BUILD_TOOLS}/' + ('apksigner.bat' if platform.system() == 'Windows' else 'apksigner')
+ADB = f'{PLATFORM_TOOLS}/adb'
+ZIPALIGN = f'{BUILD_TOOLS}/zipalign'
 
-BUILD_TYPES: Final[tuple] = ('Release', 'Debug')
-BUILD_DIR: Final[str] = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
+BUILD_TYPES = ('Release', 'Debug')
+BUILD_DIR = '{}.{}'.format(build_in, 'dbg' if enb_debug else 'rel')
 
-MOD_VERSION: Final[str] = '0.104'
-APK_OUT: Final[str] = f'{install_in}/gtasa-dir'
+MOD_VERSION = '0.104'
+APK_OUT = f'{install_in}/gtasa-dir'
 
-LIB_BASENAME: Final[str] = 'samp20'
+LIB_BASENAME = 'samp20'
 
-OUTPUT_MOD_FILE: Final[str] = f'{install_in}/{LIB_BASENAME} v{MOD_VERSION}.apk'
-MALICIOUS_SMALI: Final[str] = 'smali/GTASA.smali'
+OUTPUT_MOD_FILE = f'{install_in}/{LIB_BASENAME} v{MOD_VERSION}.apk'
+MALICIOUS_SMALI = 'smali/GTASA.smali'
 
 parser = argparse.ArgumentParser()
 
@@ -81,10 +85,10 @@ parser.add_argument('-c', '--clean', action='store_true')
 args = parser.parse_args()
 def build_dir():
     os.mkdir(BUILD_DIR)
-    CWD: Final[str] = os.getcwd()
+    command = os.getcwd()
     os.chdir(BUILD_DIR)
 
-    CMAKE_BUILD_OPTIONS: Final[dict] = {
+    cmake_build_options = {
         '-DANDROID_NDK=': NDK_PATH,
         '-DANDROID_ABI=': ANDROID_MICRO_ABI,
         '-DANDROID_PLATFORM=': ANDROID_MIN,
@@ -103,33 +107,33 @@ def build_dir():
         '-G': 'Ninja'
     }
 
-    FULL_CMAKE: Final[list] = ['{}{}'.format(*c) for c in sorted(CMAKE_BUILD_OPTIONS.items())]
+    full_cmake = ['{}{}'.format(*c) for c in sorted(cmake_build_options.items())]
 
-    print('CMake options list: ', FULL_CMAKE)
-    subprocess.run([CMAKE_BIN] + FULL_CMAKE + ['../..'], shell=False)
-    os.chdir(CWD)
+    print('CMake options list: ', full_cmake)
+    subprocess.run([CMAKE_BIN] + full_cmake + ['../..'], shell=False)
+    os.chdir(command)
 def generate_apk():
     if not os.path.exists(APK_OUT):
         subprocess.run(['java', '-jar', APKTOOL, 'd', '--output', APK_OUT, APK_BASE], shell=False)
         shutil.copy(MALICIOUS_SMALI, f'{APK_OUT}/smali/com/rockstargames/gtasa/GTASA.smali')
 
-        # Removing all directories that we don't care inside of (lib) dir
+        # Removing all directories that we don't care about inside the (lib) directory
         useless_libdirs = os.listdir(f'{APK_OUT}/lib')
         useless_libdirs.remove(ANDROID_MICRO_ABI)
 
         for useless in useless_libdirs:
             shutil.rmtree(f'{APK_OUT}/lib/{useless}')
 
-    CWD: Final[str] = os.getcwd()
+    cwd = os.getcwd()
     os.chdir(BUILD_DIR)
     subprocess.run([NINJA_BIN, 'install'])
-    os.chdir(CWD)
+    os.chdir(cwd)
 
     # Copying all needed libraries
-    CPP_LIB: Final[str] = f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/' + ANDROID_SHARED.split('/')[-1]
+    cpp_lib = f'{APK_OUT}/lib/{ANDROID_MICRO_ABI}/' + ANDROID_SHARED.split('/')[-1]
 
-    if not pathlib.Path(CPP_LIB).is_file():
-        shutil.copy(ANDROID_SHARED, CPP_LIB)
+    if not pathlib.Path(cpp_lib).is_file():
+        shutil.copy(ANDROID_SHARED, cpp_lib)
 
     for lib_file in glob.glob(f'{install_in}/lib*'):
         lib_file = lib_file.replace('\\', '/')
@@ -151,6 +155,7 @@ def generate_apk():
     os.remove(f'{OUTPUT_MOD_FILE}.un')
     os.remove(f'{OUTPUT_MOD_FILE}.aligned')
     subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_MOD_FILE}'])
+
 def list_devices():
     subprocess.run([ADB, 'devices'], shell=False)
 def connect_device(dev_device: str):
@@ -159,14 +164,14 @@ def install_apk():
     subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_MOD_FILE])
 def logcat():
     try:
-        subprocess.run([ADB, 'logcat', 'coop,stargames.gtasa, *:S'])
+        subprocess.run([ADB, 'logcat', 'samp20,stargames.gtasa, *:S'])
     except KeyboardInterrupt:
         pass
 def clean():
-    CWD: Final[str] = os.getcwd()
+    local = os.getcwd()
     os.chdir(BUILD_DIR)
     subprocess.run([NINJA_BIN, 'clean'])
-    os.chdir(CWD)
+    os.chdir(local)
 
     delete_files = [f'{install_in}/{de}' for de in os.listdir(install_in)]
     delete_files.remove(APK_OUT)

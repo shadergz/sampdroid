@@ -1,5 +1,5 @@
 #include <inj/patches_notes.h>
-#include <client/log_client.h>
+#include <core/log_client.h>
 
 #include <game/objects.h>
 void (*g_CClock_Update)(uint64_t rX0);

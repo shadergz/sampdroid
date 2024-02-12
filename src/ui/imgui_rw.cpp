@@ -18,7 +18,7 @@ void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
     const RwReal* nearScreenZ = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868);
     const RwReal* recipNearClip = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864);
     
-    RwIm2DVertex* vtxDest{vertexBuffer.data()};
+    RwIm2DVertex* vtxDest = vertexBuffer.data();
     uint32_t vtxOffset{};
 
     // Fill up the entire vertex buffer and fix all screen coordinates

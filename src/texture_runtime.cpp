@@ -6,8 +6,7 @@
 #include <render/rwcore.h>
 #include <android/log_client.h>
 
-#include "texture_runtime.h"
-
+#include <texture_runtime.h>
 extern uintptr_t g_gameAddr;
 class TextureDatabaseRuntime* g_textureDatabase;
 
