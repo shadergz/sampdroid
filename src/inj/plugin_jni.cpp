@@ -93,7 +93,7 @@ static struct sigaction originSigSegv;
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
-    useriDsp("GTA:SA CO-OP has loaded, build date: " __DATE__ " " __TIME__);
+    useriDsp("SAMP20 has loaded, build date: " __DATE__ " " __TIME__);
     
     coutFmt(Info, "Loaded by thread id {} in core {}", std::this_thread::get_id(), sched_getcpu());
     const jint useVersion{JNI_VERSION_1_6};

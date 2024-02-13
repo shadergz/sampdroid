@@ -56,7 +56,7 @@ UiClientUser::UiClientUser()
     };
     for (auto font : saFontPtrs) {   
         std::snprintf(font->m_fontPathBuffer, std::size(font->m_fontPathBuffer),
-            "%sfonts/%s", gameDataDir, font->m_fontName);
+            "%sSAMP/fonts/%s", gameDataDir, font->m_fontName);
 
         userdDsp("GUI: attempt to load font %s from %s", font->m_fontName, font->m_fontPathBuffer);
 
@@ -112,7 +112,7 @@ void UiClientUser::renderSceneDetails()
     static char txtBuffer[0x30];
     float gameFpsCounter = *reinterpret_cast<float*>(g_gameAddr + 0xbdc58c);
 
-    std::snprintf(txtBuffer, sizeof txtBuffer, "Build v(%3u) | frames: %2.f",
+    std::snprintf(txtBuffer, sizeof txtBuffer, "Build v%3u - FPS: %2.f",
         modVersionMJF, gameFpsCounter);
 
     ImGui::GetOverlayDrawList()->AddText(

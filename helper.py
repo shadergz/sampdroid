@@ -70,7 +70,7 @@ APK_OUT = f'{install_in}/gtasa-dir'
 
 LIB_BASENAME = 'samp20'
 
-OUTPUT_MOD_FILE = f'{install_in}/{LIB_BASENAME} v{MOD_VERSION}.apk'
+OUTPUT_MOD_FILE = f'{install_in}/{LIB_BASENAME.upper()} v{MOD_VERSION}.apk'
 MALICIOUS_SMALI = 'smali/GTASA.smali'
 
 parser = argparse.ArgumentParser()

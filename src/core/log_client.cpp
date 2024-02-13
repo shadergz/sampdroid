@@ -31,10 +31,10 @@ private:
 
 static LogFile logFile{};
 [[gnu::always_inline]] inline void checkLogFile() {
-    char logFilePath[0x4f];
+    char logFilePath[0x60];
 
     std::snprintf(logFilePath, std::size(logFilePath),
-        "%samp_client.log", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
+        "%sSAMP.log", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
 
     logFile = fopen(logFilePath, "a");
     char openedAt[0x2f];
@@ -52,13 +52,12 @@ static LogFile logFile{};
     const auto timeData = localtime(&ts);
 
     std::strftime(openedAt, std::size(openedAt), "%T", timeData);
-    SALOG_ASSERT(access(logFilePath, W_OK) == 0, "Log file in GTASA external data directory couldn't be found");
-
-    __android_log_print(ANDROID_LOG_INFO, logcatTag, "Log file opened in %s", logFilePath);
-
-    std::fprintf(*logFile, "Start time of writing [%s], file pointer: %p from %s\n",
-        openedAt, *logFile, logFilePath);
-    fflush(*logFile);
+    if (*logFile) {
+        std::fprintf(*logFile, "Start time of writing [%s], file pointer: %p from %s\n",
+            openedAt, *logFile, logFilePath);
+        __android_log_print(ANDROID_LOG_INFO, logcatTag, "Log file opened in %s", logFilePath);
+        fflush(*logFile);
+    }
 }
 
 int userDisplay(const LogId mode, const char* format, va_list va) {
