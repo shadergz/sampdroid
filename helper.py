@@ -46,10 +46,11 @@ NINJA_BIN = f'{ANDROID_CMAKE}/bin/ninja'
 
 ANDROID_MODEL = 'c++_shared'
 
-ANDROID_TOOLCHAIN = f'{NDK_PATH}/build/cmake/core.toolchain.cmake'
+ANDROID_TOOLCHAIN = f'{NDK_PATH}/build/cmake/android.toolchain.cmake'
 
 ANDROID_PREBUILT = 'windows-x86_64' if platform.system() == 'Windows' else 'linux-x86_64'
-ANDROID_SHARED = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/sysroot/usr/lib/aarch64-linux-core/lib{ANDROID_MODEL}.so'
+ANDROID_SHARED = f'{NDK_PATH}/toolchains/llvm/prebuilt/{ANDROID_PREBUILT}/\
+sysroot/usr/lib/aarch64-linux-android/lib{ANDROID_MODEL}.so'
 
 ANDROID_MIN = 31
 ANDROID_MAX = 33
@@ -83,6 +84,8 @@ parser.add_argument('-l', '--logcat', action='store_true')
 parser.add_argument('-c', '--clean', action='store_true')
 
 args = parser.parse_args()
+
+
 def build_dir():
     os.mkdir(BUILD_DIR)
     command = os.getcwd()
@@ -112,6 +115,8 @@ def build_dir():
     print('CMake options list: ', full_cmake)
     subprocess.run([CMAKE_BIN] + full_cmake + ['../..'], shell=False)
     os.chdir(command)
+
+
 def generate_apk():
     if not os.path.exists(APK_OUT):
         subprocess.run(['java', '-jar', APKTOOL, 'd', '--output', APK_OUT, APK_BASE], shell=False)
@@ -156,17 +161,26 @@ def generate_apk():
     os.remove(f'{OUTPUT_MOD_FILE}.aligned')
     subprocess.run([APKSIGNER, 'verify', '-v', f'{OUTPUT_MOD_FILE}'])
 
+
 def list_devices():
     subprocess.run([ADB, 'devices'], shell=False)
+
+
 def connect_device(dev_device: str):
     subprocess.run([ADB, 'connect', dev_device])
+
+
 def install_apk():
     subprocess.run([ADB, 'install', '-r', '--streaming', OUTPUT_MOD_FILE])
+
+
 def logcat():
     try:
         subprocess.run([ADB, 'logcat', 'samp20,stargames.gtasa, *:S'])
     except KeyboardInterrupt:
         pass
+
+
 def clean():
     local = os.getcwd()
     os.chdir(BUILD_DIR)
@@ -180,21 +194,22 @@ def clean():
 
     for delete in delete_files:
         os.remove(delete)
-        
+
+
 if args.build and not os.path.exists(BUILD_DIR):
     build_dir()
-    
+
 if args.genapk:
     if not os.path.exists(BUILD_DIR):
         build_dir()
     generate_apk()
-    
+
 if args.devices:
     list_devices()
 
 if args.connect:
     connect_device(args.connect)
-    
+
 if args.install:
     if not pathlib.Path(OUTPUT_MOD_FILE).is_file():
         generate_apk()

@@ -1,6 +1,6 @@
 #include <malloc.h>
 #include <inj/patches_notes.h>
-#include <user/log_client.h>
+#include <core/log_client.h>
 #include <game/objects.h>
 
 void (*g_CTouchInterface_DrawAll)(bool drawAll);

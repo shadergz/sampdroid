@@ -1,8 +1,8 @@
 
-#include <client/log_client.h>
+#include <core/log_client.h>
 
-#include "rwcore.h"
-#include "skeleton.h"
+#include <rwcore.h>
+#include <skeleton.h>
 
 /* render/rwcore.h */
 RwCamera* (*RwCameraBeginUpdate)(RwCamera *camera);
@@ -58,79 +58,72 @@ RwBool (*RwIm2DRenderIndexedPrimitive)(RwPrimitiveType primType, RwIm2DVertex* v
 RwImage* (*RtPNGImageWrite)(RwImage* image, const RwChar* imageName);
 RwImage* (*RtPNGImageRead)(const RwChar* imageName);
 
-namespace saglobal {
-    RsGlobalType* g_rsGlobal;
-    extern uintptr_t g_gameAddr;
-}
+RsGlobalType* g_rsGlobal;
+extern uintptr_t g_gameAddr;
 
-namespace sarender {
-    using namespace saglobal;
+void initSaReferences()
+{
+   useriDsp("Render: loading RenderWare Graphics engine functions references...");
 
-    void initSaReferences()
-    {
-        salog::print(salog::Info, "Render: loading RenderWare Graphics engine functions references...");
+    /* render/skeleton.h */
+    g_rsGlobal = (RsGlobalType*)(g_gameAddr + 0xc9b320);
+    userdDsp(
+        "1. App Name: %s\n"
+        "2. Maximum FPS: %u",
+        g_rsGlobal->appName, g_rsGlobal->maxFPS);
 
-        /* render/skeleton.h */
-        g_rsGlobal = (RsGlobalType*)(g_gameAddr + 0xc9b320);
-        salog::printFormat(salog::Debug, 
-            "1. App Name: %s\n"
-            "2. Maximum FPS: %u",
-            g_rsGlobal->appName, g_rsGlobal->maxFPS);
-        
-        /* render/rwcore.h */
-        *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr + 0x26cf50);
-        *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr + 0x26cf48);
-        *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr + 0x26d220);
+    /* render/rwcore.h */
+    *(uintptr_t**)(&RwCameraBeginUpdate)          = (uintptr_t*)(g_gameAddr + 0x26cf50);
+    *(uintptr_t**)(&RwCameraEndUpdate)            = (uintptr_t*)(g_gameAddr + 0x26cf48);
+    *(uintptr_t**)(&RwCameraShowRaster)           = (uintptr_t*)(g_gameAddr + 0x26d220);
 
-        *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_gameAddr + 0x272e34);
-        *(uintptr_t**)(&RwRasterDestroy)              = (uintptr_t*)(g_gameAddr + 0x272b24);
-        *(uintptr_t**)(&RwRasterGetOffset)            = (uintptr_t*)(g_gameAddr + 0x272940);
-        *(uintptr_t**)(&RwRasterGetNumLevels)         = (uintptr_t*)(g_gameAddr + 0x272cf4);
-        *(uintptr_t**)(&RwRasterSubRaster)            = (uintptr_t*)(g_gameAddr + 0x272da4);
-        *(uintptr_t**)(&RwRasterRenderFast)           = (uintptr_t*)(g_gameAddr + 0x272a18);
-        *(uintptr_t**)(&RwRasterRender)               = (uintptr_t*)(g_gameAddr + 0x272a9c);
-        *(uintptr_t**)(&RwRasterRenderScaled)         = (uintptr_t*)(g_gameAddr + 0x272b94);
-        *(uintptr_t**)(&RwRasterPushContext)          = (uintptr_t*)(g_gameAddr + 0x272b94);
-        *(uintptr_t**)(&RwRasterPopContext)           = (uintptr_t*)(g_gameAddr + 0x272c8c);
-        *(uintptr_t**)(&RwRasterGetCurrentContext)    = (uintptr_t*)(g_gameAddr + 0x2728e4);
-        *(uintptr_t**)(&RwRasterClear)                = (uintptr_t*)(g_gameAddr + 0x272994);
-        *(uintptr_t**)(&RwRasterClearRect)            = (uintptr_t*)(g_gameAddr + 0x272a60);
-        *(uintptr_t**)(&RwRasterShowRaster)           = (uintptr_t*)(g_gameAddr + 0x272d4c);
-        *(uintptr_t**)(&RwRasterLock)                 = (uintptr_t*)(g_gameAddr + 0x272f18);
-        *(uintptr_t**)(&RwRasterUnlock)               = (uintptr_t*)(g_gameAddr + 0x272954);
-        *(uintptr_t**)(&RwRasterLockPalette)          = (uintptr_t*)(g_gameAddr + 0x272c40);
-        *(uintptr_t**)(&RwRasterUnlockPalette)        = (uintptr_t*)(g_gameAddr + 0x272ae4);
-        *(uintptr_t**)(&RwImageCreate)                = (uintptr_t*)(g_gameAddr + 0x2709d8);
-        *(uintptr_t**)(&RwImageDestroy)               = (uintptr_t*)(g_gameAddr + 0x270a50);
-        *(uintptr_t**)(&RwImageAllocatePixels)        = (uintptr_t*)(g_gameAddr + 0x270b1c);
-        *(uintptr_t**)(&RwImageFreePixels)            = (uintptr_t*)(g_gameAddr + 0x270ad4);
-        *(uintptr_t**)(&RwImageCopy)                  = (uintptr_t*)(g_gameAddr + 0x2712f8);
-        *(uintptr_t**)(&RwImageResize)                = (uintptr_t*)(g_gameAddr + 0x270c00);
-        *(uintptr_t**)(&RwImageApplyMask)             = (uintptr_t*)(g_gameAddr + 0x270f58);
+    *(uintptr_t**)(&RwRasterCreate)               = (uintptr_t*)(g_gameAddr + 0x272e34);
+    *(uintptr_t**)(&RwRasterDestroy)              = (uintptr_t*)(g_gameAddr + 0x272b24);
+    *(uintptr_t**)(&RwRasterGetOffset)            = (uintptr_t*)(g_gameAddr + 0x272940);
+    *(uintptr_t**)(&RwRasterGetNumLevels)         = (uintptr_t*)(g_gameAddr + 0x272cf4);
+    *(uintptr_t**)(&RwRasterSubRaster)            = (uintptr_t*)(g_gameAddr + 0x272da4);
+    *(uintptr_t**)(&RwRasterRenderFast)           = (uintptr_t*)(g_gameAddr + 0x272a18);
+    *(uintptr_t**)(&RwRasterRender)               = (uintptr_t*)(g_gameAddr + 0x272a9c);
+    *(uintptr_t**)(&RwRasterRenderScaled)         = (uintptr_t*)(g_gameAddr + 0x272b94);
+    *(uintptr_t**)(&RwRasterPushContext)          = (uintptr_t*)(g_gameAddr + 0x272b94);
+    *(uintptr_t**)(&RwRasterPopContext)           = (uintptr_t*)(g_gameAddr + 0x272c8c);
+    *(uintptr_t**)(&RwRasterGetCurrentContext)    = (uintptr_t*)(g_gameAddr + 0x2728e4);
+    *(uintptr_t**)(&RwRasterClear)                = (uintptr_t*)(g_gameAddr + 0x272994);
+    *(uintptr_t**)(&RwRasterClearRect)            = (uintptr_t*)(g_gameAddr + 0x272a60);
+    *(uintptr_t**)(&RwRasterShowRaster)           = (uintptr_t*)(g_gameAddr + 0x272d4c);
+    *(uintptr_t**)(&RwRasterLock)                 = (uintptr_t*)(g_gameAddr + 0x272f18);
+    *(uintptr_t**)(&RwRasterUnlock)               = (uintptr_t*)(g_gameAddr + 0x272954);
+    *(uintptr_t**)(&RwRasterLockPalette)          = (uintptr_t*)(g_gameAddr + 0x272c40);
+    *(uintptr_t**)(&RwRasterUnlockPalette)        = (uintptr_t*)(g_gameAddr + 0x272ae4);
+    *(uintptr_t**)(&RwImageCreate)                = (uintptr_t*)(g_gameAddr + 0x2709d8);
+    *(uintptr_t**)(&RwImageDestroy)               = (uintptr_t*)(g_gameAddr + 0x270a50);
+    *(uintptr_t**)(&RwImageAllocatePixels)        = (uintptr_t*)(g_gameAddr + 0x270b1c);
+    *(uintptr_t**)(&RwImageFreePixels)            = (uintptr_t*)(g_gameAddr + 0x270ad4);
+    *(uintptr_t**)(&RwImageCopy)                  = (uintptr_t*)(g_gameAddr + 0x2712f8);
+    *(uintptr_t**)(&RwImageResize)                = (uintptr_t*)(g_gameAddr + 0x270c00);
+    *(uintptr_t**)(&RwImageApplyMask)             = (uintptr_t*)(g_gameAddr + 0x270f58);
 
-        *(uintptr_t**)(&RwImageMakeMask)              = (uintptr_t*)(g_gameAddr + 0x270dc0);
-        *(uintptr_t**)(&RwImageReadMaskedImage)       = (uintptr_t*)(g_gameAddr + 0x271dac);
-        *(uintptr_t**)(&RwImageRead)                  = (uintptr_t*)(g_gameAddr + 0x271634);
-        *(uintptr_t**)(&RwImageWrite)                 = (uintptr_t*)(g_gameAddr + 0x271cdc);
-        *(uintptr_t**)(&RwImageSetFromRaster)         = (uintptr_t*)(g_gameAddr + 0x272568);
-        *(uintptr_t**)(&RwRasterSetFromImage)         = (uintptr_t*)(g_gameAddr + 0x2725a4);
-        *(uintptr_t**)(&RwRasterRead)                 = (uintptr_t*)(g_gameAddr + 0x27275c);
-        *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_gameAddr + 0x27285c);
-        *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_gameAddr + 0x2725e0);
+    *(uintptr_t**)(&RwImageMakeMask)              = (uintptr_t*)(g_gameAddr + 0x270dc0);
+    *(uintptr_t**)(&RwImageReadMaskedImage)       = (uintptr_t*)(g_gameAddr + 0x271dac);
+    *(uintptr_t**)(&RwImageRead)                  = (uintptr_t*)(g_gameAddr + 0x271634);
+    *(uintptr_t**)(&RwImageWrite)                 = (uintptr_t*)(g_gameAddr + 0x271cdc);
+    *(uintptr_t**)(&RwImageSetFromRaster)         = (uintptr_t*)(g_gameAddr + 0x272568);
+    *(uintptr_t**)(&RwRasterSetFromImage)         = (uintptr_t*)(g_gameAddr + 0x2725a4);
+    *(uintptr_t**)(&RwRasterRead)                 = (uintptr_t*)(g_gameAddr + 0x27275c);
+    *(uintptr_t**)(&RwRasterReadMaskedRaster)     = (uintptr_t*)(g_gameAddr + 0x27285c);
+    *(uintptr_t**)(&RwImageFindRasterFormat)      = (uintptr_t*)(g_gameAddr + 0x2725e0);
 
-        /* render/rwlpcore.h */
-        *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_gameAddr + 0x27d640);
-        *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_gameAddr + 0x27d654);
-        *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_gameAddr + 0x27d6b8);
-        *(uintptr_t**)(&RwRenderStateSet)             = (uintptr_t*)(g_gameAddr + 0x27d668);
-        *(uintptr_t**)(&RwIm2DRenderLine)             = (uintptr_t*)(g_gameAddr + 0x27d6cc);
-        *(uintptr_t**)(&RwIm2DRenderTriangle)         = (uintptr_t*)(g_gameAddr + 0x27d6e0);
-        *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_gameAddr + 0x27d6f4);
-        *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_gameAddr + 0x27d708);
+    /* render/rwlpcore.h */
+    *(uintptr_t**)(&RwIm2DGetNearScreenZ)         = (uintptr_t*)(g_gameAddr + 0x27d640);
+    *(uintptr_t**)(&RwIm2DGetFarScreenZ)          = (uintptr_t*)(g_gameAddr + 0x27d654);
+    *(uintptr_t**)(&RwRenderStateGet)             = (uintptr_t*)(g_gameAddr + 0x27d6b8);
+    *(uintptr_t**)(&RwRenderStateSet)             = (uintptr_t*)(g_gameAddr + 0x27d668);
+    *(uintptr_t**)(&RwIm2DRenderLine)             = (uintptr_t*)(g_gameAddr + 0x27d6cc);
+    *(uintptr_t**)(&RwIm2DRenderTriangle)         = (uintptr_t*)(g_gameAddr + 0x27d6e0);
+    *(uintptr_t**)(&RwIm2DRenderPrimitive)        = (uintptr_t*)(g_gameAddr + 0x27d6f4);
+    *(uintptr_t**)(&RwIm2DRenderIndexedPrimitive) = (uintptr_t*)(g_gameAddr + 0x27d708);
 
-        /* render/rtpng.h */
-        *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_gameAddr + 0x2ad4d0);
-        *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_gameAddr + 0x2ad8c8);
-    }
-
+    /* render/rtpng.h */
+    *(uintptr_t**)(&RtPNGImageWrite)              = (uintptr_t*)(g_gameAddr + 0x2ad4d0);
+    *(uintptr_t**)(&RtPNGImageRead)               = (uintptr_t*)(g_gameAddr + 0x2ad8c8);
 }

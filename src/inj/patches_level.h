@@ -50,7 +50,7 @@ private:
                 MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
             SALOG_ASSERT(m_tRWXData != MAP_FAILED, "m_tRWXData is pointing to an invalid address space");
-            salog::printFormat(salog::Info, "Hook: patch data allocated at: %#p", m_tRWXData);
+            useriDsp("Hook: patch data allocated at: %#p", m_tRWXData);
 
 #ifndef NDEBUG
             for (uintptr_t iIdex{}; iIdex != PATCHER_PAGE_SIZE; iIdex += 4)
@@ -71,8 +71,4 @@ private:
 
     MicroRaw_Trampoline m_trBank{};
 };
-
-namespace sapatch {
-    void applyOnGame();
-}
-
+void applyOnGame();

@@ -13,8 +13,6 @@ std::atomic<bool> g_clientHasInitiliazed{false};
 std::atomic<bool> g_clientIsRunning{false};
 extern JNIEnv* g_gameEnv;
 
-using namespace saglobal;
-
 pthread_cond_t g_multCond;
 pthread_mutex_t g_multExclusive;
 

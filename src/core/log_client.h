@@ -2,6 +2,7 @@
 
 #include <android/log.h>
 #include <cstdio>
+#include <cstdarg>
 
 #include <utility>
 #include <string_view>
@@ -16,7 +17,7 @@ enum LogId {
     Error = ANDROID_LOG_ERROR,
 };
 
-static int userDisplay(const LogId mode, const char* format, va_list va);
+int userDisplay(const LogId mode, const char* format, va_list va);
 #define USER_DSP_FUNC(mode, fmt)\
     va_list va;\
     va_start(va, fmt);\
@@ -24,13 +25,13 @@ static int userDisplay(const LogId mode, const char* format, va_list va);
     va_end(va);\
     return print
 
-int useriDsp(const char* format, ...) {
+inline int useriDsp(const char* format, ...) {
     USER_DSP_FUNC(Info, format);
 }
-int userdDsp(const char* format, ...) {
+inline int userdDsp(const char* format, ...) {
     USER_DSP_FUNC(Debug, format);
 }
-int usereDsp(const char* format, ...) {
+inline int usereDsp(const char* format, ...) {
     USER_DSP_FUNC(Error, format);
 }
 

@@ -7,7 +7,7 @@
 #include <game/menu_handler.h>
 #include <game/objects.h>
 #include <nv_threads.h>
-#include <txt/texture_runtime.h>
+#include <texture_runtime.h>
 
 #include <inj/patches_level.h>
 #include <inj/patches_macros.h>
@@ -89,8 +89,8 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
 
     UPDATE_HOOK_CTX(hookCtx, method, m_nemesis, 0);
     // Doing the frame backup (we're divorciating now)
-    auto originFunc = reinterpret_cast<uint32_t*>(method)};
-    auto trContext = reinterpret_cast<uint32_t*>(hookCtx->m_content.data())};
+    auto originFunc = reinterpret_cast<uint32_t*>(method);
+    auto trContext = reinterpret_cast<uint32_t*>(hookCtx->m_content.data());
     {
         int nextToCopy{};
 
@@ -135,11 +135,11 @@ void AArch64Patcher::placeHookAt(const uintptr_t method, const uintptr_t replace
 }
 void AArch64Patcher::turnTextSegmentMutable(uintptr_t textPage, uint64_t regionSize)
 {
-    const auto baseAddr = textPage & 0xfffffff000u};
+    const auto baseAddr = textPage & 0xfffffff000u;
     /* If page isn't aligned we can't change the permission for more than one page 
      * without break into multiples */
-    const auto protect = PROT_READ | PROT_WRITE | PROT_EXEC};
-    const auto pageSize = getpagesize()};
+    const auto protect = PROT_READ | PROT_WRITE | PROT_EXEC;
+    const auto pageSize = getpagesize();
     auto countPages = [pageSize](const auto size) -> auto {
         uintptr_t count{size / pageSize};
         if (size % pageSize)
@@ -147,8 +147,8 @@ void AArch64Patcher::turnTextSegmentMutable(uintptr_t textPage, uint64_t regionS
         return count;
     };
 
-    auto overflow = textPage & 0xffff ? 1 : 0};
-    auto count = countPages(regionSize) + overflow};
+    auto overflow = textPage & 0xffff ? 1 : 0;
+    auto count = countPages(regionSize) + overflow;
 
     useriDsp("Hook: changing permission of %lu pages in %#llx base address", count, baseAddr);
     mprotect(reinterpret_cast<void*>(baseAddr), count * pageSize, protect);

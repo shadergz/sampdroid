@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR})
-add_library(coop MODULE)
+add_library(samp20 MODULE)
 
 set(CMAKE_CXX_FLAGS "-DANDROID -Wall -Werror -fno-rtti")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fno-stack-protector -flto=full -DNDEBUG")
@@ -22,6 +22,7 @@ add_library(vendor_imgui STATIC
     # $<$<CONFIG:DEBUG>:${SRC_DIR}/vendor/imgui/imgui_demo.cpp>
     )
 add_subdirectory(src)
+include_directories(src)
 
 target_include_directories(vendor_imgui INTERFACE
     # Does #include <imgui/imgui.h> be available for us

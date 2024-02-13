@@ -10,10 +10,7 @@ void ImGui_ImplRenderWare_NewFrame();
 void ImGui_ImplRenderWare_RenderDrawData(ImDrawData* draw_data);
 
 void ImGui_ImplRenderWare_Shutdown();
-
-namespace saglobal {
-    extern uintptr_t g_gameAddr;
-}
+extern uintptr_t g_gameAddr;
 
 static const ImWchar ranges[] {
     0x0020, 0x0080,
@@ -51,7 +48,7 @@ UiClientUser::UiClientUser()
     style.WindowBorderSize = 0.0f;
 
     // Loading related fonts
-    auto gameDataDir = reinterpret_cast<const char*>(saglobal::g_gameAddr + 0x8b46a8);
+    auto gameDataDir = reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8);
 
     std::array<SaFont*, 1> saFontPtrs {
         // &sampAux3Font, &userDefaultFont, 
@@ -113,7 +110,7 @@ void UiClientUser::renderSceneDetails()
 {
     static constexpr uint modVersionMJF{104};
     static char txtBuffer[0x30];
-    float gameFpsCounter = *reinterpret_cast<float*>(saglobal::g_gameAddr + 0xbdc58c)};
+    float gameFpsCounter = *reinterpret_cast<float*>(g_gameAddr + 0xbdc58c);
 
     std::snprintf(txtBuffer, sizeof txtBuffer, "Build v(%3u) | frames: %2.f",
         modVersionMJF, gameFpsCounter);

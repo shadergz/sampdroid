@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/log_client.h>
-#include <patches_level.h>
+#include <inj/patches_level.h>
 
 // BIG - D32: 0x14000003
 #define INC1_NEXT_PC(addr)\
@@ -48,9 +48,9 @@
 
 #ifndef NDEBUG
 #define DUMP_PRINT_INST(origin, limit)\
-    salog::printFormat(salog::Debug, "Hook: dump of %llu from method %#p", limit, origin);\
+    userdDsp("Hook: dump of %llu from method %#p", limit, origin);\
     for (uint64_t _inst_count{}; _inst_count < limit; _inst_count++)\
-        salog::printFormat(salog::Debug, "\t%llu. %#p = %#llx",\
+        userdDsp("\t%llu. %#p = %#llx",\
             _inst_count, reinterpret_cast<uint32_t*>(origin) + _inst_count, *(reinterpret_cast<uint32_t*>(origin) + _inst_count))
 #elif NDEBUG
 #define DUMP_PRINT_INST(origin, limit)

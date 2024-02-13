@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "rwcore.h"
+#include <rwcore.h>
 
 enum RsInputDeviceType
 {

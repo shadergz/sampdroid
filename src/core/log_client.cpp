@@ -5,8 +5,9 @@
 #include <ctime>
 #include <unistd.h>
 
-#include <android/log_client.h>
+#include <core/log_client.h>
 static const char* logcatTag = "samp20";
+extern uintptr_t g_gameAddr;
 
 // This wrapper class is used to ensure that the file will be fclose()'d at the end of this library's lifetime
 class LogFile {
@@ -21,7 +22,7 @@ public:
     auto operator*() {
         return m_logFile;
     }
-    bool operator() const {
+    operator bool() const {
         return m_logFile != nullptr;
     }
 private:
@@ -35,7 +36,7 @@ static LogFile logFile{};
     std::snprintf(logFilePath, std::size(logFilePath),
         "%samp_client.log", reinterpret_cast<const char*>(g_gameAddr + 0x8b46a8));
 
-    logFile = fopen_s(logFilePath, "a");
+    logFile = fopen(logFilePath, "a");
     char openedAt[0x2f];
 
     if (logFile) {
@@ -47,11 +48,11 @@ static LogFile logFile{};
         return;
     }
 
-    auto ts = time(nullptr)};
+    auto ts = time(nullptr);
     const auto timeData = localtime(&ts);
 
     std::strftime(openedAt, std::size(openedAt), "%T", timeData);
-    SALOG_ASSERT(access(logFilePath, W_OK) == 0, "Log file in GTA SA external data directory couldn't be found");
+    SALOG_ASSERT(access(logFilePath, W_OK) == 0, "Log file in GTASA external data directory couldn't be found");
 
     __android_log_print(ANDROID_LOG_INFO, logcatTag, "Log file opened in %s", logFilePath);
 
@@ -62,18 +63,17 @@ static LogFile logFile{};
 
 int userDisplay(const LogId mode, const char* format, va_list va) {
 #if NDEBUG
-    if (prio == LogId::Debug)
+    if (mode == LogId::Debug)
         return 0;
 #endif
-    va_list var, cp;
-    va_start(var, format);
-    va_copy(cp, var);
+    va_list cp;
+    va_copy(cp, va);
 
     [[unlikely]] if (!*logFile && g_gameAddr)
         checkLogFile();
 
     const auto droidRet = __android_log_vprint(
-        static_cast<android_LogPriority>(prio), logcatTag, format, var);
+        static_cast<android_LogPriority>(mode), logcatTag, format, cp);
 
 #ifdef NDEBUG
     if (*logFile) {
@@ -82,7 +82,6 @@ int userDisplay(const LogId mode, const char* format, va_list va) {
         fflush(*logFile);
     }
 #endif
-    va_end(var);
     va_end(cp);
     return droidRet;
 }

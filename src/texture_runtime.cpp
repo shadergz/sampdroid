@@ -3,8 +3,8 @@
 #include <cstring>
 #include <arm_neon.h>
 
-#include <render/rwcore.h>
-#include <android/log_client.h>
+#include <rwcore.h>
+#include <core/log_client.h>
 
 #include <texture_runtime.h>
 extern uintptr_t g_gameAddr;
@@ -13,7 +13,7 @@ class TextureDatabaseRuntime* g_textureDatabase;
 uintptr_t TextureDatabaseRuntime::GetTexture(const char* textureName)
 {
     useriDsp("DB: loading new texture with name %s in memory", textureName);
-    auto loadedTex = ((RwTexture* (*)(const char*))(saglobal::g_gameAddr + 0x286718))(textureName);
+    auto loadedTex = ((RwTexture* (*)(const char*))(g_gameAddr + 0x286718))(textureName);
     if (!loadedTex)
         return 0;
 
@@ -57,14 +57,14 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
         if (dbPtr >= &dbPtr[std::size(dbHandler)])
           break;
 
-        auto dbClass = ((uintptr_t (*)(const char*))(saglobal::g_gameAddr + 0x0287af4))(dbName);
+        auto dbClass = ((uintptr_t (*)(const char*))(g_gameAddr + 0x0287af4))(dbName);
         *dbPtr = reinterpret_cast<NativeTDRHandler*>(dbClass);
         if (!*dbPtr) {
             usereDsp("DB: database not found: %s", dbName);
             std::terminate();
         }
 
-        ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2865d8))(*dbPtr);
+        ((void (*)(NativeTDRHandler*))(g_gameAddr + 0x2865d8))(*dbPtr);
     }
 
     const auto loadedTexture = GetTexture(textureName);
@@ -73,11 +73,11 @@ uintptr_t TextureDatabaseRuntime::textureLoadNew(const char* dbName, const char*
     if (!std::strncmp(dbName, cleanTrigger, sizeof(cleanTrigger))) {
         // Closing the databases, there is no need to keep them open
         if (*(dbHandler + 0x0))
-            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x0));
+            ((void (*)(NativeTDRHandler*))(g_gameAddr + 0x2866a4))(*(dbHandler + 0x0));
         if (*(dbHandler + 0x1))
-            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x1));
+            ((void (*)(NativeTDRHandler*))(g_gameAddr + 0x2866a4))(*(dbHandler + 0x1));
         if (*(dbHandler + 0x2))
-            ((void (*)(NativeTDRHandler*))(saglobal::g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
+            ((void (*)(NativeTDRHandler*))(g_gameAddr + 0x2866a4))(*(dbHandler + 0x2));
         
         static uint8x16_t cl{};
         veorq_u8(cl, cl);

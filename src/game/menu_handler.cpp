@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 
-#include <render/rwcore.h>
+#include <rwcore.h>
 #include <texture_runtime.h>
 #include <core/log_client.h>
 

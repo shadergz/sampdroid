@@ -1,19 +1,19 @@
-#include <client/log_client.h>
+#include <core/log_client.h>
 #include <inj/jvm_helper.h>
 extern JNIEnv* g_gameEnv;
 extern jobject g_gtaSA;
 
 uint getPackageIdentifier(std::span<char> packageNameId)
 {
-    auto gtasaClass = g_gameEnv->FindClass("core/app/Application")};
-    jclass threadClass = g_gameEnv->FindClass("core/app/ActivityThread")};
+    auto gtasaClass = g_gameEnv->FindClass("core/app/Application");
+    jclass threadClass = g_gameEnv->FindClass("core/app/ActivityThread");
 
-    jmethodID getNameMid = g_gameEnv->GetMethodID(gtasaClass, "getPackageName", "()Ljava/lang/String;")};
+    jmethodID getNameMid = g_gameEnv->GetMethodID(gtasaClass, "getPackageName", "()Ljava/lang/String;");
     jmethodID threadMid = g_gameEnv->GetStaticMethodID(threadClass,
         "currentActivityThread", "()Landroid/app/ActivityThread;");
 
     jobject activityThreadObj = g_gameEnv->CallStaticObjectMethod(threadClass, threadMid);
-    jmethodID getGTASAMid = g_gameEnv->GetMethodID(threadClass, "getApplication", "()Landroid/app/Application;")};
+    jmethodID getGTASAMid = g_gameEnv->GetMethodID(threadClass, "getApplication", "()Landroid/app/Application;");
     jobject GTASAobj = g_gameEnv->CallObjectMethod(activityThreadObj, getGTASAMid);
 
     auto GTASAid = static_cast<jstring>(g_gameEnv->CallObjectMethod(GTASAobj, getNameMid));
@@ -36,15 +36,15 @@ ImVec2 getScreenSize()
 {
     useriDsp("Java: Geeting screen size from JVM");
 
-    jclass activityClass = g_gameEnv->GetObjectClass(g_gtaSA)};
-    jclass displayClass = g_gameEnv->FindClass("core/view/Display")};
-    jmethodID getDefaultDisplayMethod = g_gameEnv->GetMethodID(activityClass, "getWindowManager", "()Landroid/view/WindowManager;")};
-    jmethodID getDefaultDisplayMethodID = g_gameEnv->GetMethodID(displayClass, "getDefaultDisplay", "()Landroid/view/Display;")};
+    jclass activityClass = g_gameEnv->GetObjectClass(g_gtaSA);
+    jclass displayClass = g_gameEnv->FindClass("core/view/Display");
+    jmethodID getDefaultDisplayMethod = g_gameEnv->GetMethodID(activityClass, "getWindowManager", "()Landroid/view/WindowManager;");
+    jmethodID getDefaultDisplayMethodID = g_gameEnv->GetMethodID(displayClass, "getDefaultDisplay", "()Landroid/view/Display;");
 
     jobject windowManager = g_gameEnv->CallObjectMethod(g_gtaSA, getDefaultDisplayMethod);
     jobject display = g_gameEnv->CallObjectMethod(windowManager, getDefaultDisplayMethodID);
 
-    jmethodID getMetricsMethod = g_gameEnv->GetMethodID(displayClass, "getMetrics", "(Landroid/util/DisplayMetrics;)V")};
+    jmethodID getMetricsMethod = g_gameEnv->GetMethodID(displayClass, "getMetrics", "(Landroid/util/DisplayMetrics;)V");
 
     jclass metricsClass = g_gameEnv->FindClass("core/util/DisplayMetrics");
     jmethodID constructor = g_gameEnv->GetMethodID(metricsClass, "<init>", "()V");
@@ -53,7 +53,7 @@ ImVec2 getScreenSize()
     g_gameEnv->CallVoidMethod(display, getMetricsMethod, metrics);
 
     jfieldID widthPixelsField = g_gameEnv->GetFieldID(metricsClass, "widthPixels", "I");
-    jfieldID heightPixelsFiel = {g_gameEnv->GetFieldID(metricsClass, "heightPixels", "I");
+    jfieldID heightPixelsField = g_gameEnv->GetFieldID(metricsClass, "heightPixels", "I");
 
     jint width = g_gameEnv->GetIntField(metrics, widthPixelsField);
     jint height = g_gameEnv->GetIntField(metrics, heightPixelsField);

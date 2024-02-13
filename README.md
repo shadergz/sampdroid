@@ -2,7 +2,7 @@
 A plugin for the Android version of GTASA to allow players to join SAMP (PC) matches
 
 ### Project aims
-- Complete replacement for build69-plus (SAMP for ARMv7 from GTASA v1.8 which has been deprecated)
+- Complete replacement for build70-plus (Which has been deprecated)
 
 ### How to compile?
 - Before starting, make sure that you have configured the 'env.json' file in the project folder

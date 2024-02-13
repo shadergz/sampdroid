@@ -11,8 +11,8 @@
 #include <texture_runtime.h>
 #include <ui/user_graphics.h>
 
-#include <game/jvm_helper.h>
-#include <linux_hierarchy.h>
+#include <inj/jvm_helper.h>
+#include <game/linux_hierarchy.h>
 
 // This env is specific by the calling thread and shouldn't be shared
 JNIEnv* g_gameEnv;
@@ -70,7 +70,7 @@ static struct sigaction originSigSegv;
 
     uint64_t PC = segvContext->uc_mcontext.pc;
     
-    uint64_t pcOffset = (PC & 0xffffff) - (g_gameAddr & 0xffffff)};
+    uint64_t pcOffset = (PC & 0xffffff) - (g_gameAddr & 0xffffff);
     if (!(pcOffset & (static_cast<uint64_t>(0xffffffff) << 32))) {
         usereDsp("\tGame space region without base library, at: %#p", pcOffset);
     }
@@ -95,8 +95,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 {
     useriDsp("GTA:SA CO-OP has loaded, build date: " __DATE__ " " __TIME__);
     
-    coutFmt(salog::Info, "Loaded by thread id {} in core {}",
-        std::this_thread::get_id(), sched_getcpu());
+    coutFmt(Info, "Loaded by thread id {} in core {}", std::this_thread::get_id(), sched_getcpu());
     const jint useVersion{JNI_VERSION_1_6};
 
     JavaVMAttachArgs attachThread{.version = useVersion, .name = "JNI_OnLoad"};
@@ -124,7 +123,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, [[maybe_unused]] void* reserved)
 
     SALOG_ASSERT(g_gameAddr && g_audioBackend, "Can't found a valid address space of GTASA and/or OpenAL, "
         "SAMP is being halted now :[");
-    salog::printFormat(salog::Info, "Native libraries base region address found in:\n"
+    useriDsp("Native libraries base region address found in:\n"
         "1. (GTASA) (%#lx)\n2. (OpenAL64) (%#lx)", g_gameAddr, g_audioBackend);
 
     // Applying patches and hooking some methods

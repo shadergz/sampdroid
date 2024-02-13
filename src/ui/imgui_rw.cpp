@@ -2,10 +2,10 @@
 #include <vector>
 
 #include <core/log_client.h>
-#include <core/jvm_helper.h>
+#include <inj/jvm_helper.h>
 
-#include <render/rwlpcore.h>
-#include <render/skeleton.h>
+#include <rwlpcore.h>
+#include <skeleton.h>
 
 extern RsGlobalType* g_rsGlobal;
 extern uintptr_t g_gameAddr;
@@ -15,8 +15,8 @@ std::vector<RwIm2DVertex> vertexBuffer;
 void ImGui_ImplRenderWare_RenderDrawData([[maybe_unused]] ImDrawData* drawData)
 {
     userdDsp("GUI: ImGui_Impl RenderWare for data draw purposes, has been called");
-    const RwReal* nearScreenZ = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20868);
-    const RwReal* recipNearClip = reinterpret_cast<RwReal*>(saglobal::g_gameAddr + 0xd20864);
+    const RwReal* nearScreenZ = reinterpret_cast<RwReal*>(g_gameAddr + 0xd20868);
+    const RwReal* recipNearClip = reinterpret_cast<RwReal*>(g_gameAddr + 0xd20864);
     
     RwIm2DVertex* vtxDest = vertexBuffer.data();
     uint32_t vtxOffset{};
@@ -93,13 +93,13 @@ bool ImGui_ImplRenderWare_Init()
     if (vertexBuffer.empty())
         vertexBuffer.resize(vertexInitialSize);
 
-    const ImVec2 displaySz(static_cast<float>(saglobal::g_rsGlobal->maximumWidth), 
-        static_cast<float>(saglobal::g_rsGlobal->maximumHeight));
+    const ImVec2 displaySz(static_cast<float>(g_rsGlobal->maximumWidth),
+        static_cast<float>(g_rsGlobal->maximumHeight));
     
     if (displaySz.x && displaySz.y) {
         io.DisplaySize = displaySz;
     } else {
-        io.DisplaySize = sajvm::getScreenSize();
+        io.DisplaySize = getScreenSize();
     }
     // Updates to the screen size will only appear when the next frame buffer is rendered
     // ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
@@ -125,7 +125,7 @@ static void ImGui_ImplRenderWare_CreateDeviceObjects()
 
     useriDsp("GUI: font atlas pixels (%#lp), width (%d), height (%d)", pxS, outWidth, outHeight);
     
-    RwImage* fontData = RwImageCreate(outWidth, outHeight, outBytesPerPixel)};
+    RwImage* fontData = RwImageCreate(outWidth, outHeight, outBytesPerPixel);
     useriDsp("GUI: font data allocated at %#p", fontData);
 
     if (!fontData) {

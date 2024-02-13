@@ -18,6 +18,6 @@ target_sources(samp20 PRIVATE
     ui/user_graphics.cpp
 
     engine.cpp
-    nv_thread.cpp
+    nv_threads.cpp
     texture_runtime.cpp
 )
