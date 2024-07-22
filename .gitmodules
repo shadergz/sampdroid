@@ -6,4 +6,4 @@
 	url = https://github.com/ocornut/imgui.git
 [submodule "vendor/raknet"]
 	path = vendor/raknet
-	url = https://github.com/beloncode/raknet.git
+	url = https://github.com/shadergz/raknet.git
